@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical Commander // Operational Core</title>
+    <title>Tactical Commander // Operational Core v2.0</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
@@ -16,8 +16,8 @@
 
         body {
             font-family: 'JetBrains Mono', monospace;
-            background: #050811;
-            color: #d1d9e7;
+            background: #03060f;
+            color: #a3b8cc;
             display: flex;
             flex-direction: column;
             height: 100vh;
@@ -31,7 +31,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: #050811;
+            background: #03060f;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -41,259 +41,176 @@
         .password-screen.hidden { display: none !important; }
 
         .password-box {
-            background: #0b1120;
-            border: 1px solid rgba(13, 169, 212, 0.3);
+            background: #070d1a;
+            border: 1px solid rgba(0, 242, 254, 0.2);
             padding: 40px;
-            width: 360px;
+            width: 380px;
             text-align: center;
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            position: relative;
+        }
+        
+        .password-box::before {
+            content: ''; position: absolute; top:0; left:0; width:100%; height:2px; background: #00f2fe;
         }
 
         .password-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
-            color: #0da9d4;
-            letter-spacing: 0.15em;
+            color: #00f2fe;
+            letter-spacing: 0.2em;
             margin-bottom: 6px;
         }
 
         .password-subtitle {
-            font-size: 10px;
-            color: #52627a;
+            font-size: 9px;
+            color: #4a617c;
             margin-bottom: 24px;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.15em;
         }
 
         .password-input {
-            background: #050811;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #e8eef7;
-            padding: 12px;
+            background: #02040a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #00f2fe;
+            padding: 14px;
             font-family: inherit;
-            font-size: 14px;
+            font-size: 16px;
             width: 100%;
             outline: none;
             text-align: center;
-            letter-spacing: 0.2em;
+            letter-spacing: 0.4em;
             margin-bottom: 16px;
+            transition: border 0.3s;
         }
 
-        .password-input:focus {
-            border-color: #0da9d4;
-        }
+        .password-input:focus { border-color: #00f2fe; }
 
         .password-button {
-            background: transparent;
-            color: #0da9d4;
-            border: 1px solid #0da9d4;
-            padding: 10px;
+            background: rgba(0, 242, 254, 0.03);
+            color: #00f2fe;
+            border: 1px solid #00f2fe;
+            padding: 12px;
             font-family: inherit;
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             width: 100%;
             cursor: pointer;
-            transition: all 0.2s;
+            letter-spacing: 0.1em;
         }
 
-        .password-button:hover {
-            background: rgba(13, 169, 212, 0.1);
-        }
-
-        .password-error {
-            color: #f45164;
-            font-size: 10px;
-            margin-top: 12px;
-            display: none;
-        }
+        .password-button:hover { background: rgba(0, 242, 254, 0.1); }
+        .password-error { color: #ff3366; font-size: 10px; margin-top: 12px; display: none; }
 
         /* HEADER NETWORK */
         .header {
-            background: #0b1120;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: #070d1a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             padding: 0 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 56px;
+            height: 48px;
             z-index: 10;
         }
 
-        .op-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .op-title { display: flex; align-items: center; gap: 10px; }
+        .op-indicator { width: 6px; height: 6px; background: #00f2fe; box-shadow: 0 0 8px #00f2fe; }
+        .op-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #e1e9f0; cursor: pointer; }
 
-        .op-indicator {
-            width: 8px;
-            height: 8px;
-            background: #0da9d4;
-            box-shadow: 0 0 8px #0da9d4;
-        }
-
-        .op-name {
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #e8eef7;
-            cursor: pointer;
-        }
-
-        .op-name-input {
-            background: #050811;
-            border: 1px solid #0da9d4;
-            color: #e8eef7;
-            padding: 4px 8px;
-            font-family: inherit;
-            font-size: 13px;
-            outline: none;
-        }
-
-        .controls { display: flex; gap: 16px; align-items: center; }
-        .control-group { display: flex; gap: 6px; align-items: center; }
-        .control-label { font-size: 10px; text-transform: uppercase; color: #52627a; font-weight: 700; margin-right: 4px; }
+        .controls { display: flex; gap: 12px; align-items: center; }
+        .control-group { display: flex; gap: 4px; align-items: center; border-right: 1px solid rgba(255,255,255,0.05); padding-right:12px; }
+        .control-group:last-child { border: none; padding-right: 0; }
+        .control-label { font-size: 9px; text-transform: uppercase; color: #4a617c; font-weight: 700; margin-right: 4px; }
 
         /* INTERFACE GRIDS */
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .sidebar {
-            width: 260px;
-            background: #0b1120;
-            display: flex;
-            flex-direction: column;
-            z-index: 5;
-        }
-
-        .sidebar-left { border-right: 1px solid rgba(255, 255, 255, 0.08); }
-        .sidebar-right { border-left: 1px solid rgba(255, 255, 255, 0.08); }
+        .main { flex: 1; display: flex; overflow: hidden; position: relative; }
+        .sidebar { width: 240px; background: #070d1a; display: flex; flex-direction: column; z-index: 5; }
+        .sidebar-left { border-right: 1px solid rgba(255, 255, 255, 0.05); }
+        .sidebar-right { border-left: 1px solid rgba(255, 255, 255, 0.05); }
 
         .sidebar-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 14px;
         }
 
-        .section { display: flex; flex-direction: column; gap: 8px; }
-        .section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #52627a; font-weight: 700; }
+        .section { display: flex; flex-direction: column; gap: 6px; }
+        .section-title { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: #4a617c; font-weight: 700; }
 
         .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
         .button-grid.triple { grid-template-columns: repeat(3, 1fr); }
 
         button {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #74859d;
-            padding: 8px 10px;
-            border-radius: 2px;
+            background: rgba(255,255,255,0.01);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #697c92;
+            padding: 6px 8px;
             font-family: inherit;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 500;
             text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.1s;
             text-align: center;
         }
 
-        button:hover:not(:disabled) {
-            border-color: rgba(255, 255, 255, 0.2);
-            color: #e8eef7;
-        }
+        button:hover:not(:disabled) { border-color: rgba(255, 255, 255, 0.15); color: #e1e9f0; }
+        button.active { border-color: #00f2fe; color: #00f2fe; background: rgba(0, 242, 254, 0.04); }
+        button:disabled { opacity: 0.1; cursor: not-allowed; }
 
-        button.active {
-            border-color: #0da9d4;
-            color: #0da9d4;
-            background: rgba(13, 169, 212, 0.05);
-        }
-
-        button:disabled {
-            opacity: 0.15;
-            cursor: not-allowed;
-            border-color: rgba(255, 255, 255, 0.03);
-        }
-
-        .canvas-container {
-            flex: 1;
-            background: #050811;
-            position: relative;
-        }
-
+        .canvas-container { flex: 1; background: #03060f; position: relative; }
         canvas { display: block; width: 100%; height: 100%; }
 
+        /* LIVE TELEMETRY STREAM LOG */
+        .log-terminal {
+            height: 100px; background: #02040a; border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 8px 12px; font-size: 10px; color: #00f2fe; overflow-y: auto; font-family: inherit;
+        }
+        .log-line { margin-bottom: 2px; opacity: 0.8; display: flex; gap: 10px; }
+        .log-time { color: #4a617c; }
+        .log-alert { color: #ff3366; font-weight: bold; }
+
         textarea {
-            background: #050811;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #e8eef7;
-            padding: 10px;
-            font-family: inherit;
-            font-size: 11px;
-            resize: none;
-            flex: 1;
-            outline: none;
-            line-height: 1.5;
+            background: #02040a; border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #e1e9f0; padding: 8px; font-family: inherit; font-size: 10px;
+            resize: none; flex: 1; outline: none; line-height: 1.4; min-height: 60px;
         }
-        textarea:focus { border-color: rgba(13, 169, 212, 0.4); }
+        textarea:focus { border-color: rgba(0, 242, 254, 0.3); }
 
-        .divider { height: 1px; background: rgba(255, 255, 255, 0.08); }
+        .divider { height: 1px; background: rgba(255, 255, 255, 0.05); }
 
-        /* TIMELINE ELEMENT SYSTEM */
-        .tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; }
-        .tab {
-            padding: 6px 10px; font-size: 10px; border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #74859d; background: transparent; cursor: pointer;
-        }
-        .tab.active { color: #0da9d4; border-color: #0da9d4; background: rgba(13, 169, 212, 0.05); }
+        .tabs { display: flex; gap: 4px; overflow-x: auto; }
+        .tab { padding: 4px 6px; font-size: 9px; border: 1px solid rgba(255, 255, 255, 0.05); color: #697c92; }
+        .tab.active { color: #00f2fe; border-color: #00f2fe; background: rgba(0, 242, 254, 0.04); }
 
-        .stat { display: flex; justify-content: space-between; font-size: 11px; padding: 4px 0; }
-        .stat-val { color: #0da9d4; font-weight: 700; }
+        .stat { display: flex; justify-content: space-between; font-size: 10px; padding: 2px 0; }
+        .stat-val { color: #00f2fe; font-weight: 700; }
 
         .unit-info-box {
-            background: #050811;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 12px;
-            font-size: 11px;
-            min-height: 90px;
-            line-height: 1.6;
+            background: #02040a; border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px; font-size: 10px; min-height: 80px; line-height: 1.5;
         }
 
-        /* MODAL POPUPS */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 8, 17, 0.8); z-index: 5000; display: none;
-            backdrop-filter: blur(4px);
-        }
-        .modal {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #0b1120; border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 24px; width: 320px; z-index: 5001; display: none;
-        }
+        /* OVERLAYS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3,6,15,0.8); z-index: 5000; display: none; backdrop-filter: blur(2px); }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #070d1a; border: 1px solid rgba(255,255,255,0.1); padding: 20px; width: 300px; z-index: 5001; display: none; }
         .modal.active, .modal-overlay.active { display: block; }
-        .modal-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #0da9d4; margin-bottom: 8px; }
-        .modal-msg { font-size: 11px; color: #74859d; margin-bottom: 20px; }
-        .modal-buttons { display: flex; gap: 8px; }
+        .modal-title { font-size: 11px; font-weight: 700; color: #ff3366; margin-bottom: 6px; letter-spacing: 0.05em; }
+        .modal-msg { font-size: 10px; color: #a3b8cc; margin-bottom: 16px; }
+        .modal-buttons { display: flex; gap: 6px; }
         .modal-buttons button { flex: 1; }
     </style>
 </head>
 <body>
 
-    <!-- AUTHORIZATION DIALOG -->
+    <!-- SECURITY AUTHORIZATION -->
     <div class="password-screen" id="auth-screen">
         <div class="password-box">
-            <div class="password-title">SECURE STRATEGIC SURFACE</div>
-            <div class="password-subtitle">INPUT OPERATION SYNC KEY</div>
+            <div class="password-title">TACTICAL COMMAND SURFACE</div>
+            <div class="password-subtitle">ENTER INTERFACE ENCRYPTION CODE</div>
             <input type="password" class="password-input" id="auth-input" placeholder="••••" autocomplete="off"/>
-            <button class="password-button" id="auth-submit">AUTHENTICATE</button>
-            <div class="password-error" id="auth-error">INVALID AUTHENTICATION KEY</div>
+            <button class="password-button" id="auth-submit">DECRYPT & RUN</button>
+            <div class="password-error" id="auth-error">DECRYPTION FAILURE: RE-ENTER PIN</div>
         </div>
     </div>
 
@@ -301,7 +218,7 @@
     <div class="header">
         <div class="op-title">
             <div class="op-indicator"></div>
-            <span class="op-name" id="op-label">OPERATION ALPHA</span>
+            <span class="op-name" id="op-label">OPERATION RECON // MAIN</span>
         </div>
         <div class="controls">
             <div class="control-group">
@@ -309,41 +226,42 @@
                 <button id="ctrl-redo">REDO</button>
             </div>
             <div class="control-group">
-                <span class="control-label">GRID</span>
+                <span class="control-label">GRID MATRIX</span>
                 <button id="ctrl-grid" class="active">ON</button>
             </div>
             <div class="control-group">
-                <button id="ctrl-play" style="border-color:#2dd4a4; color:#2dd4a4;">EXECUTE</button>
+                <button id="ctrl-play" style="border-color:#00ffaa; color:#00ffaa;">EXECUTE SIM</button>
                 <button id="ctrl-reset">RESET</button>
             </div>
         </div>
     </div>
 
     <div class="main">
-        <!-- SYSTEM NAVIGATION (LEFT) -->
+        <!-- CONTROLS SIDEBAR (LEFT) -->
         <div class="sidebar sidebar-left">
             <div class="sidebar-content">
                 <div class="section">
-                    <div class="section-title">COMMAND MODE</div>
+                    <div class="section-title">COMMAND SELECTION</div>
                     <div class="button-grid">
                         <button class="mode-btn active" data-mode="deploy">DEPLOY</button>
                         <button class="mode-btn" data-mode="path">ROUTING</button>
                         <button class="mode-btn" data-mode="zone">ZONE</button>
+                        <button class="mode-btn" data-mode="fog" style="color: #9d4edd;">FOG MASK</button>
                     </div>
                 </div>
 
                 <div class="section">
-                    <div class="section-title">FACTION SELECTION</div>
+                    <div class="section-title">FACTION LAYERS</div>
                     <div class="button-grid">
                         <button class="faction-btn active" data-faction="GAR">GAR</button>
-                        <button class="faction-btn" data-faction="OPFOR" style="color:#f45164;">OPFOR</button>
-                        <button class="faction-btn" data-faction="ALLY" style="color:#2dd4a4;">ALLY</button>
-                        <button class="faction-btn" data-faction="TANGO" style="color:#fbbf24;">TANGO</button>
+                        <button class="faction-btn" data-faction="OPFOR" style="color:#ff3366;">OPFOR</button>
+                        <button class="faction-btn" data-faction="ALLY" style="color:#00ffaa;">ALLY</button>
+                        <button class="faction-btn" data-faction="TANGO" style="color:#ffcc00;">TANGO</button>
                     </div>
                 </div>
 
                 <div class="section">
-                    <div class="section-title">ASSET TYPE</div>
+                    <div class="section-title">MICRO ASSET CLASS</div>
                     <div class="button-grid triple">
                         <button class="unit-btn active" data-unit="Infantry">INF</button>
                         <button class="unit-btn" data-unit="Specialist">SPC</button>
@@ -355,7 +273,7 @@
                 </div>
 
                 <div class="section">
-                    <div class="section-title">ROUTE STYLING</div>
+                    <div class="section-title">ROUTE INTERPOLATION</div>
                     <div class="button-grid">
                         <button class="path-style-btn active" data-pstyle="linear">STRAIGHT</button>
                         <button class="path-style-btn" data-pstyle="elbow">ELBOW</button>
@@ -363,77 +281,84 @@
                 </div>
 
                 <div class="section">
-                    <div class="section-title">ZONE BOUNDARY</div>
-                    <div class="button-grid triple">
-                        <button class="zone-shape-btn" data-shape="rect">RECT</button>
-                        <button class="zone-shape-btn" data-shape="circle">CIRC</button>
+                    <div class="section-title">ZONE BOUNDARY STYLE</div>
+                    <div class="button-grid">
+                        <button class="zone-shape-btn" data-shape="rect">RECTANGLE</button>
+                        <button class="zone-shape-btn" data-shape="circle">CIRCULAR</button>
                     </div>
                 </div>
 
                 <div class="divider"></div>
 
                 <div class="section">
-                    <div class="section-title">MISSION PHASES</div>
+                    <div class="section-title">OPERATIONAL TIMELINE</div>
                     <div class="tabs" id="phase-container"></div>
                     <div class="button-grid">
                         <button id="phase-add">+ NEW</button>
                         <button id="phase-clone">CLONE</button>
                     </div>
-                    <button id="phase-delete" style="color:#f45164; border-color:rgba(244,81,100,0.2);">PURGE PHASE</button>
-                </div>
-
-                <div class="section" style="flex: 1;">
-                    <div class="section-title">FIELD INTEL DATA</div>
-                    <textarea id="intel-field" placeholder="Enter objective data rules..."></textarea>
+                    <button id="phase-delete" style="color:#ff3366; border-color:rgba(255,51,102,0.15);">PURGE CURRENT PHASE</button>
                 </div>
             </div>
         </div>
 
-        <!-- TACTICAL GRAPHICS CANVAS -->
-        <div class="canvas-container" id="canvas-holder">
-            <canvas id="tactical-grid"></canvas>
+        <!-- CENTER MATRIX WORKSPACE -->
+        <div style="flex:1; display:flex; flex-direction:column; position:relative;">
+            <div class="canvas-container" id="canvas-holder">
+                <canvas id="tactical-grid"></canvas>
+            </div>
+            <!-- REAL-TIME CONSOLE FEED -->
+            <div class="log-terminal" id="system-log">
+                <div class="log-line"><span class="log-time">[00:00:00]</span> CIC INITIALIZED // INPUT PIN SECURE ENCRYPT CODE ENTRY KEY</div>
+            </div>
         </div>
 
-        <!-- SYSTEM REGISTRY (RIGHT) -->
+        <!-- MONITORING REGISTRY (RIGHT) -->
         <div class="sidebar sidebar-right">
             <div class="sidebar-content">
                 <div class="section">
-                    <div class="section-title">TELEMETRY COUNTS</div>
-                    <div class="stat"><span>ACTIVE ASSETS:</span><span class="stat-val" id="tele-units">0</span></div>
-                    <div class="stat"><span>DEFINED ZONES:</span><span class="stat-val" id="tele-zones">0</span></div>
+                    <div class="section-title">TACTICAL TELEMETRY</div>
+                    <div class="stat"><span>ASSETS IN THEATER:</span><span class="stat-val" id="tele-units">0</span></div>
+                    <div class="stat"><span>REGISTERED ZONES:</span><span class="stat-val" id="tele-zones">0</span></div>
+                    <div class="stat"><span>FOG SHROUDS MAPPED:</span><span class="stat-val" id="tele-fogs">0</span></div>
                 </div>
 
                 <div class="divider"></div>
 
                 <div class="section" style="flex: 1;">
-                    <div class="section-title">SELECTED ASSET DATA</div>
+                    <div class="section-title">SELECTED OBJECT MONITOR</div>
                     <div class="unit-info-box" id="info-display">
-                        <span style="color: #52627a;">NO SELECTION</span>
+                        <span style="color: #4a617c;">AWAITING SELECTION TARGET</span>
                     </div>
-                    <button id="asset-purge" style="color:#f45164; border-color:rgba(244,81,100,0.2); width:100%; margin-top:8px;">REMOVE ASSET</button>
+                    <button id="asset-purge" style="color:#ff3366; border-color:rgba(255,51,102,0.15); width:100%; margin-top:6px;">PURGE SELECTED</button>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">INTEL MISSION LOG</div>
+                    <textarea id="intel-field" placeholder="Input specific field engagement directives..."></textarea>
                 </div>
 
                 <div class="divider"></div>
-                <button id="board-wipe" style="color:#f45164; border-color:rgba(244,81,100,0.3);">CLEAR ACTIVE CANVAS</button>
+                <button id="board-wipe" style="color:#ff3366; border-color:rgba(255,51,102,0.25);">WIPE ACTIVE MATRIX</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL WARNING OVERLAYS -->
+    <!-- NOTIFICATION DIALOG SYSTEM -->
     <div class="modal-overlay" id="overlay-shield"></div>
     <div class="modal" id="modal-box">
-        <div class="modal-title" id="m-title">CONFIRM</div>
-        <div class="modal-msg" id="m-msg">Proceed with action?</div>
+        <div class="modal-title" id="m-title">ALERT // REQUIRE CRITICAL CONFIRMATION</div>
+        <div class="modal-msg" id="m-msg">Commit permanent operational change?</div>
         <div class="modal-buttons">
-            <button id="m-confirm" style="border-color:#2dd4a4; color:#2dd4a4;">EXECUTE</button>
+            <button id="m-confirm" style="border-color:#00ffaa; color:#00ffaa;">CONFIRM</button>
             <button id="m-cancel">ABORT</button>
         </div>
     </div>
 
     <script>
-        const COLORS = { GAR: '#0da9d4', OPFOR: '#f45164', ALLY: '#2dd4a4', TANGO: '#fbbf24' };
+        const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TANGO: '#ffcc00' };
 
-        // AUTHENTICATION GUARD CONTROL
+        // SECURITY PIN GATEWAY
         const authScreen = document.getElementById('auth-screen');
         const authInput = document.getElementById('auth-input');
         const authSubmit = document.getElementById('auth-submit');
@@ -453,23 +378,22 @@
             }
         }
 
-        // STATE ARCHITECTURE
+        // RE-ENGINEERED STATE CONTROL ARCHITECTURE
         const STATE = {
-            opName: 'OPERATION RECON',
-            mode: 'deploy', // deploy, path, zone
+            opName: 'OPERATION AXE-RECON',
+            mode: 'deploy', // deploy, path, zone, fog
             faction: 'GAR',
             unitType: 'Infantry',
-            pathStyle: 'linear', // linear, elbow
-            zoneShape: 'rect', // rect, circle
+            pathStyle: 'linear',
+            zoneShape: 'rect',
             gridOn: true,
             phaseIdx: 0,
             animating: false,
             animProgress: 0,
             selectedId: null,
-            phases: [{ intel: 'DEPLOYMENT PHASE: Secure landing sectors.', assets: [], zones: [] }]
+            phases: [{ intel: 'SECURE LANDING ZONES // SHROUD ENEMY RADAR VECTOR MATRICES', assets: [], zones: [], fogs: [] }]
         };
 
-        // HISTORICAL ENGINE RECORD
         let systemHistory = [];
         let systemHistoryIdx = -1;
 
@@ -486,6 +410,7 @@
                 systemHistoryIdx--;
                 STATE.phases = JSON.parse(systemHistory[systemHistoryIdx]);
                 if (STATE.phaseIdx >= STATE.phases.length) STATE.phaseIdx = STATE.phases.length - 1;
+                pushTerminalLog("System recovery: UNDO executed.");
                 syncInterface();
             }
         }
@@ -494,15 +419,16 @@
             if (systemHistoryIdx < systemHistory.length - 1) {
                 systemHistoryIdx++;
                 STATE.phases = JSON.parse(systemHistory[systemHistoryIdx]);
+                pushTerminalLog("System state advancement: REDO executed.");
                 syncInterface();
             }
         }
 
-        // CANVAS VARIABLE DEFINITIONS
         const canvas = document.getElementById('tactical-grid');
         const ctx = canvas.getContext('2d');
         const intelField = document.getElementById('intel-field');
         const phaseContainer = document.getElementById('phase-container');
+        const terminalLog = document.getElementById('system-log');
 
         let isInteracting = false;
         let dragAnchor = null;
@@ -514,6 +440,7 @@
             window.addEventListener('resize', resizeTacticalSurface);
             attachInterfaceListeners();
             recordState();
+            pushTerminalLog("CIC Core online. Rasterizing navigation tracking meshes...");
             syncInterface();
             runRenderLoop();
         }
@@ -524,13 +451,22 @@
             canvas.height = container.clientHeight;
         }
 
-        // DYNAMIC WORKSPACE UI LOCK ENGINE
+        function pushTerminalLog(message, isAlert = false) {
+            const now = new Date();
+            const timeStr = `[${now.toTimeString().split(' ')[0]}]`;
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            logLine.innerHTML = `<span class="log-time">${timeStr}</span> <span class="${isAlert ? 'log-alert' : ''}">${message.toUpperCase()}</span>`;
+            terminalLog.appendChild(logLine);
+            terminalLog.scrollTop = terminalLog.scrollHeight;
+        }
+
+        // HARDBOUND INTERFACE MATRIX SWITCHES
         function legaliseControlState() {
             const deployButtons = document.querySelectorAll('.unit-btn, .faction-btn');
             const styleButtons = document.querySelectorAll('.path-style-btn');
             const zoneButtons = document.querySelectorAll('.zone-shape-btn');
 
-            // Deactivate and mute irrelevant parameter states instantly
             deployButtons.forEach(b => b.disabled = (STATE.mode !== 'deploy'));
             styleButtons.forEach(b => b.disabled = (STATE.mode !== 'path'));
             zoneButtons.forEach(b => b.disabled = (STATE.mode !== 'zone'));
@@ -543,10 +479,10 @@
         }
 
         function attachInterfaceListeners() {
-            // Mode Matrix Interchanges
             document.querySelectorAll('.mode-btn').forEach(b => {
                 b.addEventListener('click', (e) => {
                     STATE.mode = e.target.dataset.mode;
+                    pushTerminalLog(`Command interface shifted to ${STATE.mode} matrix mode.`);
                     legaliseControlState();
                 });
             });
@@ -572,12 +508,15 @@
                 e.target.classList.toggle('active', STATE.gridOn);
             });
 
-            // Action Execution Listeners
             document.getElementById('ctrl-undo').addEventListener('click', triggerUndo);
             document.getElementById('ctrl-redo').addEventListener('click', triggerRedo);
 
             document.getElementById('ctrl-play').addEventListener('click', () => {
-                if(!STATE.animating) { STATE.animating = true; STATE.animProgress = 0; }
+                if(!STATE.animating) { 
+                    STATE.animating = true; 
+                    STATE.animProgress = 0;
+                    pushTerminalLog("COMMENCING REAL-TIME DISPLACEMENT VECTORS SIMULATION RUN.");
+                }
             });
 
             document.getElementById('ctrl-reset').addEventListener('click', () => {
@@ -585,14 +524,15 @@
                 STATE.phases[STATE.phaseIdx].assets.forEach(a => a.routing = []);
                 STATE.animating = false;
                 STATE.animProgress = 0;
+                pushTerminalLog("Simulation telemetry counters cleared.");
                 syncInterface();
             });
 
-            // Phase Layout Adjusters
             document.getElementById('phase-add').addEventListener('click', () => {
                 recordState();
-                STATE.phases.push({ intel: `PHASE ${STATE.phases.length + 1} DIRECTIVES`, assets: [], zones: [] });
+                STATE.phases.push({ intel: `PHASE ${STATE.phases.length + 1} DIRECTIVES`, assets: [], zones: [], fogs: [] });
                 STATE.phaseIdx = STATE.phases.length - 1;
+                pushTerminalLog(`Instantiated clean timeline layer: Phase ${STATE.phaseIdx + 1}`);
                 syncInterface();
             });
 
@@ -603,18 +543,21 @@
                 STATE.phases.push({
                     intel: `${parent.intel} [CLONE]`,
                     assets: cleanAssets,
-                    zones: JSON.parse(JSON.stringify(parent.zones))
+                    zones: JSON.parse(JSON.stringify(parent.zones)),
+                    fogs: JSON.parse(JSON.stringify(parent.fogs || []))
                 });
                 STATE.phaseIdx = STATE.phases.length - 1;
+                pushTerminalLog(`Cloned parent phase assets into layer position ${STATE.phaseIdx + 1}`);
                 syncInterface();
             });
 
             document.getElementById('phase-delete').addEventListener('click', () => {
                 if(STATE.phases.length > 1) {
-                    showWarningBox('PURGE SELECTED PHASE?', () => {
+                    showWarningBox('PURGE TARGET STRATEGIC PHASE?', () => {
                         recordState();
                         STATE.phases.splice(STATE.phaseIdx, 1);
                         STATE.phaseIdx = Math.max(0, STATE.phaseIdx - 1);
+                        pushTerminalLog("Target timeline sector cleanly removed from memory.");
                         syncInterface();
                     });
                 }
@@ -625,16 +568,18 @@
                     recordState();
                     let current = STATE.phases[STATE.phaseIdx];
                     current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
+                    pushTerminalLog(`Target asset code index ${STATE.selectedId.toString().substring(2,7)} cleanly removed.`);
                     STATE.selectedId = null;
                     syncInterface();
                 }
             });
 
             document.getElementById('board-wipe').addEventListener('click', () => {
-                showWarningBox('WIPE ACTIVE CANVAS LAYER?', () => {
+                showWarningBox('WIPE ACTIVE CANVAS LAYER MATRICES?', () => {
                     recordState();
-                    STATE.phases[STATE.phaseIdx] = { intel: '', assets: [], zones: [] };
+                    STATE.phases[STATE.phaseIdx] = { intel: '', assets: [], zones: [], fogs: [] };
                     STATE.selectedId = null;
+                    pushTerminalLog("Wiped active phase core array fields completely.", true);
                     syncInterface();
                 });
             });
@@ -643,18 +588,10 @@
                 STATE.phases[STATE.phaseIdx].intel = e.target.value;
             });
 
-            document.getElementById('op-label').addEventListener('click', () => {
-                const updated = prompt("RE-DESIGNATE STRATEGIC OPERATION CODE:", STATE.opName);
-                if(updated) {
-                    STATE.opName = updated.toUpperCase();
-                    document.getElementById('op-label').innerText = STATE.opName;
-                }
-            });
-
-            // Canvas Pointer Connections
             canvas.addEventListener('mousedown', pointerDown);
             canvas.addEventListener('mousemove', pointerMove);
             canvas.addEventListener('mouseup', pointerUp);
+            window.addEventListener('keydown', handleKeydown);
         }
 
         function syncInterface() {
@@ -662,7 +599,6 @@
             const activePhase = STATE.phases[STATE.phaseIdx];
             intelField.value = activePhase.intel;
 
-            // Render Nav Nodes
             phaseContainer.innerHTML = '';
             STATE.phases.forEach((p, idx) => {
                 const node = document.createElement('button');
@@ -672,45 +608,47 @@
                 phaseContainer.appendChild(node);
             });
 
-            // Refresh Status Panels
             document.getElementById('tele-units').innerText = activePhase.assets.length;
             document.getElementById('tele-zones').innerText = activePhase.zones.length;
+            document.getElementById('tele-fogs').innerText = (activePhase.fogs || []).length;
 
             const selectedAsset = activePhase.assets.find(a => a.id === STATE.selectedId);
             const infoBox = document.getElementById('info-display');
             if(selectedAsset) {
-                infoBox.innerHTML = `<div>ID: SRC-${selectedAsset.id.toString().substring(2,7)}</div>
-                                     <div>DESIG: ${selectedAsset.type.toUpperCase()}</div>
-                                     <div>NET: <span style="color:${COLORS[selectedAsset.faction]}">${selectedAsset.faction}</span></div>
-                                     <div>ROUTE VECTORS: ${selectedAsset.routing.length}</div>`;
+                infoBox.innerHTML = `<div>SYSTEM ID: OBJ-${selectedAsset.id.toString().substring(2,7)}</div>
+                                     <div>DESIGNATION: ${selectedAsset.type.toUpperCase()}</div>
+                                     <div>FACTION: <span style="color:${COLORS[selectedAsset.faction]}">${selectedAsset.faction}</span></div>
+                                     <div>COORDINATES: X ${Math.round(selectedAsset.x)} // Y ${Math.round(selectedAsset.y)}</div>
+                                     <div>ROUTING NODES MAPPED: ${selectedAsset.routing.length}</div>`;
             } else {
-                infoBox.innerHTML = `<span style="color: #52627a;">NO SELECTION</span>`;
+                infoBox.innerHTML = `<span style="color: #4a617c;">AWAITING SELECTION TARGET</span>`;
             }
         }
 
-        // CANVAS MATH MATRIX ENGINE HANDLERS
         function readPointer(e) {
             const rect = canvas.getBoundingClientRect();
             return { x: e.clientX - rect.left, y: e.clientY - rect.top };
         }
 
+        // TACTICAL SELECTION AND PLACEMENT ALGORITHMS
         function pointerDown(e) {
             if (STATE.animating) return;
             const pt = readPointer(e);
             const activePhase = STATE.phases[STATE.phaseIdx];
 
             if (STATE.mode === 'deploy') {
-                // Asset collision discovery checks
-                const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 16);
+                const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 12);
                 if (found) {
                     STATE.selectedId = found.id;
                     dragAnchor = found;
+                    pushTerminalLog(`Target linked: OBJ-${found.id.toString().substring(2,7)} under command lock.`);
                 } else {
                     recordState();
                     const created = { id: Math.random(), x: pt.x, y: pt.y, faction: STATE.faction, type: STATE.unitType, routing: [] };
                     activePhase.assets.push(created);
                     STATE.selectedId = created.id;
                     dragAnchor = created;
+                    pushTerminalLog(`New micro-asset registered: ${STATE.unitType.toUpperCase()} deployed to coordinates.`);
                 }
             } else if (STATE.mode === 'path' && STATE.selectedId) {
                 const candidate = activePhase.assets.find(a => a.id === STATE.selectedId);
@@ -719,13 +657,12 @@
                     isInteracting = true;
                     const startX = candidate.routing.length > 0 ? candidate.routing[candidate.routing.length - 1].x : candidate.x;
                     const startY = candidate.routing.length > 0 ? candidate.routing[candidate.routing.length - 1].y : candidate.y;
-                    
                     dragAnchor = { asset: candidate, startX: startX, startY: startY };
                 }
-            } else if (STATE.mode === 'zone') {
+            } else if (STATE.mode === 'zone' || STATE.mode === 'fog') {
                 isInteracting = true;
-                dragAnchor = pt; // Store anchor vector origin point
-                activeZonePreview = { shape: STATE.zoneShape, fx: pt.x, fy: pt.y, tx: pt.x, ty: pt.y, faction: STATE.faction };
+                dragAnchor = pt;
+                activeZonePreview = { shape: STATE.mode === 'fog' ? 'rect' : STATE.zoneShape, fx: pt.x, fy: pt.y, tx: pt.x, ty: pt.y, faction: STATE.faction, type: STATE.mode };
             }
             syncInterface();
         }
@@ -738,9 +675,7 @@
                 dragAnchor.x = pt.x;
                 dragAnchor.y = pt.y;
             } else if (STATE.mode === 'path' && isInteracting) {
-                // Calculate Elbow/Straight path configurations dynamically
-                let endX = pt.x;
-                let endY = pt.y;
+                let endX = pt.x; let endY = pt.y;
                 if (STATE.pathStyle === 'elbow') {
                     if (Math.abs(pt.x - dragAnchor.startX) > Math.abs(pt.y - dragAnchor.startY)) {
                         endY = dragAnchor.startY;
@@ -749,7 +684,7 @@
                     }
                 }
                 activeZonePreview = { shape: 'line', fx: dragAnchor.startX, fy: dragAnchor.startY, tx: endX, ty: endY };
-            } else if (STATE.mode === 'zone' && isInteracting) {
+            } else if ((STATE.mode === 'zone' || STATE.mode === 'fog') && isInteracting) {
                 activeZonePreview.tx = pt.x;
                 activeZonePreview.ty = pt.y;
             }
@@ -757,12 +692,21 @@
 
         function pointerUp() {
             if (STATE.animating) return;
+            const activePhase = STATE.phases[STATE.phaseIdx];
+            
             if (STATE.mode === 'path' && isInteracting && activeZonePreview) {
                 dragAnchor.asset.routing.push({ x: activeZonePreview.tx, y: activeZonePreview.ty });
-            } else if (STATE.mode === 'zone' && isInteracting && activeZonePreview) {
-                // Store structural boundaries securely into array metrics on drop release
+                pushTerminalLog(`Displacement routing line attached to active unit vector registry.`);
+            } else if (isInteracting && activeZonePreview) {
                 recordState();
-                STATE.phases[STATE.phaseIdx].zones.push(activeZonePreview);
+                if (STATE.mode === 'fog') {
+                    if(!activePhase.fogs) activePhase.fogs = [];
+                    activePhase.fogs.push({ fx: activeZonePreview.fx, fy: activeZonePreview.fy, tx: activeZonePreview.tx, ty: activeZonePreview.ty });
+                    pushTerminalLog(`Atmospheric Fog shroud projected over tactical landscape.`);
+                } else {
+                    activePhase.zones.push(activeZonePreview);
+                    pushTerminalLog(`New Tactical boundary area registered.`);
+                }
             }
             isInteracting = false;
             dragAnchor = null;
@@ -770,133 +714,169 @@
             syncInterface();
         }
 
-        // DESIGN AND RENDERING VECTORS CORE
+        // REFINED MICRO-GEOMETRIC SYMBOLOGY VECTORS (REDUCED BY 40%)
         function drawMilitarySymbol(ctx, x, y, type, color) {
             ctx.strokeStyle = color;
-            ctx.fillStyle = 'rgba(5, 8, 17, 0.85)';
-            ctx.lineWidth = 2;
+            ctx.fillStyle = '#03060f';
+            ctx.lineWidth = 1.5;
 
-            const size = 14;
+            const size = 9; // Ultra refined radius footprint scaling
             ctx.save();
             ctx.translate(x, y);
 
             if (type === 'Infantry') {
-                ctx.beginPath(); ctx.arc(0, 0, size - 2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(-size, 0); ctx.lineTo(size, 0); ctx.moveTo(0, -size); ctx.lineTo(0, size); ctx.stroke();
+                ctx.beginPath(); ctx.arc(0, 0, size - 1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-size - 2, 0); ctx.lineTo(size + 2, 0); ctx.moveTo(0, -size - 2); ctx.lineTo(0, size + 2); ctx.stroke();
             } else if (type === 'Specialist') {
                 ctx.beginPath();
-                for (let i = 0; i < 5; i++) {
-                    ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * size, Math.sin((18 + i * 72) * Math.PI / 180) * size);
-                    ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (size/2), Math.sin((54 + i * 72) * Math.PI / 180) * (size/2));
-                }
+                ctx.moveTo(0, -size); ctx.lineTo(size, 0); ctx.lineTo(0, size); ctx.lineTo(-size, 0);
                 ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(0, 0, 2, 0, Math.PI * 2); ctx.stroke();
             } else if (type === 'Armoured') {
                 ctx.beginPath();
                 for (let i = 0; i < 6; i++) {
                     ctx.lineTo(Math.cos(i * Math.PI / 3) * size, Math.sin(i * Math.PI / 3) * size);
                 }
                 ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-size + 3, 0); ctx.lineTo(size - 3, 0); ctx.stroke();
             } else if (type === 'Tank') {
-                ctx.fillRect(-size, -size + 4, size * 2, size * 2 - 8);
-                ctx.strokeRect(-size, -size + 4, size * 2, size * 2 - 8);
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(size + 6, 0); ctx.lineWidth = 4; ctx.stroke();
+                ctx.fillRect(-size, -size + 2, size * 2, size * 2 - 4);
+                ctx.strokeRect(-size, -size + 2, size * 2, size * 2 - 4);
+                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(size + 5, 0); ctx.lineWidth = 2.5; ctx.stroke();
             } else if (type === 'Walker') {
                 ctx.beginPath();
-                ctx.moveTo(-size, size); ctx.lineTo(-size/2, -size/4); ctx.lineTo(size/2, -size/4); ctx.lineTo(size, size);
-                ctx.moveTo(-size/2, -size/4); ctx.lineTo(0, -size); ctx.lineTo(size/2, -size/4);
+                ctx.moveTo(-size, size); ctx.lineTo(-size + 3, -2); ctx.lineTo(size - 3, -2); ctx.lineTo(size, size);
                 ctx.stroke();
+                ctx.strokeRect(-4, -size, 8, size - 2);
             } else if (type === 'Air') {
                 ctx.beginPath();
-                ctx.moveTo(0, -size); ctx.lineTo(size, size); ctx.lineTo(0, size/2); ctx.lineTo(-size, size);
+                ctx.moveTo(0, -size - 2); ctx.lineTo(size, size - 1); ctx.lineTo(0, size - 4); ctx.lineTo(-size, size - 1);
                 ctx.closePath(); ctx.fill(); ctx.stroke();
             }
             ctx.restore();
         }
 
+        // TACTICAL AMBIENCE RENDERING ENGINE
         function renderCanvasGrid() {
-            ctx.fillStyle = '#050811';
+            ctx.fillStyle = '#03060f';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             if (STATE.gridOn) {
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+                // Dual-Tier Digital Grid Layout Lines
                 ctx.lineWidth = 1;
-                const size = 50;
-                for (let x = 0; x < canvas.width; x += size) {
+                
+                // Minor Grid Nodes
+                ctx.strokeStyle = 'rgba(0, 242, 254, 0.015)';
+                for (let x = 0; x < canvas.width; x += 25) {
                     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
                 }
-                for (let y = 0; y < canvas.height; y += size) {
+                for (let y = 0; y < canvas.height; y += 25) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+                }
+
+                // Major Control Channels
+                ctx.strokeStyle = 'rgba(0, 242, 254, 0.04)';
+                for (let x = 0; x < canvas.width; x += 100) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+                }
+                for (let y = 0; y < canvas.height; y += 100) {
                     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
                 }
             }
         }
 
         function runRenderLoop() {
-            dynamicDashOffset = (dynamicDashOffset - 0.4) % 20;
+            dynamicDashOffset = (dynamicDashOffset - 0.5) % 20;
             renderCanvasGrid();
 
             const current = STATE.phases[STATE.phaseIdx];
 
-            // Render Confirmed Field Zones
+            // Render Zones
             current.zones.forEach(z => renderZoneBounds(z));
 
-            // Render Drag Layout Previews
+            // Real-Time Dynamic Target Intercept Bracket Computations
+            current.assets.forEach(a1 => {
+                if(a1.faction !== 'GAR') return;
+                current.assets.forEach(a2 => {
+                    if(a2.faction !== 'OPFOR') return;
+                    let dist = Math.hypot(a1.x - a2.x, a1.y - a2.y);
+                    if(dist < 110) { // Threat Engagement Acquisition Proximity Lock
+                        ctx.save();
+                        ctx.strokeStyle = 'rgba(255, 51, 102, 0.18)';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([2, 4]);
+                        ctx.beginPath(); ctx.moveTo(a1.x, a1.y); ctx.lineTo(a2.x, a2.y); ctx.stroke();
+                        
+                        // Render Bracket Center Marks
+                        let mx = (a1.x + a2.x)/2; let my = (a1.y + a2.y)/2;
+                        ctx.strokeStyle = '#ff3366';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([]);
+                        ctx.strokeRect(mx - 4, my - 4, 8, 8);
+                        ctx.restore();
+                    }
+                });
+            });
+
             if (activeZonePreview) {
                 if (activeZonePreview.shape === 'line') {
                     ctx.save();
-                    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([4, 4]);
+                    ctx.strokeStyle = 'rgba(0, 242, 254, 0.5)';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([2, 2]);
                     ctx.beginPath(); ctx.moveTo(activeZonePreview.fx, activeZonePreview.fy); ctx.lineTo(activeZonePreview.tx, activeZonePreview.ty); ctx.stroke();
                     ctx.restore();
+                } else if(STATE.mode === 'fog') {
+                    ctx.fillStyle = 'rgba(157, 78, 221, 0.15)';
+                    ctx.strokeStyle = '#9d4edd';
+                    ctx.lineWidth = 1;
+                    const w = activeZonePreview.tx - activeZonePreview.fx; const h = activeZonePreview.ty - activeZonePreview.fy;
+                    ctx.fillRect(activeZonePreview.fx, activeZonePreview.fy, w, h);
+                    ctx.strokeRect(activeZonePreview.fx, activeZonePreview.fy, w, h);
                 } else {
                     renderZoneBounds(activeZonePreview);
                 }
             }
 
-            // Route Animation Tracking Intercept calculations
             if (STATE.animating) {
-                STATE.animProgress += 0.005;
+                STATE.animProgress += 0.004;
                 if(STATE.animProgress >= 1) {
                     STATE.animating = false;
                     recordState();
                     current.assets.forEach(a => {
                         if (a.routing.length > 0) {
-                            const destination = a.routing[a.routing.length - 1];
-                            a.x = destination.x; a.y = destination.y; a.routing = [];
+                            const dest = a.routing[a.routing.length - 1];
+                            a.x = dest.x; a.y = dest.y; a.routing = [];
                         }
                     });
                     STATE.animProgress = 0;
+                    pushTerminalLog("Vector relocation tracking complete. Unit arrays locked at locations.");
                     syncInterface();
                 }
             }
 
-            // Draw Structured Pathways
+            // Draw Paths
             current.assets.forEach(asset => {
                 if (asset.routing.length === 0) return;
-                
-                // Assemble linear arrays of point positions
                 let tracks = [{ x: asset.x, y: asset.y }, ...asset.routing];
                 ctx.save();
-                ctx.lineWidth = 14;
-                ctx.strokeStyle = COLORS[asset.faction] + '1e'; // Translucent width layout band
-                ctx.beginPath();
-                ctx.moveTo(tracks[0].x, tracks[0].y);
+                ctx.lineWidth = 8; // Refined narrower vector tracks
+                ctx.strokeStyle = COLORS[asset.faction] + '12';
+                ctx.beginPath(); ctx.moveTo(tracks[0].x, tracks[0].y);
                 for(let i = 1; i < tracks.length; i++) ctx.lineTo(tracks[i].x, tracks[i].y);
                 ctx.stroke();
 
-                // Draw Internal Dynamic Movement Indicator Chevrons
-                ctx.lineWidth = 1.5;
-                ctx.strokeStyle = COLORS[asset.faction] + '88';
-                ctx.setLineDash([6, 14]);
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = COLORS[asset.faction] + '66';
+                ctx.setLineDash([4, 12]);
                 ctx.lineDashOffset = dynamicDashOffset;
                 ctx.stroke();
                 ctx.restore();
             });
 
-            // Display Assets Layers
+            // Draw Asset Positions
             current.assets.forEach(asset => {
-                let rx = asset.x;
-                let ry = asset.y;
+                let rx = asset.x; let ry = asset.y;
 
                 if (STATE.animating && asset.routing.length > 0) {
                     let tracks = [{ x: asset.x, y: asset.y }, ...asset.routing];
@@ -913,13 +893,29 @@
                 }
 
                 if (asset.id === STATE.selectedId) {
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                    ctx.strokeStyle = 'rgba(0, 242, 254, 0.25)';
                     ctx.lineWidth = 1;
-                    ctx.beginPath(); ctx.arc(rx, ry, 26, 0, Math.PI * 2); ctx.stroke();
+                    ctx.setLineDash([2, 2]);
+                    ctx.beginPath(); ctx.arc(rx, ry, 18, 0, Math.PI * 2); ctx.stroke();
+                    ctx.setLineDash([]);
                 }
 
                 drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction]);
             });
+
+            // Render Fog of War layers securely over top matrices
+            if(current.fogs) {
+                current.fogs.forEach(f => {
+                    ctx.save();
+                    ctx.fillStyle = createHexFogPattern();
+                    const w = f.tx - f.fx; const h = f.ty - f.fy;
+                    ctx.fillRect(f.fx, f.fy, w, h);
+                    ctx.strokeStyle = 'rgba(157, 78, 221, 0.2)';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(f.fx, f.fy, w, h);
+                    ctx.restore();
+                });
+            }
 
             requestAnimationFrame(runRenderLoop);
         }
@@ -927,10 +923,8 @@
         function renderZoneBounds(z) {
             ctx.save();
             const color = COLORS[z.faction];
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 1.5;
-
-            // Generate animated scanning stripe textures
+            ctx.strokeStyle = color + '88';
+            ctx.lineWidth = 1;
             ctx.fillStyle = createStripedPattern(color);
 
             if (z.shape === 'rect') {
@@ -946,18 +940,26 @@
 
         function createStripedPattern(color) {
             const pCanvas = document.createElement('canvas');
-            pCanvas.width = 16; pCanvas.height = 16;
+            pCanvas.width = 12; pCanvas.height = 12;
             const pCtx = pCanvas.getContext('2d');
-            pCtx.strokeStyle = color + '22'; // Faint tactical alpha channel
-            pCtx.lineWidth = 2;
-            pCtx.beginPath();
-            pCtx.moveTo(-4, 4); pCtx.lineTo(12, -12);
-            pCtx.moveTo(0, 16); pCtx.lineTo(20, -4);
-            pCtx.stroke();
+            pCtx.strokeStyle = color + '15';
+            pCtx.lineWidth = 1;
+            pCtx.beginPath(); pCtx.moveTo(0, 12); pCtx.lineTo(12, 0); pCtx.stroke();
             return ctx.createPattern(pCanvas, 'repeat');
         }
 
-        // WARNING INTERFACE DELEGATES
+        function createHexFogPattern() {
+            const pCanvas = document.createElement('canvas');
+            pCanvas.width = 16; pCanvas.height = 16;
+            const pCtx = pCanvas.getContext('2d');
+            pCtx.fillStyle = 'rgba(10, 5, 20, 0.65)'; // Deep dark shroud tone overlay
+            pCtx.fillRect(0,0,16,16);
+            pCtx.strokeStyle = 'rgba(157, 78, 221, 0.08)';
+            pCtx.lineWidth = 1;
+            pCtx.strokeRect(0, 0, 16, 16);
+            return ctx.createPattern(pCanvas, 'repeat');
+        }
+
         const mOverlay = document.getElementById('overlay-shield');
         const mBox = document.getElementById('modal-box');
         let confirmationCallback = null;
@@ -978,9 +980,8 @@
         document.getElementById('m-confirm').addEventListener('click', () => { if(confirmationCallback) confirmationCallback(); hideWarningBox(); });
         document.getElementById('m-cancel').addEventListener('click', hideWarningBox);
 
-        // Global hotkey routing mapping integrations
         function handleKeydown(e) {
-            if (e.target.tagName === 'TEXTAREA') return;
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
             if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); triggerUndo(); }
             if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); triggerRedo(); }
         }
