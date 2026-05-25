@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COMBAT PLANNER</title>
+    <title>Tactical Commander // Operational Core v4.6</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+        :root {
+            /* Baseline default parameters (Cyan core matrix) */
+            --theme-color: #00f2fe;
+            --theme-color-rgb: 0, 242, 254;
+            --theme-border: #1e354d;
+        }
 
         * {
             box-sizing: border-box;
@@ -47,30 +54,30 @@
 
         .password-box {
             background: #040914;
-            border: 2px solid #00f2fe;
+            border: 2px solid var(--theme-color);
             padding: 40px; width: 400px;
-            box-shadow: 0 0 30px rgba(0, 242, 254, 0.15);
+            box-shadow: 0 0 30px rgba(var(--theme-color-rgb), 0.15);
             position: relative;
         }
         .password-box::before {
             content: '[ COMS SECURE ]'; position: absolute; top: -10px; left: 20px; 
-            background: #02050a; padding: 0 5px; font-size: 10px; color: #00f2fe;
+            background: #02050a; padding: 0 5px; font-size: 10px; color: var(--theme-color);
         }
 
-        .password-title { font-size: 14px; font-weight: 700; color: #00f2fe; letter-spacing: 0.25em; margin-bottom: 6px; }
+        .password-title { font-size: 14px; font-weight: 700; color: var(--theme-color); letter-spacing: 0.25em; margin-bottom: 6px; }
         .password-subtitle { font-size: 9px; color: #43586d; margin-bottom: 24px; letter-spacing: 0.15em; }
         .password-input {
-            background: #010307; border: 1px solid #1e354d; color: #00f2fe;
+            background: #010307; border: 1px solid var(--theme-border); color: var(--theme-color);
             padding: 14px; font-family: inherit; font-size: 16px; width: 100%;
             outline: none; text-align: center; letter-spacing: 0.5em; margin-bottom: 16px;
         }
-        .password-input:focus { border-color: #00f2fe; box-shadow: 0 0 10px rgba(0,242,254,0.2); }
+        .password-input:focus { border-color: var(--theme-color); box-shadow: 0 0 10px rgba(var(--theme-color-rgb), 0.2); }
         .password-button {
-            background: rgba(0, 242, 254, 0.08); color: #00f2fe; border: 1px solid #00f2fe;
+            background: rgba(var(--theme-color-rgb), 0.08); color: var(--theme-color); border: 1px solid var(--theme-color);
             padding: 12px; font-family: inherit; font-size: 11px; font-weight: 700;
             width: 100%; cursor: pointer; letter-spacing: 0.15em;
         }
-        .password-button:hover { background: #00f2fe; color: #02050a; }
+        .password-button:hover { background: var(--theme-color); color: #02050a; }
         .password-error { color: #ff3366; font-size: 10px; margin-top: 12px; display: none; font-weight: bold; }
 
         .header {
@@ -82,11 +89,11 @@
             position: relative;
         }
         .header::after {
-            content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 1px; background: #00f2fe; opacity: 0.2;
+            content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 1px; background: var(--theme-color); opacity: 0.2;
         }
 
         .op-title { display: flex; align-items: center; gap: 12px; }
-        .op-indicator { width: 8px; height: 8px; background: #00f2fe; box-shadow: 0 0 10px #00f2fe; animation: blink 2s infinite ease-in-out; }
+        .op-indicator { width: 8px; height: 8px; background: var(--theme-color); box-shadow: 0 0 10px var(--theme-color); animation: blink 2s infinite ease-in-out; }
         .op-name { font-size: 13px; font-weight: 700; letter-spacing: 0.15em; color: #d1dfec; }
 
         .controls { display: flex; gap: 16px; align-items: center; }
@@ -128,7 +135,7 @@
 
         button {
             background: #010307;
-            border: 1px solid #1e354d;
+            border: 1px solid var(--theme-border);
             color: #7a92a8;
             padding: 8px;
             font-family: inherit; font-size: 9px; font-weight: 700;
@@ -137,16 +144,16 @@
             text-align: left; padding-left: 12px;
         }
         button::before {
-            content: '▫'; position: absolute; left: 4px; color: #1e354d; font-size: 7px; top: 9px;
+            content: '▫'; position: absolute; left: 4px; color: var(--theme-border); font-size: 7px; top: 9px;
         }
         button:hover:not(:disabled) { 
             border-color: #43586d; color: #d1dfec; background: rgba(30, 53, 77, 0.2); 
         }
         button.active { 
-            border-color: #00f2fe; color: #00f2fe; background: rgba(0, 242, 254, 0.05);
-            box-shadow: inset 0 0 8px rgba(0, 242, 254, 0.1);
+            border-color: var(--theme-color); color: var(--theme-color); background: rgba(var(--theme-color-rgb), 0.05);
+            box-shadow: inset 0 0 8px rgba(var(--theme-color-rgb), 0.1);
         }
-        button.active::before { content: '▪'; color: #00f2fe; }
+        button.active::before { content: '▪'; color: var(--theme-color); }
         button:disabled { opacity: 0.15; cursor: not-allowed; }
 
         #ctrl-play { border-color: #00ffaa; color: #00ffaa; }
@@ -160,16 +167,16 @@
 
         .canvas-container::before {
             content: ''; position: absolute; top: 15px; left: 15px; width: 20px; height: 20px;
-            border-top: 2px solid rgba(0, 242, 254, 0.2); border-left: 2px solid rgba(0, 242, 254, 0.2); pointer-events: none;
+            border-top: 2px solid rgba(var(--theme-color-rgb), 0.2); border-left: 2px solid rgba(var(--theme-color-rgb), 0.2); pointer-events: none;
         }
         .canvas-container::after {
             content: ''; position: absolute; bottom: 15px; right: 15px; width: 20px; height: 20px;
-            border-bottom: 2px solid rgba(0, 242, 254, 0.2); border-right: 2px solid rgba(0, 242, 254, 0.2); pointer-events: none;
+            border-bottom: 2px solid rgba(var(--theme-color-rgb), 0.2); border-right: 2px solid rgba(var(--theme-color-rgb), 0.2); pointer-events: none;
         }
 
         .log-terminal {
             height: 120px; background: #010307; border-top: 2px solid #122236;
-            padding: 12px; font-size: 10px; color: #00f2fe; overflow-y: auto;
+            padding: 12px; font-size: 10px; color: var(--theme-color); overflow-y: auto;
             position: relative; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
         }
         .log-line { margin-bottom: 4px; display: flex; gap: 12px; line-height: 1.2; font-weight: 500;}
@@ -177,28 +184,28 @@
         .log-alert { color: #ff3366; text-shadow: 0 0 4px #ff3366; }
 
         textarea {
-            background: #010307; border: 1px solid #1e354d;
+            background: #010307; border: 1px solid var(--theme-border);
             color: #d1dfec; padding: 10px; font-family: inherit; font-size: 10px;
             resize: none; flex: 1; outline: none; line-height: 1.5; min-height: 70px;
         }
-        textarea:focus { border-color: #00f2fe; }
+        textarea:focus { border-color: var(--theme-color); }
 
         .divider { height: 2px; background: #122236; margin: 4px 0; }
 
         .tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
         .tab { 
-            padding: 6px 10px; font-size: 9px; border: 1px solid #1e354d; color: #7a92a8; 
+            padding: 6px 10px; font-size: 9px; border: 1px solid var(--theme-border); color: #7a92a8; 
             text-align: center; padding-left: 10px;
         }
         .tab::before { display: none; }
-        .tab.active { color: #00f2fe; border-color: #00f2fe; background: rgba(0,242,254,0.05); font-weight: bold; }
+        .tab.active { color: var(--theme-color); border-color: var(--theme-color); background: rgba(var(--theme-color-rgb), 0.05); font-weight: bold; }
 
         .stat { display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px dashed rgba(18,34,54,0.5); }
         .stat:last-child { border: none; }
-        .stat-val { color: #00f2fe; font-weight: 700; text-shadow: 0 0 4px rgba(0,242,254,0.3); }
+        .stat-val { color: var(--theme-color); font-weight: 700; text-shadow: 0 0 4px rgba(var(--theme-color-rgb), 0.3); }
 
         .unit-info-box {
-            background: #010307; border: 1px solid #1e354d;
+            background: #010307; border: 1px solid var(--theme-border);
             padding: 12px; font-size: 10px; min-height: 90px; line-height: 1.6;
             display: flex; flex-direction: column; justify-content: center;
         }
@@ -218,7 +225,7 @@
 
         .theater-btn { font-size: 8px; padding-left: 10px; }
 
-        /* --- NEW GLOBAL METT-TC SYSTEM CSS --- */
+        /* --- GLOBAL NAV SWITCHER FOR METT-TC MODULE --- */
         .global-nav-header {
             display: none; background: #040914; border-bottom: 1px solid #122236;
             height: 34px; padding: 0 20px; gap: 6px; align-items: center; z-index: 12;
@@ -228,7 +235,7 @@
             color: #43586d; border: 1px solid #122236; background: transparent; cursor: pointer;
         }
         .global-tab-btn::before { display: none; }
-        .global-tab-btn.active { color: #00f2fe; border-color: #00f2fe; background: rgba(0,242,254,0.05); }
+        .global-tab-btn.active { color: var(--theme-color); border-color: var(--theme-color); background: rgba(var(--theme-color-rgb), 0.05); }
 
         .mett-workspace {
             display: none; flex: 1; background: #010306; padding: 20px; flex-direction: column; gap: 15px; overflow-y: auto;
@@ -239,7 +246,7 @@
         
         .mett-matrix-tabs { display: flex; gap: 2px; background: #010307; border: 1px solid #122236; padding: 2px; }
         .mett-sub-tab { flex: 1; text-align: center; font-size: 9px; font-weight: 700; padding: 6px 0; color: #43586d; cursor: pointer; border: 1px solid transparent; }
-        .mett-sub-tab.active { background: rgba(0,242,254,0.08); color: #00f2fe; border-color: #00f2fe; }
+        .mett-sub-tab.active { background: rgba(var(--theme-color-rgb), 0.08); color: var(--theme-color); border-color: var(--theme-color); }
 
         .mett-pane-view { display: none; flex-direction: column; gap: 10px; margin-top: 5px; }
         .mett-pane-view.active { display: flex; }
@@ -248,10 +255,10 @@
         .form-row label { font-size: 9px; font-weight: 700; color: #43586d; letter-spacing: 0.05em; }
         
         .mett-workspace select, .mett-workspace input[type="text"], .mett-workspace input[type="number"], .mett-workspace textarea {
-            background: #010307; border: 1px solid #1e354d; color: #d1dfec; padding: 8px; font-family: inherit; font-size: 10px; outline: none; width: 100%;
+            background: #010307; border: 1px solid var(--theme-border); color: #d1dfec; padding: 8px; font-family: inherit; font-size: 10px; outline: none; width: 100%;
         }
-        .mett-workspace select:focus, .mett-workspace input:focus, .mett-workspace textarea:focus { border-color: #00f2fe; }
-        .mett-workspace select { color: #00f2fe; cursor: pointer; }
+        .mett-workspace select:focus, .mett-workspace input:focus, .mett-workspace textarea:focus { border-color: var(--theme-color); }
+        .mett-workspace select { color: var(--theme-color); cursor: pointer; }
         
         .live-output-card { background: #010307; border: 1px solid #122236; padding: 10px; font-size: 10px; line-height: 1.5; color: #7a92a8; white-space: pre-wrap; }
         .live-output-card.tlp-highlight { border-color: #00ffaa; color: #00ffaa; }
@@ -262,8 +269,8 @@
 <body>
 
     <div class="global-nav-header" id="global-tabs-row">
-        <button class="global-tab-btn active" id="nav-btn-map">GEOSPATIAL  MAP</button>
-        <button class="global-tab-btn" id="nav-btn-mett">STRATEGIC CONSOLE</button>
+        <button class="global-tab-btn active" id="nav-btn-map">GEOSPATIAL THEATER MAP</button>
+        <button class="global-tab-btn" id="nav-btn-mett">METT-TC STRATEGIC CONSOLE</button>
     </div>
 
     <div class="password-screen" id="auth-screen">
@@ -308,7 +315,7 @@
                         <button class="mode-btn" data-mode="zone">ZONE BUILDER</button>
                         <button class="mode-btn" data-mode="terrain" style="color: #ff9f1c;">TERRAIN LAYER</button>
                     </div>
-                    <div style="font-size: 8px; color: #43586d; margin-top: 5px; text-align: center; letter-spacing: 0.05em; font-weight: bold; border-top: 1px dashed #122236; padding-top: 4px;">HOLD SHIFT+CLICK TO PING<br><span style="color:#ff3366;">CTRL+CLICK ON A UNIT TO TOGGLE KIA STATUS</span></div>
+                    <div style="font-size: 8px; color: #43586d; margin-top: 5px; text-align: center; letter-spacing: 0.05em; font-weight: bold; border-top: 1px dashed #122236; padding-top: 4px;">💡 PRO TIP: HOLD SHIFT+CLICK TO PING SCANNER<br><span style="color:#ff3366;">CTRL+CLICK ON A UNIT TO TOGGLE KIA STATUS</span></div>
                 </div>
 
                 <div class="section">
@@ -391,7 +398,7 @@
         </div>
 
         <div class="mett-workspace" id="mett-strategic-workspace">
-            <div class="section-title" style="color: #00f2fe; border-bottom: 1px solid #122236; padding-bottom: 6px;">METT-TC STRATEGIC ANALYSIS ENGINE // COMMAND AND CONTROL CORE</div>
+            <div class="section-title" style="color: var(--theme-color); border-bottom: 1px solid #122236; padding-bottom: 6px;">METT-TC STRATEGIC ANALYSIS ENGINE // COMMAND AND CONTROL CORE</div>
             
             <div class="mett-layout-split">
                 <div class="mett-form-panel">
@@ -538,7 +545,7 @@
 
                 <div class="section">
                     <div class="section-title">TACTICAL TELEMETRY</div>
-                    <div class="stat"><span>ASSETS DEPLOYED::</span><span class="stat-val" id="tele-units">0</span></div>
+                    <div class="stat"><span>THEATER ASSETS:</span><span class="stat-val" id="tele-units">0</span></div>
                     <div class="stat"><span>DEPLOYED ZONES:</span><span class="stat-val" id="tele-zones">0</span></div>
                     <div class="stat"><span>ROUTE VECTORS:</span><span class="stat-val" id="tele-paths">0</span></div>
                 </div>
@@ -577,22 +584,31 @@
     <script>
         const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TARGET: '#ffcc00' };
 
+        // Configuration map registry matching designated passwords to color strings
+        const LEGION_THEMES = {
+            'BARC':  { color: '#ff3366', rgb: '255, 51, 102',  border: '#4a121f', label: "BARC COMMAND // STAGE RED" },
+            '104TH': { color: '#8a9da8', rgb: '138, 157, 168', border: '#2b353c', label: "104TH WOLF PACK // STAGE GREY" },
+            '187TH': { color: '#a033ff', rgb: '160, 51, 255',  border: '#33124a', label: "187TH LEGION // STAGE PURPLE" },
+            '212TH': { color: '#ff9f1c', rgb: '255, 159, 28',  border: '#4a300d', label: "212TH ATTACK // STAGE ORANGE" },
+            '501ST': { color: '#0066ff', rgb: '0, 102, 255',   border: '#0d254a', label: "501ST VANGUARD // STAGE BLUE" }
+        };
+
         const THEATERS = {
-            default: { name: "CORE BASELINE MATRIX", bg: "#010306", gridColor: "rgba(0, 242, 254, 0.012)", drawSatelliteMap: null, terrain: [] },
+            default: { name: "CORE BASELINE MATRIX", bg: "#010306", gridColor: "rgba(var(--theme-color-rgb), 0.012)", drawSatelliteMap: null, terrain: [] },
             
             christophsis: { 
-                name: "THEATER: CHRISTOPHSIS // URBAN CRYSTAL MESH", bg: "#020712", gridColor: "rgba(0, 242, 254, 0.03)",
+                name: "THEATER: CHRISTOPHSIS // URBAN CRYSTAL MESH", bg: "#020712", gridColor: "rgba(var(--theme-color-rgb), 0.03)",
                 terrain: [
                     { type: 'trench', points: [{x:100, y:80}, {x:220, y:80}, {x:220, y:240}, {x:100, y:240}] },
                     { type: 'ridge', points: [{x:450, y:250}, {x:570, y:250}, {x:570, y:410}, {x:450, y:410}] }
                 ],
                 drawSatelliteMap: (ctx, w, h) => {
-                    ctx.fillStyle = "rgba(0, 242, 254, 0.015)";
+                    ctx.fillStyle = "rgba(var(--theme-color-rgb), 0.015)";
                     for(let i = 0; i < w; i += 80) {
                         ctx.fillRect(i, 0, 30, h);
                         ctx.fillRect(0, i, w, 30);
                     }
-                    ctx.strokeStyle = "rgba(0, 242, 254, 0.05)";
+                    ctx.strokeStyle = "rgba(var(--theme-color-rgb), 0.05)";
                     ctx.lineWidth = 1;
                     for (let r = 100; r < 500; r += 120) {
                         ctx.beginPath();
@@ -662,7 +678,7 @@
                         ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke();
                     }
                     ctx.fillStyle = "rgba(4, 9, 20, 0.8)";
-                    ctx.strokeStyle = "rgba(0, 242, 254, 0.08)";
+                    ctx.strokeStyle = "rgba(var(--theme-color-rgb), 0.08)";
                     ctx.lineWidth = 2;
                     ctx.beginPath(); ctx.arc(w/2, h/2, 90, 0, Math.PI*2); ctx.fill(); ctx.stroke();
                     ctx.beginPath(); ctx.arc(w/2, h/2, 45, 0, Math.PI*2); ctx.stroke();
@@ -700,10 +716,31 @@
 
         function verifyPasskey() {
             const inputCode = authInput.value.trim().toUpperCase();
+            
+            // Intercept and load dynamic Legion profiles
+            if (LEGION_THEMES[inputCode]) {
+                const themeData = LEGION_THEMES[inputCode];
+                
+                // Set native root variables
+                document.documentElement.style.setProperty('--theme-color', themeData.color);
+                document.documentElement.style.setProperty('--theme-color-rgb', themeData.rgb);
+                document.documentElement.style.setProperty('--theme-border', themeData.border);
+                
+                // Expose strategic task console explicitly for legion authorization routes
+                document.getElementById('global-tabs-row').style.display = 'flex';
+                
+                authScreen.classList.add('hidden');
+                bootstrapSystem();
+                
+                document.getElementById('op-label').innerText = `SYS.MAIN // ${themeData.label} // SECURE`;
+                pushTerminalLog(`LEGION REGISTRY RECOGNIZED: SYSTEM ACCENTS MODIFIED TO ${inputCode} CORE PROFILE.`);
+                return;
+            }
+
+            // Standard baseline security entry gates
             if (inputCode === 'AXEYZY' || inputCode === 'ADMIN' || inputCode === '') {
                 authScreen.classList.add('hidden');
                 
-                // Expose Workspace Navigation Tab switcher layout ONLY if authenticated via designated admin tags
                 if(inputCode === 'AXEYZY' || inputCode === 'ADMIN') {
                     document.getElementById('global-tabs-row').style.display = 'flex';
                 }
@@ -786,8 +823,6 @@
             pushTerminalLog("Operational baseline synchronized successfully.");
             syncInterface();
             runRenderLoop();
-
-            // Initialize structural updates for the new detached METT-TC computation engine
             runMettCalculationSync();
         }
 
@@ -997,7 +1032,7 @@
             });
             window.addEventListener('keydown', handleKeydown);
 
-            // --- DECOUPLED TAB INTERACTION LOGIC SUBSCRIPTIONS ---
+            // Global Module Navigation Tab hooks
             document.getElementById('nav-btn-map').addEventListener('click', () => toggleGlobalWorkspaceMode('map'));
             document.getElementById('nav-btn-mett').addEventListener('click', () => toggleGlobalWorkspaceMode('mett'));
 
@@ -1010,13 +1045,11 @@
                 });
             });
 
-            // Bind update telemetry directly to form fields for local tracking compilation
             document.querySelectorAll('#mett-strategic-workspace input, #mett-strategic-workspace select, #mett-strategic-workspace textarea').forEach(inputNode => {
                 inputNode.addEventListener('input', runMettCalculationSync);
             });
         }
 
-        // Handles workspace visibility switching between Map Assets and METT-TC Form System
         function toggleGlobalWorkspaceMode(mode) {
             const btnMap = document.getElementById('nav-btn-map');
             const btnMett = document.getElementById('nav-btn-mett');
@@ -1040,9 +1073,7 @@
             }
         }
 
-        // Decoupled computation loop reading selector metrics and outputting live TLP/WARNORD assessments
         function runMettCalculationSync() {
-            // Read standard 1/3 - 2/3 planning rule parameters
             const totalHoursInput = parseFloat(document.getElementById('ti-hours-total').value) || 0;
             const cmdHours = (totalHoursInput * (1/3)).toFixed(1);
             const squadHours = (totalHoursInput * (2/3)).toFixed(1);
@@ -1050,7 +1081,6 @@
             document.getElementById('calc-cmd-time').innerText = `${cmdHours} Hours`;
             document.getElementById('calc-sub-time').innerText = `${squadHours} Hours`;
 
-            // Compile dynamic live summary data report
             const friendlyTask = document.getElementById('m-friendly-task').value;
             const enemyEffect = document.getElementById('m-enemy-effect').value;
             const intentPurpose = document.getElementById('m-intent-purpose').value;
@@ -1079,7 +1109,6 @@
 
             document.getElementById('mett-live-summary-box').innerText = coreReport;
 
-            // Compile TLP Step 2 Warning Order live text block
             let warnoTemplate = `WARNORD // FLASH TRANSMISSION DIRECTIVE\n`;
             warnoTemplate += `DOCUMENT TYPE: PRELIMINARY PLANNING OUTLINE MATRIX\n`;
             warnoTemplate += `TARGET ACTION ELEMENT: ${who}\n`;
@@ -1389,11 +1418,12 @@
 
             if (STATE.gridOn) {
                 ctx.lineWidth = 1;
-                ctx.strokeStyle = theaterProfile.gridColor;
+                // Read root layout parameters globally to adapt dynamically
+                ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() + '14';
                 for (let x = 0; x < canvas.width; x += 25) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
                 for (let y = 0; y < canvas.height; y += 25) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
 
-                ctx.strokeStyle = theaterProfile.gridColor.replace(/[\d\.]+\)$/, '0.08)'); 
+                ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() + '28';
                 for (let x = 0; x < canvas.width; x += 100) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
                 for (let y = 0; y < canvas.height; y += 100) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
             }
@@ -1406,9 +1436,11 @@
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
 
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim();
+
             if (t.type === 'trench') {
                 ctx.lineWidth = 26;
-                ctx.strokeStyle = "rgba(0, 242, 254, 0.05)";
+                ctx.strokeStyle = accentColor + '0d';
                 strokePathPoints(t.points);
 
                 ctx.lineWidth = 16;
@@ -1416,11 +1448,11 @@
                 strokePathPoints(t.points);
 
                 ctx.lineWidth = 14;
-                ctx.strokeStyle = createHatchPattern('#122b47');
+                ctx.strokeStyle = createHatchPattern(accentColor + '44');
                 strokePathPoints(t.points);
 
                 ctx.lineWidth = 12;
-                ctx.strokeStyle = "rgba(0, 242, 254, 0.3)";
+                ctx.strokeStyle = accentColor + '66';
                 ctx.setLineDash([4, 12]);
                 strokePathPoints(t.points);
                 
@@ -1579,7 +1611,7 @@
 
                 if (asset.id === STATE.selectedId) {
                     ctx.save();
-                    ctx.strokeStyle = asset.kia ? 'rgba(67, 88, 109, 0.5)' : 'rgba(0, 242, 254, 0.5)'; 
+                    ctx.strokeStyle = asset.kia ? 'rgba(67, 88, 109, 0.5)' : getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() + '88'; 
                     ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
                     ctx.beginPath(); ctx.arc(rx, ry, 18, 0, Math.PI * 2); ctx.stroke(); 
                     ctx.restore();
@@ -1614,10 +1646,11 @@
         function renderZoneBounds(z) {
             ctx.save();
             let zoneColor = COLORS[z.faction] || '#7a92a8';
+            const baseAccent = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim();
             
             if (z.style === 'fob') {
-                ctx.strokeStyle = '#00f2fe';
-                ctx.fillStyle = createGridPattern('#00f2fe');
+                ctx.strokeStyle = baseAccent;
+                ctx.fillStyle = createGridPattern(baseAccent);
             } else if (z.style === 'noman') {
                 ctx.strokeStyle = '#e63946';
                 ctx.fillStyle = createStripedPattern('#e63946');
