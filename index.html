@@ -205,7 +205,8 @@
             display: flex; flex-direction: column; justify-content: center;
         }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2,5,10,0.85); z-index: 5000; display: none; backdrop-filter: blur(4px); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2,5,10,0.85); z-index: 5000; display: none; backdrop-filter: blur(4px);
+        }
         .modal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #040914; border: 2px solid #ff3366; padding: 24px; width: 340px; z-index: 5001; display: none;
@@ -222,12 +223,14 @@
 
         /* METT-TC Panel Styles */
         .mett-header-tabs { display: flex; gap: 2px; background: #010307; padding: 2px; border: 1px solid #122236; }
-        .mett-tab { padding: 6px 2px; font-size: 9px; flex: 1; text-align: center; border: 1px solid transparent; cursor: pointer; color: #43586d; font-weight: bold; }
+        .mett-tab { padding: 6px 2px; font-size: 9px; flex: 1; text-align: center; border: 1px solid transparent; cursor: pointer; color: #43586d;
+            font-weight: bold; }
         .mett-tab.active { background: rgba(0, 242, 254, 0.08); border-color: #00f2fe; color: #00f2fe; }
         .mett-pane { display: none; flex-direction: column; gap: 10px; margin-top: 8px; }
         .mett-pane.active { display: flex; }
         .mett-subrow { display: flex; gap: 6px; align-items: center; }
-        .mett-custom-item { display: flex; justify-content: space-between; align-items: center; background: rgba(30,53,77,0.15); border: 1px solid #1e354d; padding: 4px 6px; font-size: 9px; margin-top: 4px; }
+        .mett-custom-item { display: flex; justify-content: space-between; align-items: center; background: rgba(30,53,77,0.15); border: 1px solid #1e354d; padding: 4px 6px; font-size: 9px;
+            margin-top: 4px; }
         .mett-custom-del { color: #ff3366; cursor: pointer; font-weight: bold; font-size: 10px; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -351,10 +354,7 @@
 
             <div class="sidebar-content" id="panel-mett-core" style="display: none;">
                 <div class="section">
-                    <div class="section-title" style="color:#00f2fe; display: flex; justify-content: space-between; align-items: center;">
-                        <span>METT-TC CONSOLE</span>
-                        <button id="btn-mett-escape" style="font-size: 8px; color: #ff3366; border-color: rgba(255,51,102,0.3); padding: 2px 6px;">← BACK</button>
-                    </div>
+                    <div class="section-title" style="color:#00f2fe">METT-TC ANALYSIS CONSOLE</div>
                     <div class="mett-header-tabs">
                         <div class="mett-tab active" data-mpane="m_pane">M</div>
                         <div class="mett-tab" data-mpane="e_pane">E</div>
@@ -423,7 +423,7 @@
                             <select id="mett-e-coa">
                                 <option value="Hold High Ground">HOLD HIGH GROUND</option>
                                 <option value="Flank Assembly Zones">FLANK ASSEMBLY ZONES</option>
-                                <option value="Envelop Defending Front">ENTRENCHED DEFENSE</option>
+                                <option value="Envelop Defending Front">ENVELOP DEFENDING FRONT</option>
                                 <option value="Conduct Breakout Attempt">CONDUCT BREAKOUT ATTEMPT</option>
                             </select>
                         </div>
@@ -524,7 +524,6 @@
                 <button class="tab active" id="mett-toggle-map" style="padding:4px 12px;">GEOSPATIAL THEATER MAP</button>
                 <button class="tab" id="mett-toggle-mett" style="padding:4px 12px; color:#00f2fe;">METT-TC STRATEGIC CONSOLE</button>
             </div>
-
             <div class="canvas-container" id="canvas-holder">
                 <canvas id="tactical-grid"></canvas>
             </div>
@@ -535,7 +534,6 @@
 
         <div class="sidebar sidebar-right">
             <div class="sidebar-content">
-
                 <div class="section">
                     <div class="section-title">THEATER GRID MATRIX</div>
                     <div class="button-grid">
@@ -591,7 +589,6 @@
 
         const THEATERS = {
             default: { name: "CORE BASELINE MATRIX", bg: "#010306", gridColor: "rgba(0, 242, 254, 0.012)", drawSatelliteMap: null, terrain: [] },
-
             christophsis: {
                 name: "THEATER: CHRISTOPHSIS // URBAN CRYSTAL MESH", bg: "#020712", gridColor: "rgba(0, 242, 254, 0.03)",
                 terrain: [
@@ -600,23 +597,14 @@
                 ],
                 drawSatelliteMap: (ctx, w, h) => {
                     ctx.fillStyle = "rgba(0, 242, 254, 0.015)";
-                    for(let i = 0; i < w; i += 80) {
-                        ctx.fillRect(i, 0, 30, h);
-                        ctx.fillRect(0, i, w, 30);
-                    }
-                    ctx.strokeStyle = "rgba(0, 242, 254, 0.05)";
-                    ctx.lineWidth = 1;
+                    for(let i = 0; i < w; i += 80) { ctx.fillRect(i, 0, 30, h); ctx.fillRect(0, i, w, 30); }
+                    ctx.strokeStyle = "rgba(0, 242, 254, 0.05)"; ctx.lineWidth = 1;
                     for (let r = 100; r < 500; r += 120) {
-                        ctx.beginPath();
-                        for(let s = 0; s < 6; s++) {
-                            let angle = (s * Math.PI / 3);
-                            ctx.lineTo(w/2 + Math.cos(angle)*r, h/2 + Math.sin(angle)*r);
-                        }
+                        ctx.beginPath(); for(let s = 0; s < 6; s++) { let angle = (s * Math.PI / 3); ctx.lineTo(w/2 + Math.cos(angle)*r, h/2 + Math.sin(angle)*r); }
                         ctx.closePath(); ctx.stroke();
                     }
                 }
             },
-
             ryloth: {
                 name: "THEATER: RYLOTH // TRENCH OUTPOST MESH", bg: "#120b05", gridColor: "rgba(255, 159, 28, 0.02)",
                 terrain: [
@@ -624,1243 +612,509 @@
                     { type: 'ridge', points: [{x:300, y:380}, {x:550, y:350}, {x:650, y:450}] }
                 ],
                 drawSatelliteMap: (ctx, w, h) => {
-                    ctx.strokeStyle = "rgba(255, 159, 28, 0.03)";
-                    ctx.lineWidth = 1.5;
-                    for(let i = -200; i < h; i += 60) {
-                        ctx.beginPath();
-                        ctx.moveTo(0, i);
-                        ctx.bezierCurveTo(w * 0.25, i + 120, w * 0.75, i - 120, w, i + 50);
-                        ctx.stroke();
-                    }
-                    ctx.fillStyle = "rgba(255, 159, 28, 0.01)";
-                    ctx.beginPath(); ctx.arc(w*0.2, h*0.3, 140, 0, Math.PI*2); ctx.fill();
+                    ctx.strokeStyle = "rgba(255, 159, 28, 0.03)"; ctx.lineWidth = 1.5;
+                    for(let i = -200; i < h; i += 60) { ctx.beginPath(); ctx.moveTo(0, i); ctx.bezierCurveTo(w * 0.25, i + 120, w * 0.75, i - 120, w, i + 50); ctx.stroke(); }
+                    ctx.fillStyle = "rgba(255, 159, 28, 0.01)"; ctx.beginPath(); ctx.arc(w*0.2, h*0.3, 140, 0, Math.PI*2); ctx.fill();
                     ctx.beginPath(); ctx.arc(w*0.8, h*0.7, 180, 0, Math.PI*2); ctx.fill();
                 }
             },
-
             kashyyyk: {
                 name: "THEATER: KASHYYYK // KACHIRO BEACHHEAD", bg: "#031206", gridColor: "rgba(0, 255, 170, 0.02)",
-                terrain: [
-                    { type: 'hazard', points: [{x:0, y:150}, {x:220, y:180}, {x:450, y:130}, {x:800, y:160}] }
-                ],
+                terrain: [ { type: 'hazard', points: [{x:0, y:150}, {x:220, y:180}, {x:450, y:130}, {x:800, y:160}] } ],
                 drawSatelliteMap: (ctx, w, h) => {
-                    ctx.strokeStyle = "rgba(0, 255, 170, 0.025)";
-                    ctx.lineWidth = 1;
-                    for (let d = 0; d < 80; d += 20) {
-                        ctx.beginPath();
-                        ctx.moveTo(0, 150 + d); ctx.bezierCurveTo(200, 190 + d, 400, 110 + d, w, 170 + d);
-                        ctx.stroke();
-                    }
-                    const roots = [{x:100, y:400}, {x:350, y:300}, {x:650, y:450}];
-                    roots.forEach(r => {
-                        for(let rad = 30; rad < 140; rad += 25) {
-                            ctx.beginPath(); ctx.arc(r.x, r.y, rad, 0, Math.PI*2); ctx.stroke();
-                        }
-                    });
+                    ctx.strokeStyle = "rgba(0, 255, 170, 0.025)"; ctx.lineWidth = 1;
+                    for (let d = 0; d < 80; d += 20) { ctx.beginPath(); ctx.moveTo(0, 150 + d); ctx.bezierCurveTo(w*0.3, 120+d, w*0.6, 220+d, w, 140+d); ctx.stroke(); }
+                    ctx.fillStyle = "rgba(0, 255, 170, 0.012)"; ctx.beginPath(); ctx.moveTo(0, 150); ctx.bezierCurveTo(w*0.3, 120, w*0.6, 220, w, 140); ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
                 }
             },
-
             coruscant: {
-                name: "THEATER: CORUSCANT // SECURITY QUADRANT", bg: "#060810", gridColor: "rgba(209, 223, 236, 0.025)",
-                terrain: [
-                    { type: 'trench', points: [{x:150, y:0}, {x:150, y:500}] },
-                    { type: 'trench', points: [{x:500, y:0}, {x:500, y:500}] }
-                ],
+                name: "THEATER: CORUSCANT // TACTICAL HQ SURFACE", bg: "#050b14", gridColor: "rgba(209, 223, 236, 0.015)", terrain: [],
                 drawSatelliteMap: (ctx, w, h) => {
-                    ctx.strokeStyle = "rgba(209, 223, 236, 0.04)";
-                    ctx.lineWidth = 0.5;
-                    for (let i = 0; i < w; i += 40) {
-                        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
-                        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke();
-                    }
-                    ctx.fillStyle = "rgba(4, 9, 20, 0.8)";
-                    ctx.strokeStyle = "rgba(0, 242, 254, 0.08)";
-                    ctx.lineWidth = 2;
-                    ctx.beginPath(); ctx.arc(w/2, h/2, 90, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-                    ctx.beginPath(); ctx.arc(w/2, h/2, 45, 0, Math.PI*2); ctx.stroke();
+                    ctx.strokeStyle = "rgba(0, 242, 254, 0.03)"; ctx.lineWidth = 0.5;
+                    for(let x=0; x<w; x+=40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+                    for(let y=0; y<h; y+=40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+                    ctx.fillStyle = "rgba(0, 242, 254, 0.02)"; ctx.fillRect(w/2 - 120, h/2 - 120, 240, 240);
+                    ctx.strokeStyle = "rgba(0, 242, 254, 0.1)"; ctx.strokeRect(w/2 - 120, h/2 - 120, 240, 240);
                 }
             },
-
             corellia: {
-                name: "THEATER: CORELLIA // SHIPYARD INDUSTRIAL SLATS", bg: "#0d0404", gridColor: "rgba(230, 57, 70, 0.02)",
-                terrain: [
-                    { type: 'ridge', points: [{x:200, y:100}, {x:450, y:100}] },
-                    { type: 'ridge', points: [{x:200, y:360}, {x:450, y:360}] }
-                ],
+                name: "THEATER: CORELLIA // SHIPYARDS ASSEMBLY GRID", bg: "#0d0406", gridColor: "rgba(230, 57, 70, 0.015)",
+                terrain: [ { type: 'ridge', points: [{x:200, y:0}, {x:260, y:0}, {x:260, y:600}, {x:200, y:600}] } ],
                 drawSatelliteMap: (ctx, w, h) => {
-                    ctx.strokeStyle = "rgba(230, 57, 70, 0.03)";
-                    ctx.lineWidth = 1.5;
-                    ctx.strokeRect(100, -50, 150, h + 100);
-                    ctx.strokeRect(w - 250, -50, 150, h + 100);
-                    ctx.lineWidth = 0.5;
-                    ctx.beginPath();
-                    for(let i = -h; i < w; i += 50) {
-                        ctx.moveTo(i, 0); ctx.lineTo(i + h, h);
-                    }
-                    ctx.stroke();
+                    ctx.strokeStyle = "rgba(230, 57, 70, 0.04)"; ctx.lineWidth = 1;
+                    ctx.beginPath(); ctx.arc(w/2, h/2, 220, 0, Math.PI*2); ctx.stroke(); ctx.beginPath(); ctx.arc(w/2, h/2, 100, 0, Math.PI*2); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(w, h); ctx.moveTo(w, 0); ctx.lineTo(0, h); ctx.stroke();
                 }
             }
         };
 
-        const authScreen = document.getElementById('auth-screen');
-        const authInput = document.getElementById('auth-input');
-        const authSubmit = document.getElementById('auth-submit');
-        const authError = document.getElementById('auth-error');
-
-        authSubmit.addEventListener('click', verifyPasskey);
-        authInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') verifyPasskey(); });
-
-        let isAdminUnlocked = false;
-
-        function verifyPasskey() {
-            const inputCode = authInput.value.trim().toUpperCase();
-            if (inputCode === 'AXEYZY' || inputCode === 'ADMIN' || inputCode === '') {
-                if(inputCode === 'AXEYZY' || inputCode === 'ADMIN') {
-                    isAdminUnlocked = true;
-                }
-                authScreen.classList.add('hidden');
-                bootstrapSystem();
-            } else {
-                authError.style.display = 'block';
-                authInput.value = '';
-                setTimeout(() => { authError.style.display = 'none'; }, 2000);
-            }
-        }
-
-        const STATE = {
-            opName: 'OPERATION AXE-RECON',
-            mode: 'deploy',
-            pStyle: 'straight',
-            zType: 'rect',
-            zStyle: 'faction',
-            tStyle: 'trench',
-            faction: 'GAR',
-            unitType: 'Infantry',
-            gridOn: true,
-            phaseIdx: 0,
-            animating: false,
-            animProgress: 0,
-            selectedId: null,
-            activeTheater: 'default',
-            phases: [{ intel: 'SECURE RECON COORD LAYERS // ASSIGN STRUCTURAL LANES', assets: [], zones: [], paths: [], terrain: [] }]
+        let STATE = {
+            mode: 'deploy', faction: 'GAR', unitType: 'Infantry', pStyle: 'straight', zType: 'rect', zStyle: 'faction', tStyle: 'trench',
+            activeTheater: 'default', gridVisible: true, phases: [], currentPhaseIdx: 0, undoStack: [], redoStack: [], customMettItems: []
         };
 
-        const METT_DATA = {
-            customAddons: [],
-            activePane: 'm_pane',
-            uiViewMode: 'map' 
-        };
+        const canvas = document.getElementById('tactical-grid'); const ctx = canvas.getContext('2d');
+        let selectedEntity = null; let activePathBuilding = null; let draggingEntity = null; let dragOffset = {x:0, y:0};
+        let isSimulating = false; let simulationTimer = null;
 
-        let systemHistory = [];
-        let systemHistoryIdx = -1;
-        let activePings = [];
+        const ADMIN_UNLOCK_KEYS = ["SECURE_ALPHA", "METT_TC_4.7", "COMMANDER_VALID", "66", "ADMIN"];
 
-        function recordState() {
-            if (systemHistoryIdx < systemHistory.length - 1) {
-                systemHistory = systemHistory.slice(0, systemHistoryIdx + 1);
-            }
-            systemHistory.push(JSON.stringify(STATE.phases));
-            systemHistoryIdx++;
+        function createDefaultPhase() { return { units: [], zones: [], paths: [], logs: ["PHASE INITIALIZED // READY"] }; }
+        function getCurPhase() { if(STATE.phases.length === 0) STATE.phases.push(createDefaultPhase()); return STATE.phases[STATE.currentPhaseIdx]; }
+
+        function saveState() {
+            const snapshot = JSON.stringify(STATE.phases); STATE.undoStack.push(snapshot); STATE.redoStack = [];
+            if(STATE.undoStack.length > 30) STATE.undoStack.shift();
         }
-
         function triggerUndo() {
-            if (systemHistoryIdx > 0) {
-                systemHistoryIdx--;
-                STATE.phases = JSON.parse(systemHistory[systemHistoryIdx]);
-                if (STATE.phaseIdx >= STATE.phases.length) STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog("System recovery: UNDO executed.");
-                syncInterface();
-            }
+            if(STATE.undoStack.length === 0) { logToTerminal("SYSTEM // CANNOT UNDO // STACK EMPTY", true); return; }
+            STATE.redoStack.push(JSON.stringify(STATE.phases)); STATE.phases = JSON.parse(STATE.undoStack.pop());
+            if(STATE.currentPhaseIdx >= STATE.phases.length) STATE.currentPhaseIdx = STATE.phases.length - 1;
+            selectedEntity = null; activePathBuilding = null; rebuildPhaseTabs(); updateTelemetry(); triggerRepaint(); logToTerminal("SYSTEM // ACTIONS REVERTED SUCCESSFULLY");
         }
-
         function triggerRedo() {
-            if (systemHistoryIdx < systemHistory.length - 1) {
-                systemHistoryIdx++;
-                STATE.phases = JSON.parse(systemHistory[systemHistoryIdx]);
-                pushTerminalLog("System state advancement: REDO executed.");
-                syncInterface();
-            }
+            if(STATE.redoStack.length === 0) { logToTerminal("SYSTEM // CANNOT REDO // STACK EMPTY", true); return; }
+            STATE.undoStack.push(JSON.stringify(STATE.phases)); STATE.phases = JSON.parse(STATE.redoStack.pop());
+            selectedEntity = null; activePathBuilding = null; rebuildPhaseTabs(); updateTelemetry(); triggerRepaint(); logToTerminal("SYSTEM // ACTIONS RE-APPLIED SUCCESSFULLY");
         }
 
-        const canvas = document.getElementById('tactical-grid');
-        const ctx = canvas.getContext('2d');
-        const intelField = document.getElementById('intel-field');
-        const phaseContainer = document.getElementById('phase-container');
-        const terminalLog = document.getElementById('system-log');
-
-        let isInteracting = false;
-        let dragAnchor = null;
-        let activeZonePreview = null;
-        let dynamicDashOffset = 0;
-        let activePathBuilding = null;
-        let mouseCurrentPos = { x: 0, y: 0 };
-
-        function bootstrapSystem() {
-            resizeTacticalSurface();
-            window.addEventListener('resize', resizeTacticalSurface);
-            attachInterfaceListeners();
-            setupMettCoreListeners();
-
-            if (isAdminUnlocked) {
-                initializeAdminLayout();
-            }
-
-            recordState();
-            pushTerminalLog("Operational baseline synchronized successfully.");
-            syncInterface();
-            runRenderLoop();
+        function logToTerminal(msg, isAlert=false) {
+            const logBox = document.getElementById('system-log'); const timestamp = new Date().toTimeString().split(' ')[0];
+            const line = document.createElement('div'); line.className = 'log-line' + (isAlert ? ' log-alert' : '');
+            line.innerHTML = `<span class="log-time">[${timestamp}]</span> ${msg}`; logBox.appendChild(line); logBox.scrollTop = logBox.scrollHeight;
         }
 
-        function initializeAdminLayout() {
-            pushTerminalLog("CRITICAL LEVEL ACCESS DETECTED: METT-TC SYSTEM SUBSYSTEM ACTIVATED.");
-
-            const cmdSection = document.querySelector('.mode-btn').parentElement;
-            const tabHeaderGroup = document.createElement('div');
-            tabHeaderGroup.className = 'tabs';
-            tabHeaderGroup.style.marginBottom = '6px';
-            tabHeaderGroup.innerHTML = `
-                <button id="btn-tab-mapping" class="tab active" style="flex:1;">GEOSPATIAL THEATER MAP</button>
-                <button id="btn-tab-analysis" class="tab" style="flex:1; color:#00f2fe;">STRATEGIC CONSOLE</button>
-            `;
-            cmdSection.insertBefore(tabHeaderGroup, cmdSection.firstChild);
-
-            // Re-bind the mapping suite button to control full system visibility
-            document.getElementById('btn-tab-mapping').addEventListener('click', () => {
-                document.getElementById('btn-tab-mapping').classList.add('active');
-                document.getElementById('btn-tab-analysis').classList.remove('active');
-                document.getElementById('panel-mapping').style.display = 'flex';
-                document.getElementById('panel-mett-core').style.display = 'none';
-                
-                // Exclusively restore canvas grid view context
-                METT_DATA.uiViewMode = 'map';
-                document.getElementById('mett-toggle-map').classList.add('active');
-                document.getElementById('mett-toggle-mett').classList.remove('active');
-                canvas.style.display = 'block';
-            });
-
-            // Re-bind the strategic console analysis view context link
-            document.getElementById('btn-tab-analysis').addEventListener('click', () => {
-                document.getElementById('btn-tab-mapping').classList.remove('active');
-                document.getElementById('btn-tab-analysis').classList.add('active');
-                document.getElementById('panel-mapping').style.display = 'none';
-                document.getElementById('panel-mett-core').style.display = 'flex';
-                
-                // Exclusively toggle to programmatic active route HUD loop visualization
-                METT_DATA.uiViewMode = 'mett';
-                document.getElementById('mett-toggle-map').classList.remove('active');
-                document.getElementById('mett-toggle-mett').classList.add('active');
-                canvas.style.display = 'none';
-                recalculateMettOutput();
-            });
-
-            // Hook up operational sidebar panel escape vector back button trigger link
-            document.getElementById('btn-mett-escape').addEventListener('click', () => {
-                document.getElementById('btn-tab-mapping').click();
-            });
-
-            document.getElementById('mett-tab-header').style.display = 'flex';
+        function updateTelemetry() {
+            const p = getCurPhase(); document.getElementById('tele-units').innerText = p.units.length;
+            document.getElementById('tele-zones').innerText = p.zones.length; document.getElementById('tele-paths').innerText = p.paths.length;
         }
 
-        function resizeTacticalSurface() {
-            const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
+        function resizeCanvas() {
+            const box = document.getElementById('canvas-holder'); canvas.width = box.clientWidth; canvas.height = box.clientHeight; triggerRepaint();
         }
 
-        function pushTerminalLog(message, isAlert = false) {
-            const now = new Date();
-            const timeStr = `[${now.toTimeString().split(' ')[0]}]`;
-            const logLine = document.createElement('div');
-            logLine.className = 'log-line';
-            logLine.innerHTML = `<span class="log-time">${timeStr}</span> <span class="${isAlert ? 'log-alert' : ''}">${message.toUpperCase()}</span>`;
-            terminalLog.appendChild(logLine);
-            terminalLog.scrollTop = terminalLog.scrollHeight;
-        }
+        function setupInterfaceHooks() {
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active');
+                STATE.mode = e.target.dataset.mode; if(activePathBuilding) commitCurrentPath(); selectedEntity = null; updateSelectedDisplay(); triggerRepaint();
+            }));
 
-        function legaliseControlState() {
-            document.querySelectorAll('.unit-btn').forEach(b => b.disabled = (STATE.mode !== 'deploy'));
-            document.querySelectorAll('.path-style-btn').forEach(b => b.disabled = (STATE.mode !== 'path'));
-            document.querySelectorAll('.zone-type-btn, .zone-style-btn').forEach(b => b.disabled = (STATE.mode !== 'zone'));
-            document.querySelectorAll('.terrain-btn').forEach(b => b.disabled = (STATE.mode !== 'terrain'));
+            document.querySelectorAll('.faction-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.faction-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.faction = e.target.dataset.faction;
+            }));
 
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === STATE.mode));
-            document.querySelectorAll('.path-style-btn').forEach(b => b.classList.toggle('active', b.dataset.pstyle === STATE.pStyle));
-            document.querySelectorAll('.faction-btn').forEach(b => b.classList.toggle('active', b.dataset.faction === STATE.faction));
-            document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('active', b.dataset.unit === STATE.unitType));
-            document.querySelectorAll('.zone-type-btn').forEach(b => b.classList.toggle('active', b.dataset.ztype === STATE.zType));
-            document.querySelectorAll('.zone-style-btn').forEach(b => b.classList.toggle('active', b.dataset.zstyle === STATE.zStyle));
-            document.querySelectorAll('.terrain-btn').forEach(b => b.classList.toggle('active', b.dataset.tstyle === STATE.tStyle));
-            document.querySelectorAll('.theater-btn').forEach(b => b.classList.toggle('active', b.dataset.theater === STATE.activeTheater));
-        }
+            document.querySelectorAll('.unit-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.unitType = e.target.dataset.unit;
+            }));
 
-        function attachInterfaceListeners() {
-            document.querySelectorAll('.mode-btn').forEach(b => {
-                b.addEventListener('click', (e) => {
-                    STATE.mode = e.target.dataset.mode;
-                    pushTerminalLog(`Switched frame matrix to ${STATE.mode.toUpperCase()}`);
-                    if(STATE.mode !== 'path' && activePathBuilding) commitCurrentPath();
-                    legaliseControlState();
-                });
-            });
+            document.querySelectorAll('.path-style-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.path-style-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.pStyle = e.target.dataset.pstyle;
+            }));
 
-            document.querySelectorAll('.theater-btn').forEach(b => {
-                b.addEventListener('click', (e) => {
-                    recordState();
-                    const targetT = e.target.dataset.theater;
-                    STATE.activeTheater = targetT;
+            document.querySelectorAll('.zone-type-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.zone-type-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.zType = e.target.dataset.ztype;
+            }));
 
-                    const profile = THEATERS[targetT];
-                    STATE.phases[STATE.phaseIdx].terrain = JSON.parse(JSON.stringify(profile.terrain));
+            document.querySelectorAll('.zone-style-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.zone-style-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.zStyle = e.target.dataset.zstyle;
+            }));
 
-                    document.getElementById('op-label').innerText = `SYS.MAIN // ${profile.name} // SECURE`;
-                    pushTerminalLog(`CONNECTED INTEL FEED: DOWNLINKING SATELLITE TOPO FOR ${targetT.toUpperCase()}`);
-                    syncInterface();
-                });
-            });
+            document.querySelectorAll('.terrain-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.terrain-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.tStyle = e.target.dataset.tstyle;
+            }));
 
-            document.querySelectorAll('.path-style-btn').forEach(b => {
-                b.addEventListener('click', (e) => {
-                    if(activePathBuilding) commitCurrentPath();
-                    STATE.pStyle = e.target.dataset.pstyle;
-                    legaliseControlState();
-                });
-            });
-
-            document.querySelectorAll('.faction-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.faction = e.target.dataset.faction; legaliseControlState(); });
-            });
-
-            document.querySelectorAll('.unit-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.unitType = e.target.dataset.unit; legaliseControlState(); });
-            });
-
-            document.querySelectorAll('.zone-type-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.zType = e.target.dataset.ztype; legaliseControlState(); });
-            });
-
-            document.querySelectorAll('.zone-style-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.zStyle = e.target.dataset.zstyle; legaliseControlState(); });
-            });
-
-            document.querySelectorAll('.terrain-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.tStyle = e.target.dataset.tstyle; legaliseControlState(); });
-            });
+            document.querySelectorAll('.theater-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.theater-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active');
+                STATE.activeTheater = e.target.dataset.theater; logToTerminal("GRID CHANGE // " + THEATERS[STATE.activeTheater].name); triggerRepaint();
+            }));
 
             document.getElementById('ctrl-grid').addEventListener('click', (e) => {
-                STATE.gridOn = !STATE.gridOn;
-                e.target.classList.toggle('active', STATE.gridOn);
+                STATE.gridVisible = !STATE.gridVisible; e.target.classList.toggle('active', STATE.gridVisible); e.target.innerText = STATE.gridVisible ? "ON" : "OFF"; triggerRepaint();
             });
 
-            document.getElementById('ctrl-undo').addEventListener('click', triggerUndo);
-            document.getElementById('ctrl-redo').addEventListener('click', triggerRedo);
-
-            document.getElementById('ctrl-play').addEventListener('click', () => {
-                if(!STATE.animating) {
-                    if(activePathBuilding) commitCurrentPath();
-
-                    const activePhase = STATE.phases[STATE.phaseIdx];
-                    activePhase.assets.forEach(a => {
-                        a.x = a.spawnX;
-                        a.y = a.spawnY;
-                    });
-
-                    bindUnitsToRoutes();
-                    STATE.animating = true;
-                    STATE.animProgress = 0;
-                    document.getElementById('ctrl-play').classList.add('active');
-                    pushTerminalLog("COMMENCING COORDINATED FACTION-LOCKED ROUTING MATRIX SIMULATION.");
-                }
-            });
+            document.getElementById('ctrl-undo').addEventListener('click', triggerUndo); document.getElementById('ctrl-redo').addEventListener('click', triggerRedo);
 
             document.getElementById('ctrl-reset').addEventListener('click', () => {
-                recordState();
-                STATE.phases[STATE.phaseIdx].assets.forEach(a => {
-                    a.x = a.spawnX;
-                    a.y = a.spawnY;
-                    a.runtimePoints = null;
+                showWarningBox("Resetting simulator will reload original entities inside current phase window. Proceed?", () => {
+                    const p = getCurPhase(); p.units.forEach(u => { u.x = u.originX; u.y = u.originY; u.kia = false; });
+                    stopSimulationPlayback(); triggerRepaint(); logToTerminal("SIM CORE // ENTITY POSITIONS TRACKED BACK TO BASELINE");
                 });
-                STATE.animating = false;
-                STATE.animProgress = 0;
-                document.getElementById('ctrl-play').classList.remove('active');
-                pushTerminalLog("Simulation coordinates hard-reset to original deployment nodes.");
-                syncInterface();
-            });
-
-            document.getElementById('phase-add').addEventListener('click', () => {
-                recordState();
-                const profile = THEATERS[STATE.activeTheater];
-                STATE.phases.push({
-                    intel: `PHASE ${STATE.phases.length + 1} DIRECTIVES`,
-                    assets: [], zones: [], paths: [],
-                    terrain: JSON.parse(JSON.stringify(profile.terrain))
-                });
-                STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog(`New phase window mapped: Phase ${STATE.phaseIdx + 1}`);
-                syncInterface();
-            });
-
-            document.getElementById('phase-clone').addEventListener('click', () => {
-                recordState();
-                const parent = STATE.phases[STATE.phaseIdx];
-                const cleanAssets = parent.assets.map(a => ({
-                    id: Math.random(),
-                    x: a.spawnX, y: a.spawnY,
-                    spawnX: a.spawnX, spawnY: a.spawnY,
-                    faction: a.faction, type: a.type, kia: a.kia || false
-                }));
-                STATE.phases.push({
-                    intel: `${parent.intel} [CLONE]`,
-                    assets: cleanAssets,
-                    zones: JSON.parse(JSON.stringify(parent.zones)),
-                    paths: JSON.parse(JSON.stringify(parent.paths)),
-                    terrain: JSON.parse(JSON.stringify(parent.terrain || []))
-                });
-                STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog(`Cloned timeline layers into position ${STATE.phaseIdx + 1}`);
-                syncInterface();
-            });
-
-            document.getElementById('phase-delete').addEventListener('click', () => {
-                if(STATE.phases.length > 1) {
-                    showWarningBox('PURGE ACTIVE STRATEGIC PHASE ARRAY?', () => {
-                        recordState();
-                        STATE.phases.splice(STATE.phaseIdx, 1);
-                        STATE.phaseIdx = Math.max(0, STATE.phaseIdx - 1);
-                        pushTerminalLog("Timeline coordinate array cleanly excised.");
-                        syncInterface();
-                    });
-                }
-            });
-
-            document.getElementById('asset-purge').addEventListener('click', () => {
-                if(STATE.selectedId) {
-                    recordState();
-                    let current = STATE.phases[STATE.phaseIdx];
-                    current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
-                    pushTerminalLog(`Target micro-unit removed from operational memory.`);
-                    STATE.selectedId = null;
-                    syncInterface();
-                }
             });
 
             document.getElementById('board-wipe').addEventListener('click', () => {
-                showWarningBox('CLEAR CURRENT WORKSPACE MAP MATRICES?', () => {
-                    recordState();
-                    STATE.phases[STATE.phaseIdx] = { intel: '', assets: [], zones: [], paths: [], terrain: [] };
-                    STATE.selectedId = null;
-                    activePathBuilding = null;
-                    pushTerminalLog("Wiped active workspace parameters cleanly.", true);
-                    syncInterface();
+                showWarningBox("Purge absolute workspace state? This completely wipes layout models inside the current operational timeline window.", () => {
+                    saveState(); const p = getCurPhase(); p.units = []; p.zones = []; p.paths = []; selectedEntity = null; activePathBuilding = null;
+                    stopSimulationPlayback(); updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal("CORE SYSTEM // ACTIVE MATRIX CLEARED // BLANK SLATE");
                 });
             });
 
-            intelField.addEventListener('input', (e) => {
-                STATE.phases[STATE.phaseIdx].intel = e.target.value;
+            document.getElementById('asset-purge').addEventListener('click', () => {
+                if(!selectedEntity) return; saveState(); const p = getCurPhase();
+                if(selectedEntity.type === 'unit') p.units = p.units.filter(u => u.id !== selectedEntity.id);
+                else if(selectedEntity.type === 'zone') p.zones = p.zones.filter(z => z.id !== selectedEntity.id);
+                else if(selectedEntity.type === 'path') p.paths = p.paths.filter(pa => pa.id !== selectedEntity.id);
+                selectedEntity = null; updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal("SYSTEM // REMOVED MANUALLY CONTROLLED ELEMENT");
             });
 
-            canvas.addEventListener('mousedown', pointerDown);
-            canvas.addEventListener('mousemove', pointerMove);
-            canvas.addEventListener('mouseup', pointerUp);
-            canvas.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath();
+            document.getElementById('phase-add').addEventListener('click', () => {
+                saveState(); STATE.phases.push(createDefaultPhase()); STATE.currentPhaseIdx = STATE.phases.length - 1;
+                selectedEntity = null; rebuildPhaseTabs(); updateTelemetry(); triggerRepaint(); logToTerminal(`TIMELINE // CREATED OPERATIONAL STEP [PHASE ${STATE.currentPhaseIdx + 1}]`);
             });
-            window.addEventListener('keydown', handleKeydown);
-        }
 
-        function setupMettCoreListeners() {
-            document.querySelectorAll('.mett-tab').forEach(t => {
-                t.addEventListener('click', (e) => {
-                    document.querySelectorAll('.mett-tab').forEach(b => b.classList.remove('active'));
-                    document.querySelectorAll('.mett-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById('phase-clone').addEventListener('click', () => {
+                saveState(); const currentSrc = getCurPhase(); const clone = JSON.parse(JSON.stringify(currentSrc));
+                STATE.phases.push(clone); STATE.currentPhaseIdx = STATE.phases.length - 1;
+                selectedEntity = null; rebuildPhaseTabs(); updateTelemetry(); triggerRepaint(); logToTerminal(`TIMELINE // DUPLICATED MATRIX INTO NEW [PHASE ${STATE.currentPhaseIdx + 1}]`);
+            });
 
-                    e.target.classList.add('active');
-                    const paneId = `mett-${e.target.dataset.mpane}`;
-                    document.getElementById(paneId).classList.add('active');
-                    METT_DATA.activePane = e.target.dataset.mpane;
+            document.getElementById('phase-delete').addEventListener('click', () => {
+                if(STATE.phases.length <= 1) { logToTerminal("TIMELINE // CRITICAL // UNABLE TO PURGE BASE MATRIX LAYER", true); return; }
+                showWarningBox("Delete the active tactical phase? This truncates the timeline branch directly.", () => {
+                    saveState(); STATE.phases.splice(STATE.currentPhaseIdx, 1);
+                    if(STATE.currentPhaseIdx >= STATE.phases.length) STATE.currentPhaseIdx = STATE.phases.length - 1;
+                    selectedEntity = null; rebuildPhaseTabs(); updateTelemetry(); triggerRepaint(); logToTerminal("TIMELINE // SYSTEM BRANCH PURGED");
                 });
             });
 
-            document.getElementById('mett-toggle-map').addEventListener('click', () => {
-                document.getElementById('btn-tab-mapping').click();
+            document.getElementById('intel-field').addEventListener('input', (e) => { if(selectedEntity) { selectedEntity.notes = e.target.value; } });
+
+            document.getElementById('ctrl-play').addEventListener('click', () => {
+                if(isSimulating) stopSimulationPlayback(); else startSimulationPlayback();
             });
 
-            document.getElementById('mett-toggle-mett').addEventListener('click', () => {
-                document.getElementById('btn-tab-analysis').click();
-            });
+            // Master view toggling at top
+            document.getElementById('mett-toggle-map').addEventListener('click', () => { switchMasterInterfaceTab('map'); });
+            document.getElementById('mett-toggle-mett').addEventListener('click', () => { switchMasterInterfaceTab('mett'); });
 
-            const elementsToWatch = [
-                'mett-m-friendly', 'mett-m-enemy', 'mett-m-purpose',
-                'mett-5w-who', 'mett-5w-what', 'mett-5w-when', 'mett-5w-where', 'mett-5w-why',
-                'mett-e-disp', 'mett-e-coa', 'mett-t-key', 'mett-t-weather',
-                'mett-tr-status', 'mett-tr-log', 'mett-ti-hours', 'mett-c-risk', 'mett-c-roe'
-            ];
-            elementsToWatch.forEach(id => {
-                document.getElementById(id).addEventListener('input', recalculateMettOutput);
-            });
+            // METT-TC Panel Tabs
+            document.querySelectorAll('.mett-tab').forEach(t => t.addEventListener('click', (e) => {
+                document.querySelectorAll('.mett-tab').forEach(b => b.classList.remove('active')); e.target.classList.add('active');
+                document.querySelectorAll('.mett-pane').forEach(p => p.classList.remove('active'));
+                document.getElementById(`mett-${e.target.dataset.mpane}`).classList.add('active');
+            }));
 
-            document.getElementById('mett-custom-add').addEventListener('click', () => {
-                const input = document.getElementById('mett-custom-input');
-                const val = input.value.trim();
-                if(val) {
-                    METT_DATA.customAddons.push({
-                        id: Math.random(),
-                        pillar: METT_DATA.activePane.split('_')[0].toUpperCase(),
-                        text: val
-                    });
-                    input.value = '';
-                    pushTerminalLog(`Injected custom tactical constraint into [${METT_DATA.activePane.split('_')[0].toUpperCase()}] matrix profile.`);
-                    recalculateMettOutput();
-                    renderCustomMettAddons();
-                }
-            });
+            document.getElementById('mett-ti-hours').addEventListener('input', recalculateMettTimes);
+            document.getElementById('mett-custom-add').addEventListener('click', injectCustomMettParam);
+
+            const mettInputs = ['mett-m-friendly','mett-m-enemy','mett-m-purpose','mett-5w-who','mett-5w-what','mett-5w-when','mett-5w-where','mett-5w-why',
+                                'mett-e-disp','mett-e-coa','mett-t-key','mett-t-weather','mett-tr-status','mett-tr-log','mett-c-risk','mett-c-roe'];
+            mettInputs.forEach(id => document.getElementById(id).addEventListener('change', refreshMettLiveSynopsis));
+            mettInputs.forEach(id => { const el = document.getElementById(id); if(el.tagName === 'INPUT') el.addEventListener('input', refreshMettLiveSynopsis); });
+
+            window.addEventListener('resize', resizeCanvas); window.addEventListener('keydown', handleKeydown);
+            setupCanvasClickListeners();
         }
 
-        function renderCustomMettAddons() {
-            const listContainer = document.getElementById('mett-custom-list');
-            listContainer.innerHTML = '';
-            METT_DATA.customAddons.forEach(item => {
-                const node = document.createElement('div');
-                node.className = 'mett-custom-item';
-                node.innerHTML = `<span>[${item.pillar}] ${item.text}</span><span class="mett-custom-del" data-id="${item.id}">×</span>`;
-                node.querySelector('.mett-custom-del').addEventListener('click', (e) => {
-                    const targetId = parseFloat(e.target.dataset.id);
-                    METT_DATA.customAddons = METT_DATA.customAddons.filter(x => x.id !== targetId);
-                    recalculateMettOutput();
-                    renderCustomMettAddons();
-                });
-                listContainer.appendChild(node);
-            });
-        }
+        function switchMasterInterfaceTab(target) {
+            const mapToggle = document.getElementById('mett-toggle-map'); const mettToggle = document.getElementById('mett-toggle-mett');
+            const mapSidePanel = document.getElementById('panel-mapping'); const mettSidePanel = document.getElementById('panel-mett-core');
 
-        function recalculateMettOutput() {
-            const mFriendly = document.getElementById('mett-m-friendly').value;
-            const mEnemy = document.getElementById('mett-m-enemy').value;
-            const mPurpose = document.getElementById('mett-m-purpose').value;
-
-            const who = document.getElementById('mett-5w-who').value || '[UNDEF_WHO]';
-            const what = document.getElementById('mett-5w-what').value || '[UNDEF_WHAT]';
-            const when = document.getElementById('mett-5w-when').value || '[UNDEF_WHEN]';
-            const where = document.getElementById('mett-5w-where').value || '[UNDEF_WHERE]';
-            const why = document.getElementById('mett-5w-why').value || '[UNDEF_WHY]';
-
-            const eDisp = document.getElementById('mett-e-disp').value;
-            const eCoa = document.getElementById('mett-e-coa').value;
-            const tKey = document.getElementById('mett-t-key').value;
-            const tWeather = document.getElementById('mett-t-weather').value;
-            const trStatus = document.getElementById('mett-tr-status').value;
-            const trLog = document.getElementById('mett-tr-log').value;
-            const cRisk = document.getElementById('mett-c-risk').value;
-            const cRoe = document.getElementById('mett-c-roe').value;
-
-            const totalHours = parseFloat(document.getElementById('mett-ti-hours').value) || 0;
-            const cmdHours = (totalHours * (1/3)).toFixed(1);
-            const sqdHours = (totalHours * (2/3)).toFixed(1);
-
-            document.getElementById('mett-calc-plan').innerText = `${cmdHours} hrs`;
-            document.getElementById('mett-calc-prep').innerText = `${sqdHours} hrs`;
-
-            const warnoString = `WARNORD // TLP STEP 2 INIT\n\n1. SITUATION: Enemy forces identified in ${tKey} under ${tWeather}.\n2. MISSION: ${who} will execute a ${mFriendly} operation to ${mPurpose} higher command intents.\n3. EXECUTION TIMELINE: Total window locked at ${totalHours} hours. Commander planning cut-off is H-${cmdHours} hours. Subordinate preparation checks commence immediately. Acknowledgement required.`;
-            document.getElementById('mett-warno-box').innerText = warnoString;
-
-            const filterCustom = (pCode) => METT_DATA.customAddons.filter(x => x.pillar === pCode).map(x => `   • CUSTOM: ${x.text}`).join('\n');
-
-            const customM = filterCustom('M');
-            const customE = filterCustom('E');
-            const customT = filterCustom('T');
-            const customTR = filterCustom('TR');
-            const customTI = filterCustom('TI');
-            const customC = filterCustom('C');
-
-            const synopsis = `[MISSION (M)]
- • DOCTRINAL VERB: ${mFriendly} / ${mEnemy} / ${mPurpose}
- • RESTATED 5W: ${who} conducts ${what} at ${where} execution phase ${when} in order to ${why}.
-${customM ? customM + '\n' : ''}
-[ENEMY (E)]
- • DISPOSITION: ${eDisp}
- • THREAT COA: ${eCoa}
-${customE ? customE + '\n' : ''}
-[TERRAIN & WEATHER (T)]
- • OAKOC KEY NODE: ${tKey}
- • ENVIRO SPEC: ${tWeather}
-${customT ? customT + '\n' : ''}
-[TROOPS & SUPPORT (TR)]
- • STATUS MANPOWER: ${trStatus}
- • LOG LOGISTICS: ${trLog}
-${customTR ? customTR + '\n' : ''}
-[TIME AVAILABLE (TI)]
- • TOTAL TIME SPAN: ${totalHours} hours
- • BACKWARD MILESTONE: Planning = ${cmdHours}h // Subordinate Prep = ${sqdHours}h
-${customTI ? customTI + '\n' : ''}
-[CIVILIAN CONSIDERATIONS (C)]
- • CIVIL RISK MATRIX: ${cRisk}
- • SECURE RULES: ${cRoe}
-${customC ? customC : ''}`;
-
-            document.getElementById('mett-live-synopsis').innerText = synopsis;
-        }
-
-        function syncInterface() {
-            legaliseControlState();
-            const activePhase = STATE.phases[STATE.phaseIdx];
-            intelField.value = activePhase.intel;
-
-            phaseContainer.innerHTML = '';
-            STATE.phases.forEach((p, idx) => {
-                const node = document.createElement('button');
-                node.className = `tab ${idx === STATE.phaseIdx ? 'active' : ''}`;
-                node.innerText = `PH-${idx + 1}`;
-                node.addEventListener('click', () => { STATE.phaseIdx = idx; STATE.selectedId = null; activePathBuilding = null; syncInterface(); });
-                phaseContainer.appendChild(node);
-            });
-
-            document.getElementById('tele-units').innerText = activePhase.assets.length;
-            document.getElementById('tele-zones').innerText = activePhase.zones.length;
-            document.getElementById('tele-paths').innerText = activePhase.paths.length;
-
-            const selectedAsset = activePhase.assets.find(a => a.id === STATE.selectedId);
-            const infoBox = document.getElementById('info-display');
-            if(selectedAsset) {
-                infoBox.innerHTML = `<div>SYS_ID // OBJ-${selectedAsset.id.toString().substring(2,7)}</div>
-                                     <div>CLASS  // ${selectedAsset.type.toUpperCase()}</div>
-                                     <div>TEAM   // <span style="color:${selectedAsset.kia ? '#43586d' : COLORS[selectedAsset.faction]}">${selectedAsset.faction} ${selectedAsset.kia ? '[KIA]' : ''}</span></div>
-                                     <div>LOC    // X:${Math.round(selectedAsset.x)} Y:${Math.round(selectedAsset.y)}</div>`;
+            if(target === 'map') {
+                mapToggle.classList.add('active'); mettToggle.classList.remove('active');
+                mapSidePanel.style.display = 'flex'; mettSidePanel.style.display = 'none';
             } else {
-                infoBox.innerHTML = `<span style="color: #43586d; text-align:center;">AWAITING SELECTION TARGET</span>`;
-            }
-
-            if(isAdminUnlocked) {
-                recalculateMettOutput();
+                mapToggle.classList.remove('active'); mettToggle.classList.add('active');
+                mapSidePanel.style.display = 'none'; mettSidePanel.style.display = 'flex';
+                refreshMettLiveSynopsis();
             }
         }
 
-        function readPointer(e) {
-            const rect = canvas.getBoundingClientRect();
-            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-        }
+        function setupAuthGate() {
+            const screen = document.getElementById('auth-screen'); const btn = document.getElementById('auth-submit');
+            const input = document.getElementById('auth-input'); const err = document.getElementById('auth-error');
 
-        function pointerDown(e) {
-            const pt = readPointer(e);
-
-            if (e.shiftKey) {
-                activePings.push({
-                    x: pt.x, y: pt.y,
-                    color: COLORS[STATE.faction],
-                    radius: 2, maxRadius: 65, alpha: 1.0, expansionRate: 2.2
-                });
-                pushTerminalLog(`COMS BRIEF PING: BROADCAST APPLIED AT FIELD SECTOR X:${Math.round(pt.x)} Y:${Math.round(pt.y)}`);
-                return;
-            }
-
-            if (STATE.animating || METT_DATA.uiViewMode === 'mett') return;
-            const activePhase = STATE.phases[STATE.phaseIdx];
-
-            if (e.ctrlKey) {
-                const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 18);
-                if (found) {
-                    recordState();
-                    found.kia = !found.kia;
-                    pushTerminalLog(`Asset OBJ-${found.id.toString().substring(2,7)} metric status changed: ${found.kia ? 'KIA // LOSS REGISTERED' : 'ACTIVE // RETURNED TO SERVICE'}`);
-                    STATE.selectedId = found.id;
-                    syncInterface();
-                }
-                return;
-            }
-
-            if (STATE.mode === 'deploy') {
-                const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 18);
-                if (found) {
-                    STATE.selectedId = found.id;
-                    dragAnchor = found;
-                    pushTerminalLog(`Linked command matrix to asset: OBJ-${found.id.toString().substring(2,7)}`);
-                } else {
-                    recordState();
-                    const created = {
-                        id: Math.random(),
-                        x: pt.x, y: pt.y,
-                        spawnX: pt.x, spawnY: pt.y,
-                        faction: STATE.faction,
-                        type: STATE.unitType,
-                        kia: false
-                    };
-                    activePhase.assets.push(created);
-                    STATE.selectedId = created.id;
-                    dragAnchor = created;
-                    pushTerminalLog(`Asset operational: ${STATE.unitType.toUpperCase()} initialized.`);
-                }
-                syncInterface();
-            } else if (STATE.mode === 'path') {
-                if (STATE.pStyle === 'straight') {
-                    isInteracting = true;
-                    activePathBuilding = { id: Math.random(), type: 'straight', faction: STATE.faction, points: [pt, {x: pt.x, y: pt.y}] };
-                } else if (STATE.pStyle === 'stencil') {
-                    if (!activePathBuilding) {
-                        activePathBuilding = { id: Math.random(), type: 'stencil', faction: STATE.faction, points: [pt] };
-                        pushTerminalLog(`Began interconnected ${STATE.faction}-locked elbow stencil trace layout.`);
+            function performUnlock() {
+                const pass = input.value.trim();
+                if(pass === "" || ADMIN_UNLOCK_KEYS.includes(pass.toUpperCase()) || ADMIN_UNLOCK_KEYS.includes(pass)) {
+                    screen.classList.add('hidden');
+                    if(pass !== "") {
+                        document.getElementById('mett-tab-header').style.display = 'flex';
+                        logToTerminal("SECURITY SYSTEM // COMS ENCRYPTION CORRELATION PASSED // EXPERT MODE ONLINE");
                     } else {
-                        activePathBuilding.points.push(pt);
-                        pushTerminalLog("Added stencil trajectory node.");
+                        logToTerminal("SECURITY SYSTEM // DEFAULT COMS ACCESS GRANTED");
                     }
+                    resizeCanvas();
+                } else {
+                    err.style.display = 'block'; setTimeout(() => { err.style.display = 'none'; }, 2000);
                 }
-            } else if (STATE.mode === 'zone') {
-                isInteracting = true;
-                dragAnchor = pt;
-                activeZonePreview = { type: STATE.zType, style: STATE.zStyle, fx: pt.x, fy: pt.y, tx: pt.x, ty: pt.y, faction: STATE.faction };
-            } else if (STATE.mode === 'terrain') {
-                recordState();
-                isInteracting = true;
-                dragAnchor = { type: STATE.tStyle, points: [pt] };
-                if(!activePhase.terrain) activePhase.terrain = [];
-                activePhase.terrain.push(dragAnchor);
-                pushTerminalLog(`Mapping tactical environment object: ${STATE.tStyle.toUpperCase()}`);
+            }
+            btn.addEventListener('click', performUnlock);
+            input.addEventListener('keydown', (e) => { if(e.key === 'Enter') performUnlock(); });
+        }
+
+        function rebuildPhaseTabs() {
+            const container = document.getElementById('phase-container'); container.innerHTML = '';
+            STATE.phases.forEach((_, idx) => {
+                const tab = document.createElement('div'); tab.className = 'tab' + (idx === STATE.currentPhaseIdx ? ' active' : '');
+                tab.innerText = `P-${idx + 1}`; tab.addEventListener('click', () => {
+                    if(isSimulating) stopSimulationPlayback(); STATE.currentPhaseIdx = idx; selectedEntity = null; activePathBuilding = null;
+                    rebuildPhaseTabs(); updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal(`TIMELINE // SWITCHED TO STEP INDEX [PHASE ${idx+1}]`);
+                }); container.appendChild(tab);
+            });
+        }
+
+        function triggerRepaint() { requestAnimationFrame(paintTacticalSurface); }
+
+        function paintTacticalSurface() {
+            ctx.fillStyle = THEATERS[STATE.activeTheater].bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if(THEATERS[STATE.activeTheater].drawSatelliteMap) THEATERS[STATE.activeTheater].drawSatelliteMap(ctx, canvas.width, canvas.height);
+            if(STATE.gridVisible) renderCoordinateGridMesh();
+
+            renderTerrainObjects(); const phase = getCurPhase();
+            phase.zones.forEach(drawTacticalZone); phase.paths.forEach(drawRouteVectorPath);
+            if(activePathBuilding) drawRouteVectorPath(activePathBuilding);
+            phase.units.forEach(drawTacticalUnit);
+
+            if(selectedEntity && selectedEntity.type === 'zone') {
+                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+                if(selectedEntity.shape === 'rect') ctx.strokeRect(selectedEntity.x - selectedEntity.w/2 - 4, selectedEntity.y - selectedEntity.h/2 - 4, selectedEntity.w + 8, selectedEntity.h + 8);
+                else { ctx.beginPath(); ctx.arc(selectedEntity.x, selectedEntity.y, selectedEntity.r + 4, 0, Math.PI*2); ctx.stroke(); } ctx.setLineDash([]);
             }
         }
 
-        function pointerMove(e) {
-            const pt = readPointer(e);
-            mouseCurrentPos = pt;
-            if (STATE.animating || METT_DATA.uiViewMode === 'mett') return;
+        function renderCoordinateGridMesh() {
+            ctx.strokeStyle = THEATERS[STATE.activeTheater].gridColor || "rgba(0, 242, 254, 0.015)"; ctx.lineWidth = 1;
+            const size = 35;
+            for(let x = 0; x < canvas.width; x += size) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+            for(let y = 0; y < canvas.height; y += size) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+        }
 
-            if (STATE.mode === 'deploy' && dragAnchor) {
-                dragAnchor.x = pt.x;
-                dragAnchor.y = pt.y;
-                dragAnchor.spawnX = pt.x;
-                dragAnchor.spawnY = pt.y;
-            } else if (STATE.mode === 'path' && activePathBuilding) {
-                if (STATE.pStyle === 'straight' && isInteracting) {
-                    activePathBuilding.points[1] = pt;
-                }
-            } else if (STATE.mode === 'zone' && isInteracting && activeZonePreview) {
-                activeZonePreview.tx = pt.x;
-                activeZonePreview.ty = pt.y;
-            } else if (STATE.mode === 'terrain' && isInteracting && dragAnchor) {
-                const lastPt = dragAnchor.points[dragAnchor.points.length - 1];
-                if (Math.hypot(pt.x - lastPt.x, pt.y - lastPt.y) > 12) {
-                    dragAnchor.points.push(pt);
-                }
+        function renderTerrainObjects() {
+            const terrain = THEATERS[STATE.activeTheater].terrain || [];
+            terrain.forEach(t => {
+                ctx.beginPath(); t.points.forEach((p, i) => { if(i===0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+                if(t.type === 'trench') { ctx.strokeStyle = 'rgba(0,242,254,0.15)'; ctx.lineWidth = 6; ctx.stroke(); ctx.strokeStyle = '#02050a'; ctx.lineWidth = 2; ctx.stroke(); }
+                else if(t.type === 'ridge') { ctx.fillStyle = 'rgba(255,159,28,0.04)'; ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(255,159,28,0.15)'; ctx.lineWidth = 1.5; ctx.stroke(); }
+                else if(t.type === 'hazard') { ctx.strokeStyle = 'rgba(255,51,102,0.12)'; ctx.lineWidth = 12; ctx.stroke(); ctx.fillStyle = generatePatternFill('#ff3366'); ctx.fill(); }
+            });
+        }
+
+        function generatePatternFill(color) {
+            const pCanvas = document.createElement('canvas'); pCanvas.width = 14; pCanvas.height = 14;
+            const pCtx = pCanvas.getContext('2d'); pCtx.strokeStyle = color + '18'; pCtx.lineWidth = 1; pCtx.strokeRect(0, 0, 14, 14);
+            return ctx.createPattern(pCanvas, 'repeat');
+        }
+
+        function drawTacticalUnit(u) {
+            ctx.save(); ctx.translate(u.x, u.y); const clr = COLORS[u.faction];
+            ctx.fillStyle = clr; ctx.strokeStyle = clr; ctx.lineWidth = 2;
+
+            if(u.kia) { ctx.strokeStyle = '#43586d'; ctx.fillStyle = 'rgba(67, 88, 109, 0.2)'; }
+
+            ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI*2); ctx.stroke();
+            if(selectedEntity && selectedEntity.id === u.id) { ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI*2); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.stroke(); }
+
+            ctx.fillStyle = u.kia ? '#43586d' : clr; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(getUnitCodeSymbol(u.className), 0, 3);
+            ctx.font = '7px monospace'; ctx.textAlign = 'left';
+            ctx.fillText(u.name + (u.kia ? " [KIA]" : ""), 11, 3);
+            ctx.restore();
+        }
+
+        function getUnitCodeSymbol(c) {
+            if(c==='Infantry') return 'I'; if(c==='Specialist') return 'S'; if(c==='Armoured') return 'A';
+            if(c==='Tank') return 'T'; if(c==='ATTE') return 'X'; if(c==='Air') return 'F'; return 'U';
+        }
+
+        function drawTacticalZone(z) {
+            const baseColor = z.style === 'faction' ? COLORS[z.faction] : (z.style === 'fob' ? '#00f2fe' : '#e63946');
+            ctx.strokeStyle = baseColor + 'aa'; ctx.lineWidth = 1.5; ctx.fillStyle = baseColor + '10';
+
+            if(z.shape === 'rect') {
+                ctx.fillRect(z.x - z.w/2, z.y - z.h/2, z.w, z.h); ctx.strokeRect(z.x - z.w/2, z.y - z.h/2, z.w, z.h);
+                ctx.fillStyle = baseColor + '44'; ctx.font = '7px monospace'; ctx.fillText(z.name, z.x - z.w/2 + 4, z.y - z.h/2 + 10);
+            } else {
+                ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = baseColor + '44'; ctx.font = '7px monospace'; ctx.fillText(z.name, z.x - z.r + 6, z.y + 3);
             }
         }
 
-        function pointerUp(e) {
-            if (STATE.animating || METT_DATA.uiViewMode === 'mett') return;
-            const activePhase = STATE.phases[STATE.phaseIdx];
+        function drawRouteVectorPath(p) {
+            if(p.waypoints.length === 0) return;
+            ctx.strokeStyle = COLORS[p.faction] || '#00f2fe'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]);
 
-            if (STATE.mode === 'path') {
-                if (STATE.pStyle === 'straight' && isInteracting && activePathBuilding) {
-                    recordState();
-                    activePhase.paths.push(activePathBuilding);
-                    pushTerminalLog(`Committed straight line routing vector for ${activePathBuilding.faction}.`);
-                    activePathBuilding = null;
-                }
-            } else if (STATE.mode === 'zone' && isInteracting && activeZonePreview) {
-                recordState();
-                activePhase.zones.push(activeZonePreview);
-                pushTerminalLog(`Strategic map zone registered: ${activeZonePreview.type.toUpperCase()}`);
-                activeZonePreview = null;
+            ctx.beginPath(); ctx.moveTo(p.waypoints[0].x, p.waypoints[0].y);
+            for(let i=1; i<p.waypoints.length; i++) {
+                if(p.style === 'stencil') {
+                    ctx.lineTo(p.waypoints[i].x, p.waypoints[i-1].y); ctx.lineTo(p.waypoints[i].x, p.waypoints[i].y);
+                } else { ctx.lineTo(p.waypoints[i].x, p.waypoints[i].y); }
             }
-            isInteracting = false;
-            if(STATE.mode !== 'path') dragAnchor = null;
-            syncInterface();
+            ctx.stroke(); ctx.setLineDash([]);
+
+            p.waypoints.forEach((w, idx) => {
+                ctx.fillStyle = idx === p.waypoints.length - 1 ? '#ffcc00' : '#ffffff'; ctx.fillRect(w.x-2, w.y-2, 4, 4);
+            });
+
+            if(selectedEntity && selectedEntity.id === p.id) {
+                ctx.fillStyle = '#ffffff'; ctx.font = '7px monospace';
+                const last = p.waypoints[p.waypoints.length - 1]; if(last) ctx.fillText(`VEC // ${p.id.substring(0,5)}`, last.x + 6, last.y - 2);
+            }
+        }
+
+        function setupCanvasClickListeners() {
+            canvas.addEventListener('mousedown', (e) => {
+                const rect = canvas.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
+                const phase = getCurPhase();
+
+                if(e.shiftKey) { triggerSonarPingScanner(mouseX, mouseY); return; }
+
+                if(STATE.mode === 'deploy') {
+                    let clickedUnit = [...phase.units].reverse().find(u => Math.hypot(u.x - mouseX, u.y - mouseY) < 12);
+                    if(clickedUnit) {
+                        if(e.ctrlKey) { saveState(); clickedUnit.kia = !clickedUnit.kia; logToTerminal(`STATUS CHANGE // ${clickedUnit.name} TO ${clickedUnit.kia?'KIA':'ACTIVE'}`); triggerRepaint(); return; }
+                        selectedEntity = clickedUnit; draggingEntity = clickedUnit; dragOffset.x = mouseX - clickedUnit.x; dragOffset.y = mouseY - clickedUnit.y;
+                        updateSelectedDisplay(); triggerRepaint(); return;
+                    }
+                    saveState(); const id = 'un-' + Math.random().toString(36).substr(2, 5);
+                    const count = phase.units.filter(u => u.className === STATE.unitType).length + 1;
+                    const newUnit = { id, type: 'unit', className: STATE.unitType, faction: STATE.faction, x: mouseX, y: mouseY, originX: mouseX, originY: mouseY, name: `${STATE.faction}_${STATE.unitType.toUpperCase()}_${count}`, kia: false, notes: "" };
+                    phase.units.push(newUnit); selectedEntity = newUnit; updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal(`DEPLOYED // ${newUnit.name} POSITIONED`);
+                }
+                else if(STATE.mode === 'path') {
+                    if(!activePathBuilding) {
+                        const targetUnit = phase.units.find(u => Math.hypot(u.x - mouseX, u.y - mouseY) < 14);
+                        activePathBuilding = { id: 'pa-' + Math.random().toString(36).substr(2, 5), type: 'path', faction: targetUnit ? targetUnit.faction : STATE.faction, style: STATE.pStyle, waypoints: [{x: mouseX, y: mouseY}], unitId: targetUnit ? targetUnit.id : null, notes: "" };
+                    } else { activePathBuilding.waypoints.push({x: mouseX, y: mouseY}); } triggerRepaint();
+                }
+                else if(STATE.mode === 'zone') {
+                    let clickedZone = [...phase.zones].reverse().find(z => z.shape === 'rect' ? (Math.abs(z.x - mouseX) < z.w/2 && Math.abs(z.y - mouseY) < z.h/2) : (Math.hypot(z.x - mouseX, z.y - mouseY) < z.r));
+                    if(clickedZone) { selectedEntity = clickedZone; draggingEntity = clickedZone; dragOffset.x = mouseX - clickedZone.x; dragOffset.y = mouseY - clickedZone.y; updateSelectedDisplay(); triggerRepaint(); return; }
+                    saveState(); const id = 'zo-' + Math.random().toString(36).substr(2, 5);
+                    const count = phase.zones.length + 1;
+                    const newZone = { id, type: 'zone', name: `ZONE_MATRIX_${count}`, shape: STATE.zType, faction: STATE.faction, style: STATE.zStyle, x: mouseX, y: mouseY, w: 90, h: 60, r: 45, notes: "" };
+                    phase.zones.push(newZone); selectedEntity = newZone; updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal(`CONSTRUCTED // ${newZone.name} BROUGHT ONLINE`);
+                }
+                else if(STATE.mode === 'terrain') {
+                    let clickedPath = [...phase.paths].reverse().find(p => p.waypoints.some(w => Math.hypot(w.x - mouseX, w.y - mouseY) < 8));
+                    if(clickedPath) { selectedEntity = clickedPath; updateSelectedDisplay(); triggerRepaint(); }
+                }
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if(!draggingEntity) return; const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
+                draggingEntity.x = mouseX - dragOffset.x; draggingEntity.y = mouseY - dragOffset.y;
+                if(draggingEntity.type === 'unit') { draggingEntity.originX = draggingEntity.x; draggingEntity.originY = draggingEntity.y; }
+                triggerRepaint();
+            });
+
+            canvas.addEventListener('mouseup', () => { draggingEntity = null; });
         }
 
         function commitCurrentPath() {
-            if(!activePathBuilding) return;
-            if(activePathBuilding.type === 'stencil' && activePathBuilding.points.length >= 2) {
-                recordState();
-                STATE.phases[STATE.phaseIdx].paths.push(activePathBuilding);
-                pushTerminalLog(`Elbow stencil network committed cleanly for ${activePathBuilding.faction}.`);
+            if(!activePathBuilding || activePathBuilding.waypoints.length < 2) { activePathBuilding = null; triggerRepaint(); return; }
+            saveState(); const phase = getCurPhase(); phase.paths.push(activePathBuilding); selectedEntity = activePathBuilding;
+            activePathBuilding = null; updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal("VECTOR ROUTE // APPLIED VECTOR CHAIN");
+        }
+
+        function triggerSonarPingScanner(cx, cy) {
+            logToTerminal(`SCANNER // PING DISPATCHED AT POINT [X:${Math.round(cx)} Y:${Math.round(cy)}]`);
+            let r = 0; function step() {
+                r += 6; paintTacticalSurface(); ctx.strokeStyle = COLORS[STATE.faction]; ctx.lineWidth = 1.5; ctx.globalAlpha = Math.max(0, 1 - r/160);
+                ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1; if(r < 160) requestAnimationFrame(step); else triggerRepaint();
+            } requestAnimationFrame(step);
+        }
+
+        function updateSelectedDisplay() {
+            const display = document.getElementById('info-display'); const area = document.getElementById('intel-field');
+            if(!selectedEntity) { display.innerHTML = '<span style="color: #43586d; text-align:center;">AWAITING SELECTION TARGET</span>'; area.value = ""; return; }
+            area.value = selectedEntity.notes || "";
+
+            if(selectedEntity.type === 'unit') {
+                display.innerHTML = `<div class="stat"><span>DESIGNATOR:</span><span class="stat-val">${selectedEntity.name}</span></div>
+                                     <div class="stat"><span>CLASS CODES:</span><span class="stat-val">${selectedEntity.className}</span></div>
+                                     <div class="stat"><span>AFFILIATION:</span><span class="stat-val" style="color:${COLORS[selectedEntity.faction]}">${selectedEntity.faction}</span></div>
+                                     <div class="stat"><span>MATRIX ADDR:</span><span class="stat-val">X:${Math.round(selectedEntity.x)} Y:${Math.round(selectedEntity.y)}</span></div>
+                                     <div class="stat"><span>SURVIVAL:</span><span class="stat-val" style="color:${selectedEntity.kia?'#ff3366':'#00ffaa'}">${selectedEntity.kia?'KIA / DESTROYED':'FMC STATUS'}</span></div>`;
+            } else if(selectedEntity.type === 'zone') {
+                display.innerHTML = `<div class="stat"><span>SECTOR GRID:</span><span class="stat-val">${selectedEntity.name}</span></div>
+                                     <div class="stat"><span>BOUND SHAPE:</span><span class="stat-val">${selectedEntity.shape.toUpperCase()}</span></div>
+                                     <div class="stat"><span>PRESET PATTERN:</span><span class="stat-val">${selectedEntity.style.toUpperCase()}</span></div>
+                                     <div class="stat"><span>CENTER POINT:</span><span class="stat-val">X:${Math.round(selectedEntity.x)} Y:${Math.round(selectedEntity.y)}</span></div>`;
+            } else if(selectedEntity.type === 'path') {
+                display.innerHTML = `<div class="stat"><span>VECTOR TRACE:</span><span class="stat-val">${selectedEntity.id}</span></div>
+                                     <div class="stat"><span>STYLE MODIFIER:</span><span class="stat-val">${selectedEntity.style.toUpperCase()}</span></div>
+                                     <div class="stat"><span>WAYPOINTS:</span><span class="stat-val">${selectedEntity.waypoints.length} POINTS</span></div>`;
             }
-            activePathBuilding = null;
-            syncInterface();
         }
 
-        function findDistanceToSegment(p, v, w) {
-            const l2 = Math.hypot(v.x - w.x, v.y - w.y) ** 2;
-            if (l2 === 0) return { dist: Math.hypot(p.x - v.x, p.y - v.y), point: v };
-            let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
-            t = Math.max(0, Math.min(1, t));
-            const interceptPoint = { x: v.x + t * (w.x - v.x), y: v.y + t * (w.y - v.y) };
-            return { dist: Math.hypot(p.x - interceptPoint.x, p.y - interceptPoint.y), point: interceptPoint, t: t };
-        }
+        function startSimulationPlayback() {
+            const phase = getCurPhase(); if(phase.paths.length === 0 || phase.units.length === 0) { logToTerminal("SIM CORE // ABORT // NO VECTOR PATHS OR UNTIS INSTANCED", true); return; }
+            isSimulating = true; document.getElementById('ctrl-play').innerText = "STOP SIM"; document.getElementById('ctrl-play').classList.add('active');
+            logToTerminal("SIM CORE // PLOTTING PREDICTIVE FLUIDITY STEP MATRIX");
 
-        function bindUnitsToRoutes() {
-            const activePhase = STATE.phases[STATE.phaseIdx];
-            activePhase.assets.forEach(asset => {
-                if(asset.kia) return;
-                let bestRoute = null;
-                let minimumDistance = 120;
-                let bestSegmentIdx = 0;
-                let bestInterceptPoint = null;
-
-                const factionCompatiblePaths = activePhase.paths.filter(path => path.faction === asset.faction);
-
-                factionCompatiblePaths.forEach(path => {
-                    for(let i = 0; i < path.points.length - 1; i++) {
-                        let res = findDistanceToSegment(asset, path.points[i], path.points[i+1]);
-                        if(res.dist < minimumDistance) {
-                            minimumDistance = res.dist;
-                            bestRoute = path;
-                            bestSegmentIdx = i;
-                            bestInterceptPoint = res.point;
-                        }
-                    }
-                });
-
-                if (bestRoute) {
-                    const firstNode = bestRoute.points[0];
-                    const lastNode = bestRoute.points[bestRoute.points.length - 1];
-                    const distToStart = Math.hypot(asset.x - firstNode.x, asset.y - firstNode.y);
-                    const distToEnd = Math.hypot(asset.x - lastNode.x, asset.y - lastNode.y);
-
-                    let dynamicTraversalPoints = [];
-
-                    if (distToStart <= distToEnd) {
-                        dynamicTraversalPoints.push({ x: asset.x, y: asset.y });
-                        dynamicTraversalPoints.push(bestInterceptPoint);
-                        for (let j = bestSegmentIdx + 1; j < bestRoute.points.length; j++) {
-                            dynamicTraversalPoints.push(bestRoute.points[j]);
-                        }
-                    } else {
-                        dynamicTraversalPoints.push({ x: asset.x, y: asset.y });
-                        dynamicTraversalPoints.push(bestInterceptPoint);
-                        for (let j = bestSegmentIdx; j >= 0; j--) {
-                            dynamicTraversalPoints.push(bestRoute.points[j]);
-                        }
-                    }
-
-                    asset.runtimePoints = dynamicTraversalPoints;
-                    pushTerminalLog(`Locked asset OBJ-${asset.id.toString().substring(2,7)} to ${asset.faction} routing grid.`);
-                } else {
-                    asset.runtimePoints = null;
-                }
+            phase.units.forEach(u => {
+                u.originX = u.x; u.originY = u.y; const route = phase.paths.find(p => p.unitId === u.id || (p.faction === u.faction && Math.hypot(p.waypoints[0].x - u.x, p.waypoints[0].y - u.y) < 35));
+                if(route) { u.simRoute = route; u.simTargetIdx = 1; }
             });
-        }
 
-        function drawMilitarySymbol(ctx, x, y, type, color, isKia = false) {
-            ctx.save();
-            const symbolColor = isKia ? '#43586d' : color;
-            ctx.strokeStyle = symbolColor;
-            ctx.fillStyle = '#010306';
-            ctx.lineWidth = 2;
+            simulationTimer = setInterval(() => {
+                let activeMovements = false;
+                phase.units.forEach(u => {
+                    if(u.kia || !u.simRoute || u.simTargetIdx >= u.simRoute.waypoints.length) return;
+                    activeMovements = true; const dest = u.simRoute.waypoints[u.simTargetIdx];
+                    let stepX = dest.x; let stepY = dest.y;
 
-            const size = 11;
-            ctx.translate(x, y);
+                    if(u.simRoute.style === 'stencil') {
+                        const prev = u.simRoute.waypoints[u.simTargetIdx - 1];
+                        if(Math.abs(u.x - dest.x) > 1 && Math.abs(u.y - prev.y) > 1) { stepX = dest.x; stepY = prev.y; }
+                    }
 
-            if (type === 'Infantry') {
-                ctx.beginPath(); ctx.arc(0, 0, size, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(-size, 0); ctx.lineTo(size, 0); ctx.moveTo(0, -size); ctx.lineTo(0, size); ctx.stroke();
-            } else if (type === 'Specialist') {
-                ctx.beginPath(); ctx.moveTo(0, -size - 2); ctx.lineTo(size + 2, 0); ctx.lineTo(0, size + 2); ctx.lineTo(-size - 2, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI * 2); ctx.stroke();
-            } else if (type === 'Armoured') {
-                ctx.beginPath();
-                for (let i = 0; i < 4; i++) {
-                    let angle = (i * Math.PI / 2) + (Math.PI / 4);
-                    ctx.lineTo(Math.cos(angle) * (size + 2), Math.sin(angle) * (size + 2));
-                }
-                ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(-size, -size); ctx.lineTo(size, size); ctx.stroke();
-            } else if (type === 'Tank') {
-                ctx.fillRect(-size - 2, -size + 3, (size * 2) + 4, (size * 2) - 6);
-                ctx.strokeRect(-size - 2, -size + 3, (size * 2) + 4, (size * 2) - 6);
-                ctx.fillRect(-size + 2, -size + 1, (size * 2) - 4, (size * 2) - 2);
-                ctx.strokeRect(-size + 2, -size + 1, (size * 2) - 4, (size * 2) - 2);
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(size + 8, 0); ctx.lineWidth = 3; ctx.stroke();
-            } else if (type === 'ATTE') {
-                ctx.beginPath();
-                ctx.arc(-size, -size + 4, 3, 0, Math.PI*2); ctx.arc(0, -size + 2, 3, 0, Math.PI*2);
-                ctx.arc(size, -size + 4, 3, 0, Math.PI*2);
-                ctx.arc(-size, size - 4, 3, 0, Math.PI*2); ctx.arc(0, size - 2, 3, 0, Math.PI*2);
-                ctx.arc(size, size - 4, 3, 0, Math.PI*2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(-size, -size + 4); ctx.lineTo(size, -size + 4); ctx.lineTo(size + 6, 0); ctx.lineTo(size, size - 4); ctx.lineTo(-size, size - 4);
-                ctx.closePath();
-                ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(size, 0); ctx.lineTo(size + 9, -2); ctx.moveTo(size, 0); ctx.lineTo(size + 9, 2); ctx.stroke();
-            } else if (type === 'Air') {
-                ctx.beginPath(); ctx.moveTo(size + 4, 0); ctx.lineTo(-size, -size - 2); ctx.lineTo(-size + 4, 0); ctx.lineTo(-size, size + 2); ctx.closePath(); ctx.fill(); ctx.stroke();
-            }
-
-            if(isKia) {
-                ctx.strokeStyle = '#ff3366';
-                ctx.lineWidth = 2.5;
-                ctx.beginPath();
-                ctx.moveTo(-size - 4, -size - 4);
-                ctx.lineTo(size + 4, size + 4);
-                ctx.moveTo(size + 4, -size - 4);
-                ctx.lineTo(-size - 4, size + 4);
-                ctx.stroke();
-            }
-
-            ctx.restore();
-        }
-
-        function renderCanvasGrid() {
-            const theaterProfile = THEATERS[STATE.activeTheater];
-            ctx.fillStyle = theaterProfile.bg;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            if(theaterProfile.drawSatelliteMap) {
-                theaterProfile.drawSatelliteMap(ctx, canvas.width, canvas.height);
-            }
-
-            if (STATE.gridOn) {
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = theaterProfile.gridColor;
-                for (let x = 0; x < canvas.width; x += 25) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
-                for (let y = 0; y < canvas.height; y += 25) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
-
-                ctx.strokeStyle = theaterProfile.gridColor.replace(/[\d\.]+\)$/, '0.08)');
-                for (let x = 0; x < canvas.width; x += 100) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
-                for (let y = 0; y < canvas.height; y += 100) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
-            }
-        }
-
-        function renderTacticalTerrain(t) {
-            if (!t.points || t.points.length < 2) return;
-
-            ctx.save();
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-
-            if (t.type === 'trench') {
-                ctx.lineWidth = 26;
-                ctx.strokeStyle = "rgba(0, 242, 254, 0.05)";
-                strokePathPoints(t.points);
-
-                ctx.lineWidth = 16;
-                ctx.strokeStyle = "#08111e";
-                strokePathPoints(t.points);
-
-                ctx.lineWidth = 14;
-                ctx.strokeStyle = createHatchPattern('#122b47');
-                strokePathPoints(t.points);
-
-                ctx.lineWidth = 12;
-                ctx.strokeStyle = "rgba(0, 242, 254, 0.3)";
-                ctx.setLineDash([4, 12]);
-                strokePathPoints(t.points);
-
-            } else if (t.type === 'ridge') {
-                for (let w = 45; w >= 15; w -= 10) {
-                    ctx.lineWidth = w;
-                    ctx.strokeStyle = `rgba(255, 159, 28, ${0.03 + (45 - w) * 0.003})`;
-                    strokePathPoints(t.points);
-                }
-                ctx.lineWidth = 15;
-                ctx.strokeStyle = "rgba(255, 159, 28, 0.15)";
-                ctx.setLineDash([2, 8]);
-                strokePathPoints(t.points);
-
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = "rgba(255, 159, 28, 0.4)";
-                ctx.setLineDash([]);
-                strokePathPoints(t.points);
-
-            } else if (t.type === 'hazard') {
-                ctx.lineWidth = 35;
-                ctx.strokeStyle = "rgba(255, 51, 102, 0.04)";
-                strokePathPoints(t.points);
-
-                ctx.lineWidth = 20;
-                ctx.strokeStyle = "rgba(255, 51, 102, 0.12)";
-                strokePathPoints(t.points);
-
-                ctx.lineWidth = 8;
-                ctx.strokeStyle = "#1a050b";
-                strokePathPoints(t.points);
-
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = "#ff3366";
-                ctx.setLineDash([30, 15]);
-                ctx.lineDashOffset = dynamicDashOffset * 2;
-                strokePathPoints(t.points);
-            }
-
-            ctx.restore();
-        }
-
-        function strokePathPoints(pts) {
-            ctx.beginPath();
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for(let i = 1; i < pts.length; i++) {
-                ctx.lineTo(pts[i].x, pts[i].y);
-            }
-            ctx.stroke();
-        }
-
-        function createHatchPattern(color) {
-            const pCanvas = document.createElement('canvas'); pCanvas.width = 12; pCanvas.height = 12;
-            const pCtx = pCanvas.getContext('2d');
-            pCtx.strokeStyle = color; pCtx.lineWidth = 1.5;
-            pCtx.beginPath(); pCtx.moveTo(0, 0); pCtx.lineTo(12, 12); pCtx.stroke();
-            return ctx.createPattern(pCanvas, 'repeat');
-        }
-
-        function runRenderLoop() {
-            if (METT_DATA.uiViewMode === 'map') {
-                dynamicDashOffset = (dynamicDashOffset - 0.5) % 24;
-                renderCanvasGrid();
-
-                const current = STATE.phases[STATE.phaseIdx];
-
-                if(current.terrain) {
-                    current.terrain.forEach(t => renderTacticalTerrain(t));
-                }
-
-                current.zones.forEach(z => renderZoneBounds(z));
-                if (activeZonePreview) renderZoneBounds(activeZonePreview);
-
-                current.paths.forEach(path => {
-                    ctx.save();
-                    ctx.lineWidth = 4;
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-                    ctx.beginPath(); ctx.moveTo(path.points[0].x, path.points[0].y);
-                    for(let i = 1; i < path.points.length; i++) ctx.lineTo(path.points[i].x, path.points[i].y);
-                    ctx.stroke();
-
-                    ctx.strokeStyle = COLORS[path.faction] || '#00f2fe';
-                    ctx.lineWidth = 1.5;
-                    ctx.setLineDash([8, 6]);
-                    ctx.lineDashOffset = dynamicDashOffset;
-                    ctx.stroke();
-                    ctx.restore();
-
-                    path.points.forEach((pt, idx) => {
-                        ctx.fillStyle = idx === 0 ? '#00ffaa' : (COLORS[path.faction] || '#00f2fe');
-                        ctx.beginPath(); ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2); ctx.fill();
-                    });
+                    const dist = Math.hypot(stepX - u.x, stepY - u.y);
+                    if(dist < 2.5) { u.x = stepX; u.y = stepY; if(stepX === dest.x && stepY === dest.y) u.simTargetIdx++; }
+                    else { u.x += ((stepX - u.x) / dist) * 2; u.y += ((stepY - u.y) / dist) * 2; }
                 });
+                triggerRepaint(); if(!activeMovements) { stopSimulationPlayback(); logToTerminal("SIM CORE // SIMULATION TERMINATED // OBJECTIVES REACHED"); }
+            }, 30);
+        }
 
-                if (activePathBuilding) {
-                    ctx.save();
-                    ctx.lineWidth = 1.5;
-                    ctx.strokeStyle = COLORS[activePathBuilding.faction] + '88';
-                    ctx.setLineDash([4, 4]);
-                    ctx.beginPath();
-                    ctx.moveTo(activePathBuilding.points[0].x, activePathBuilding.points[0].y);
-                    for(let i = 1; i < activePathBuilding.points.length; i++) {
-                        ctx.lineTo(activePathBuilding.points[i].x, activePathBuilding.points[i].y);
-                    }
-                    if (STATE.pStyle === 'stencil') {
-                        ctx.lineTo(mouseCurrentPos.x, mouseCurrentPos.y);
-                    }
-                    ctx.stroke();
-                    ctx.restore();
+        function stopSimulationPlayback() {
+            isSimulating = false; clearInterval(simulationTimer);
+            document.getElementById('ctrl-play').innerText = "EXECUTE SIM"; document.getElementById('ctrl-play').classList.remove('active');
+        }
 
-                    activePathBuilding.points.forEach(pt => {
-                        ctx.fillStyle = '#ffcc00';
-                        ctx.beginPath(); ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2); ctx.fill();
-                    });
-                }
+        function recalculateMettTimes() {
+            const val = parseFloat(document.getElementById('mett-ti-hours').value) || 0;
+            document.getElementById('mett-calc-plan').innerText = (val * (1/3)).toFixed(1) + " hrs";
+            document.getElementById('mett-calc-prep').innerText = (val * (2/3)).toFixed(1) + " hrs";
+            document.getElementById('mett-warno-box').innerText = `WARNORD // IMMEDIATE PREPARATION ENFORCED\n---------------------------------------\nOPERATION H-HOUR ALLOCATION: ${val} HOURS TOTAL.\nCOMMAND PLANNING HIGHER WINDOW: ${(val*(1/3)).toFixed(1)} HRS.\nSUBORDINATE PREPARATION SQUAD BOUND: ${(val*(2/3)).toFixed(1)} HRS.\nEXECUTE STEP 2 TLP PROCEDURES IMMEDIATELY.`;
+            refreshMettLiveSynopsis();
+        }
 
-                current.assets.forEach(a1 => {
-                    if(a1.faction !== 'GAR' || a1.kia) return;
-                    current.assets.forEach(a2 => {
-                        if(a2.faction !== 'OPFOR' || a2.kia) return;
-                        let dist = Math.hypot(a1.x - a2.x, a1.y - a2.y);
-                        if(dist < 110) {
-                            ctx.save(); ctx.strokeStyle = 'rgba(255, 51, 102, 0.25)'; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
-                            ctx.beginPath(); ctx.moveTo(a1.x, a1.y); ctx.lineTo(a2.x, a2.y); ctx.stroke();
-                            let mx = (a1.x + a2.x)/2; let my = (a1.y + a2.y)/2;
-                            ctx.strokeStyle = '#ff3366'; ctx.setLineDash([]); ctx.strokeRect(mx - 3, my - 3, 6, 6);
-                            ctx.restore();
-                        }
-                    });
-                });
+        function injectCustomMettParam() {
+            const input = document.getElementById('mett-custom-input'); const val = input.value.trim(); if(!val) return;
+            const item = { id: Date.now(), text: val.toUpperCase() }; STATE.customMettItems.push(item); input.value = "";
+            const list = document.getElementById('mett-custom-list'); const wrapper = document.createElement('div');
+            wrapper.className = 'mett-custom-item'; wrapper.id = `m-item-${item.id}`;
+            wrapper.innerHTML = `<span>▫ ${item.text}</span><span class="mett-custom-del">×</span>`;
+            wrapper.querySelector('.mett-custom-del').addEventListener('click', () => {
+                STATE.customMettItems = STATE.customMettItems.filter(i => i.id !== item.id); wrapper.remove(); refreshMettLiveSynopsis();
+            }); list.appendChild(wrapper); refreshMettLiveSynopsis();
+        }
 
-                if (STATE.animating) {
-                    STATE.animProgress += 0.003;
-                    if(STATE.animProgress >= 1) {
-                        STATE.animating = false;
-                        recordState();
-                        current.assets.forEach(a => {
-                            if (a.runtimePoints && a.runtimePoints.length > 0) {
-                                const dest = a.runtimePoints[a.runtimePoints.length - 1];
-                                a.x = dest.x; a.y = dest.y; a.runtimePoints = null;
-                            }
-                        });
-                        STATE.animProgress = 0;
-                        document.getElementById('ctrl-play').classList.remove('active');
-                        pushTerminalLog("Sim flight positioning iterations completed.");
-                        syncInterface();
-                    }
-                }
+        function refreshMettLiveSynopsis() {
+            const h = document.getElementById('mett-ti-hours').value;
+            let str = `[ TACTICAL ASSESSMENT STRATEGIC DATA BLOCK ]\n`;
+            str += `MISSION: RESTATED FOCUS IS TO ${document.getElementById('mett-m-friendly').value.toUpperCase()} TO EFFECT ${document.getElementById('mett-m-enemy').value.toUpperCase()} REASONING PURPOSES: ${document.getElementById('mett-m-purpose').value.toUpperCase()}.\n`;
+            str += `5W ELEMENT: ${document.getElementById('mett-5w-who').value || 'ALL'} WILL ${document.getElementById('mett-5w-what').value || 'ENGAGE'} AT ${document.getElementById('mett-5w-when').value || 'ASAP'} LOCATED NEAR ${document.getElementById('mett-5w-where').value || 'GRID'} TO ${document.getElementById('mett-5w-why').value || 'ACHIEVE COMMAND INTENT'}.\n\n`;
+            str += `ENEMY PROFILE: DISPOSITION CODE IS [${document.getElementById('mett-e-disp').value.toUpperCase()}]. COA TRACKS PREDICTIONS: [${document.getElementById('mett-e-coa').value.toUpperCase()}].\n\n`;
+            str += `TERRAIN/WEATHER MATRIX: CRITICAL OAKOC ELEM: [${document.getElementById('mett-t-key').value.toUpperCase()}]. ENVIRONMENTAL OBSCURATION CONSTRAINTS: [${document.getElementById('mett-t-weather').value.toUpperCase()}].\n\n`;
+            str += `TROOP SPECS: FORCE RATIO EFFECTIVENESS APPLIED AS [${document.getElementById('mett-tr-status').value.toUpperCase()}] WITH RE-SUPPLY CAPABILITIES RATED AT [${document.getElementById('mett-tr-log').value.toUpperCase()}].\n\n`;
+            str += `CIVILIAN CONSIDERATIONS: COLLATERAL THREAT INDEX IS [${document.getElementById('mett-c-risk').value.toUpperCase()}] GOVERNED BY THE RULES OF ENGAGEMENT MODIFIER: [${document.getElementById('mett-c-roe').value.toUpperCase()}].\n\n`;
+            str += `TIME CRITICAL COMPONENT: CRITICAL BOUND TIMELINE TO PREPARE ASSIGNED UNITS SET AT ${h} HOURS EXACT.`;
 
-                current.assets.forEach(asset => {
-                    let rx = asset.x; let ry = asset.y;
-
-                    if (STATE.animating && asset.runtimePoints && asset.runtimePoints.length > 0) {
-                        let absoluteProgress = STATE.animProgress * (asset.runtimePoints.length - 1);
-                        let baseIdx = Math.floor(absoluteProgress);
-                        let fractional = absoluteProgress - baseIdx;
-
-                        if (baseIdx < asset.runtimePoints.length - 1) {
-                            rx = asset.runtimePoints[baseIdx].x + (asset.runtimePoints[baseIdx + 1].x - asset.runtimePoints[baseIdx].x) * fractional;
-                            ry = asset.runtimePoints[baseIdx].y + (asset.runtimePoints[baseIdx + 1].y - asset.runtimePoints[baseIdx].y) * fractional;
-                        } else {
-                            rx = asset.runtimePoints[asset.runtimePoints.length - 1].x;
-                            ry = asset.runtimePoints[asset.runtimePoints.length - 1].y;
-                        }
-                    }
-
-                    if (asset.id === STATE.selectedId) {
-                        ctx.save();
-                        ctx.strokeStyle = asset.kia ? 'rgba(67, 88, 109, 0.5)' : 'rgba(0, 242, 254, 0.5)';
-                        ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
-                        ctx.beginPath(); ctx.arc(rx, ry, 18, 0, Math.PI * 2); ctx.stroke();
-                        ctx.restore();
-                    }
-
-                    drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction], asset.kia);
-                });
-
-                for (let i = activePings.length - 1; i >= 0; i--) {
-                    let p = activePings[i];
-                    p.radius += p.expansionRate;
-                    p.alpha = 1.0 - (p.radius / p.maxRadius);
-
-                    if (p.alpha <= 0) {
-                        activePings.splice(i, 1);
-                        continue;
-                    }
-
-                    ctx.save();
-                    ctx.globalAlpha = p.alpha;
-                    ctx.strokeStyle = p.color;
-                    ctx.lineWidth = 2.5;
-                    ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.stroke();
-                    ctx.fillStyle = p.color;
-                    ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill();
-                    ctx.restore();
-                }
-            } else {
-                // Renders programmatic real-time vector path tracking graphs on the active console panel
-                ctx.fillStyle = '#040914';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // Grid background matrix overlay layer
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = "rgba(0, 242, 254, 0.015)";
-                for (let x = 0; x < canvas.width; x += 30) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
-                for (let y = 0; y < canvas.height; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
-
-                ctx.fillStyle = 'rgba(0, 242, 254, 0.02)';
-                ctx.fillRect(40, 40, canvas.width - 80, canvas.height - 80);
-                ctx.strokeStyle = '#122236';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
-
-                ctx.fillStyle = '#00f2fe';
-                ctx.font = '11px "JetBrains Mono", monospace';
-                ctx.fillText('METT-TC STRATEGIC ANALYSIS CORES OVERVIEW MATRIX // ACTIVE TIMELINE', 60, 70);
-
-                // Live dynamic flashing operational stream indicator tracking text parameters
-                ctx.save();
-                dynamicDashOffset = (dynamicDashOffset - 0.2) % 24;
-                ctx.fillStyle = Math.sin(Date.now() / 200) > 0 ? '#00ffaa' : 'rgba(0, 255, 170, 0.4)';
-                ctx.fillText('● LIVE FEED DATA LINK SYNCED', canvas.width - 260, 70);
-                ctx.restore();
-
-                // Vector route paths rendering
-                ctx.save();
-                ctx.strokeStyle = '#00f2fe';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([6, 4]);
-                ctx.lineDashOffset = dynamicDashOffset;
-                ctx.beginPath();
-                ctx.moveTo(80, canvas.height - 100);
-                ctx.lineTo(240, 150);
-                ctx.lineTo(440, 230);
-                ctx.lineTo(canvas.width - 120, 130);
-                ctx.stroke();
-
-                // Base node dots definitions
-                ctx.fillStyle = '#00ffaa'; ctx.beginPath(); ctx.arc(80, canvas.height - 100, 6, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#00f2fe'; ctx.font = '9px "JetBrains Mono", monospace'; ctx.fillText('HQ-BASE', 70, canvas.height - 80);
-
-                ctx.fillStyle = '#ffcc00'; ctx.beginPath(); ctx.arc(240, 150, 4, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#ffcc00'; ctx.fillText('STR1', 232, 138);
-
-                ctx.fillStyle = '#ffcc00'; ctx.beginPath(); ctx.arc(440, 230, 4, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#ffcc00'; ctx.fillText('STR2', 432, 218);
-
-                ctx.fillStyle = '#ff3366'; ctx.beginPath(); 
-                ctx.moveTo(canvas.width - 120, 120); ctx.lineTo(canvas.width - 114, 134); ctx.lineTo(canvas.width - 126, 134); ctx.closePath(); ctx.fill();
-                ctx.fillStyle = '#ff3366'; ctx.fillText('OBJ-ALPHA', canvas.width - 145, 110);
-                ctx.restore();
-
-                // Render active compiled data sheets
-                ctx.fillStyle = '#7a92a8';
-                ctx.font = '10px "JetBrains Mono", monospace';
-                const lines = document.getElementById('mett-live-synopsis').innerText.split('\n');
-                let startY = 110;
-                lines.forEach(line => {
-                    if(line.startsWith('[')) { ctx.fillStyle = '#00ffaa'; startY += 6; }
-                    else { ctx.fillStyle = '#d1dfec'; }
-                    ctx.fillText(line, 80, startY);
-                    startY += 16;
-                });
+            if(STATE.customMettItems.length > 0) {
+                str += `\n\nINJECTED SYSTEM PARAMS:\n`; STATE.customMettItems.forEach(i => { str += ` - ${i.text}\n`; });
             }
-
-            requestAnimationFrame(runRenderLoop);
+            document.getElementById('mett-live-synopsis').innerText = str;
         }
 
-        function renderZoneBounds(z) {
-            ctx.save();
-            let zoneColor = COLORS[z.faction] || '#7a92a8';
-
-            if (z.style === 'fob') {
-                ctx.strokeStyle = '#00f2fe';
-                ctx.fillStyle = createGridPattern('#00f2fe');
-            } else if (z.style === 'noman') {
-                ctx.strokeStyle = '#e63946';
-                ctx.fillStyle = createStripedPattern('#e63946');
-            } else {
-                ctx.strokeStyle = zoneColor;
-                ctx.fillStyle = zoneColor + '08';
-            }
-
-            ctx.lineWidth = 1;
-
-            if (z.type === 'circle') {
-                const r = Math.hypot(z.tx - z.fx, z.ty - z.fy);
-                ctx.beginPath(); ctx.arc(z.fx, z.fy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-            } else {
-                const w = z.tx - z.fx; const h = z.ty - z.fy;
-                ctx.fillRect(z.fx, z.fy, w, h); ctx.strokeRect(z.fx, z.fy, w, h);
-            }
-            ctx.restore();
-        }
-
-        function createStripedPattern(color) {
-            const pCanvas = document.createElement('canvas'); pCanvas.width = 16; pCanvas.height = 16;
-            const pCtx = pCanvas.getContext('2d');
-            pCtx.strokeStyle = color + '22'; pCtx.lineWidth = 1;
-            pCtx.beginPath(); pCtx.moveTo(0, 16); pCtx.lineTo(16, 0); pCtx.stroke();
-            return ctx.createPattern(pCanvas, 'repeat');
-        }
-
-        function createGridPattern(color) {
-            const pCanvas = document.createElement('canvas'); pCanvas.width = 14; pCanvas.height = 14;
-            const pCtx = pCanvas.getContext('2d');
-            pCtx.strokeStyle = color + '18'; pCtx.lineWidth = 1;
-            pCtx.strokeRect(0, 0, 14, 14);
-            return ctx.createPattern(pCanvas, 'repeat');
-        }
-
-        const mOverlay = document.getElementById('overlay-shield');
-        const mBox = document.getElementById('modal-box');
-        let confirmationCallback = null;
-
+        const mOverlay = document.getElementById('overlay-shield'); const mBox = document.getElementById('modal-box'); let confirmationCallback = null;
         function showWarningBox(msg, callback) {
             document.getElementById('m-msg').innerText = msg; confirmationCallback = callback;
             mOverlay.classList.add('active'); mBox.classList.add('active');
         }
-
         function hideWarningBox() { mOverlay.classList.remove('active'); mBox.classList.remove('active'); confirmationCallback = null; }
-
         document.getElementById('m-confirm').addEventListener('click', () => { if(confirmationCallback) confirmationCallback(); hideWarningBox(); });
         document.getElementById('m-cancel').addEventListener('click', hideWarningBox);
 
@@ -1870,6 +1124,9 @@ ${customC ? customC : ''}`;
             if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); triggerRedo(); }
             if (e.key === 'Escape') { if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath(); }
         }
+
+        // Initialize elements
+        setupInterfaceHooks(); setupAuthGate(); recalculateMettTimes();
     </script>
 </body>
 </html>
