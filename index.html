@@ -226,7 +226,7 @@
         .modal-buttons button { flex: 1; text-align: center; padding-left: 8px; }
         .modal-buttons button::before { display: none; }
 
-        /* THEATER THEME SWITCH SPECIFICS (No structural changes, injected into button metrics) */
+        /* THEATER THEME SWITCH SPECIFICS */
         .theater-btn { font-size: 8px; padding-left: 10px; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -366,7 +366,7 @@
         <div class="sidebar sidebar-right">
             <div class="sidebar-content">
                 
-                <!-- THEATER SECTOR SELECTION SYSTEM (INTEGRATED OPTIONAL PRESET SELECTOR) -->
+                <!-- THEATER SECTOR SELECTION SYSTEM -->
                 <div class="section">
                     <div class="section-title">THEATER GRID MATRIX</div>
                     <div class="button-grid">
@@ -422,42 +422,130 @@
     <script>
         const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TARGET: '#ffcc00' };
 
-        // PLANETARY PRESET PROFILES DATA MATRIX
+        // PLANETARY PRESET PROFILES DATA MATRIX WITH PROURAL SATELLITE CONTOUR RENDERING CONTEXTS
         const THEATERS = {
-            default: { name: "CORE BASILINE MATRIX", bg: "#010306", gridColor: "rgba(0, 242, 254, 0.012)", terrain: [] },
+            default: { name: "CORE BASILINE MATRIX", bg: "#010306", gridColor: "rgba(0, 242, 254, 0.012)", drawSatelliteMap: null, terrain: [] },
+            
             christophsis: { 
-                name: "THEATER: CHRISTOPHSIS // URBAN CRYSTAL MESH", bg: "#020712", gridColor: "rgba(0, 242, 254, 0.025)",
+                name: "THEATER: CHRISTOPHSIS // URBAN CRYSTAL MESH", bg: "#020712", gridColor: "rgba(0, 242, 254, 0.03)",
                 terrain: [
-                    { type: 'ridge', points: [{x:100, y:80}, {x:220, y:80}, {x:220, y:240}, {x:100, y:240}, {x:100, y:80}] }, // Crystal Tower Block Alpha
-                    { type: 'ridge', points: [{x:450, y:250}, {x:570, y:250}, {x:570, y:410}, {x:450, y:410}, {x:450, y:250}] }  // Crystal Tower Block Beta
-                ]
+                    { type: 'ridge', points: [{x:100, y:80}, {x:220, y:80}, {x:220, y:240}, {x:100, y:240}, {x:100, y:80}] },
+                    { type: 'ridge', points: [{x:450, y:250}, {x:570, y:250}, {x:570, y:410}, {x:450, y:410}, {x:450, y:250}] }
+                ],
+                drawSatelliteMap: (ctx, w, h) => {
+                    // Angular geometric building blocks & crystal layout scans
+                    ctx.fillStyle = "rgba(0, 242, 254, 0.015)";
+                    for(let i = 0; i < w; i += 80) {
+                        ctx.fillRect(i, 0, 30, h);
+                        ctx.fillRect(0, i, w, 30);
+                    }
+                    // Crystalline structures and central plaza hex contours
+                    ctx.strokeStyle = "rgba(0, 242, 254, 0.05)";
+                    ctx.lineWidth = 1;
+                    for (let r = 100; r < 500; r += 120) {
+                        ctx.beginPath();
+                        for(let s = 0; s < 6; s++) {
+                            let angle = (s * Math.PI / 3);
+                            ctx.lineTo(w/2 + Math.cos(angle)*r, h/2 + Math.sin(angle)*r);
+                        }
+                        ctx.closePath(); ctx.stroke();
+                    }
+                }
             },
+            
             ryloth: { 
-                name: "THEATER: RYLOHT // TRENCH OUTPOST MESH", bg: "#140c04", gridColor: "rgba(255, 159, 28, 0.015)",
+                name: "THEATER: RYLOTH // TRENCH OUTPOST MESH", bg: "#120b05", gridColor: "rgba(255, 159, 28, 0.02)",
                 terrain: [
-                    { type: 'trench', points: [{x:50, y:200}, {x:250, y:230}, {x:400, y:120}] }, // Frontline defensive trench lines
+                    { type: 'trench', points: [{x:50, y:200}, {x:250, y:230}, {x:400, y:120}] },
                     { type: 'trench', points: [{x:300, y:380}, {x:550, y:350}, {x:650, y:450}] }
-                ]
+                ],
+                drawSatelliteMap: (ctx, w, h) => {
+                    // Wavy topo map ridge curves and canyons
+                    ctx.strokeStyle = "rgba(255, 159, 28, 0.03)";
+                    ctx.lineWidth = 1.5;
+                    for(let i = -200; i < h; i += 60) {
+                        ctx.beginPath();
+                        ctx.moveTo(0, i);
+                        ctx.bezierCurveTo(w * 0.25, i + 120, w * 0.75, i - 120, w, i + 50);
+                        ctx.stroke();
+                    }
+                    // Rocky mesa heat spots
+                    ctx.fillStyle = "rgba(255, 159, 28, 0.01)";
+                    ctx.beginPath(); ctx.arc(w*0.2, h*0.3, 140, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(w*0.8, h*0.7, 180, 0, Math.PI*2); ctx.fill();
+                }
             },
+            
             kashyyyk: { 
-                name: "THEATER: KASHYYYK // KACHIRO BEACHHEAD", bg: "#041208", gridColor: "rgba(0, 255, 170, 0.015)",
+                name: "THEATER: KASHYYYK // KACHIRO BEACHHEAD", bg: "#031206", gridColor: "rgba(0, 255, 170, 0.02)",
                 terrain: [
-                    { type: 'ridge', points: [{x:0, y:150}, {x:180, y:180}, {x:350, y:130}, {x:550, y:200}, {x:800, y:160}] } // Sea Wall / Shoreline Boundary
-                ]
+                    { type: 'ridge', points: [{x:0, y:150}, {x:180, y:180}, {x:350, y:130}, {x:550, y:200}, {x:800, y:160}] }
+                ],
+                drawSatelliteMap: (ctx, w, h) => {
+                    // Tree canopy concentric topography circles and shoreline contours
+                    ctx.strokeStyle = "rgba(0, 255, 170, 0.025)";
+                    ctx.lineWidth = 1;
+                    // Shoreline depth vectors
+                    for (let d = 0; d < 80; d += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(0, 150 + d); ctx.bezierCurveTo(200, 190 + d, 400, 110 + d, w, 170 + d);
+                        ctx.stroke();
+                    }
+                    // Massive Wroshyr tree trunk clusters (Topographic mounds)
+                    const roots = [{x:100, y:400}, {x:350, y:300}, {x:650, y:450}];
+                    roots.forEach(r => {
+                        for(let rad = 30; rad < 140; rad += 25) {
+                            ctx.beginPath(); ctx.arc(r.x, r.y, rad, 0, Math.PI*2); ctx.stroke();
+                        }
+                    });
+                }
             },
+            
             coruscant: { 
-                name: "THEATER: CORUSCANT // JEDI TEMPLE SECURITY QUADRANT", bg: "#0a0a0f", gridColor: "rgba(209, 223, 236, 0.02)",
+                name: "THEATER: CORUSCANT // SECURITY QUADRANT", bg: "#060810", gridColor: "rgba(209, 223, 236, 0.025)",
                 terrain: [
-                    { type: 'trench', points: [{x:150, y:0}, {x:150, y:500}] }, // Promenade Structural Columns
+                    { type: 'trench', points: [{x:150, y:0}, {x:150, y:500}] },
                     { type: 'trench', points: [{x:500, y:0}, {x:500, y:500}] }
-                ]
+                ],
+                drawSatelliteMap: (ctx, w, h) => {
+                    // Megacity grid-lines, structural blocks and sky-car lanes
+                    ctx.strokeStyle = "rgba(209, 223, 236, 0.04)";
+                    ctx.lineWidth = 0.5;
+                    // Densely nested infrastructure footprints
+                    for (let i = 0; i < w; i += 40) {
+                        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke();
+                    }
+                    // Giant circular ventilation or turbo-lift shaft layout vectors
+                    ctx.fillStyle = "rgba(4, 9, 20, 0.8)";
+                    ctx.strokeStyle = "rgba(0, 242, 254, 0.08)";
+                    ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.arc(w/2, h/2, 90, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(w/2, h/2, 45, 0, Math.PI*2); ctx.stroke();
+                }
             },
+            
             corellia: { 
-                name: "THEATER: CORELLIA // SHIPYARD INDUSTRIAL SLATS", bg: "#0d0505", gridColor: "rgba(230, 57, 70, 0.015)",
+                name: "THEATER: CORELLIA // SHIPYARD INDUSTRIAL SLATS", bg: "#0d0404", gridColor: "rgba(230, 57, 70, 0.02)",
                 terrain: [
-                    { type: 'ridge', points: [{x:200, y:100}, {x:450, y:100}] }, // Primary Assembly Girders
+                    { type: 'ridge', points: [{x:200, y:100}, {x:450, y:100}] },
                     { type: 'ridge', points: [{x:200, y:360}, {x:450, y:360}] }
-                ]
+                ],
+                drawSatelliteMap: (ctx, w, h) => {
+                    // Capital ship assembly dock lines and frame gantries
+                    ctx.strokeStyle = "rgba(230, 57, 70, 0.03)";
+                    ctx.lineWidth = 1.5;
+                    // Gantries sweeping down the sides
+                    ctx.strokeRect(100, -50, 150, h + 100);
+                    ctx.strokeRect(w - 250, -50, 150, h + 100);
+                    // Internal machinery diagonal strut layout patterns
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    for(let i = -h; i < w; i += 50) {
+                        ctx.moveTo(i, 0); ctx.lineTo(i + h, h);
+                    }
+                    ctx.stroke();
+                }
             }
         };
 
@@ -597,19 +685,18 @@
                 });
             });
 
-            // THEATER SELECTION INTERCEPT DATA STRAT
+            // THEATER SELECTION ENGINE SWITCH
             document.querySelectorAll('.theater-btn').forEach(b => {
                 b.addEventListener('click', (e) => {
                     recordState();
                     const targetT = e.target.dataset.theater;
                     STATE.activeTheater = targetT;
                     
-                    // Pull preset data configuration maps directly into active timeline configuration
                     const profile = THEATERS[targetT];
                     STATE.phases[STATE.phaseIdx].terrain = JSON.parse(JSON.stringify(profile.terrain));
                     
                     document.getElementById('op-label').innerText = `SYS.MAIN // ${profile.name} // SECURE`;
-                    pushTerminalLog(`RECONFIGURED QUANTUM SURFACE GRID SYSTEM FOR ${targetT.toUpperCase()}`);
+                    pushTerminalLog(`CONNECTED INTEL FEED: DOWNLINKING SATELLITE TOPO FOR ${targetT.toUpperCase()}`);
                     syncInterface();
                 });
             });
@@ -975,18 +1062,23 @@
         }
 
         function renderCanvasGrid() {
-            // Read active background profile settings from tactical engine
             const theaterProfile = THEATERS[STATE.activeTheater];
             ctx.fillStyle = theaterProfile.bg; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            // SATELLITE TOPO RENDERING
+            if(theaterProfile.drawSatelliteMap) {
+                theaterProfile.drawSatelliteMap(ctx, canvas.width, canvas.height);
+            }
+
+            // GRID MATRIX OVERLAY
             if (STATE.gridOn) {
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = theaterProfile.gridColor;
                 for (let x = 0; x < canvas.width; x += 25) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
                 for (let y = 0; y < canvas.height; y += 25) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
 
-                ctx.strokeStyle = theaterProfile.gridColor.replace(/[\d\.]+\)$/, '0.08)'); // Slightly heavier master lines
+                ctx.strokeStyle = theaterProfile.gridColor.replace(/[\d\.]+\)$/, '0.08)'); 
                 for (let x = 0; x < canvas.width; x += 100) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
                 for (let y = 0; y < canvas.height; y += 100) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
             }
@@ -1129,7 +1221,7 @@
                 drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction]);
             });
 
-            // SCREENSHARE COMS PING RENDERING LOGIC LOOP
+            // SCANNER PING RENDERING
             for (let i = activePings.length - 1; i >= 0; i--) {
                 let p = activePings[i];
                 p.radius += p.expansionRate;
@@ -1144,12 +1236,9 @@
                 ctx.globalAlpha = p.alpha;
                 ctx.strokeStyle = p.color;
                 ctx.lineWidth = 2.5;
-                
                 ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.stroke();
-
                 ctx.fillStyle = p.color;
                 ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill();
-                
                 ctx.restore();
             }
 
