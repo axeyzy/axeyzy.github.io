@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical Commander // Operational Core v4.0</title>
+    <title>Tactical Commander // Operational Core v4.1</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
@@ -234,7 +234,6 @@
 </head>
 <body>
 
-    <!-- SECURITY AUTHORIZATION -->
     <div class="password-screen" id="auth-screen">
         <div class="password-box">
             <div class="password-title">TACTICAL COMMAND SURFACE</div>
@@ -245,11 +244,10 @@
         </div>
     </div>
 
-    <!-- MAIN INTERFACE HEADER -->
     <div class="header">
         <div class="op-title">
             <div class="op-indicator"></div>
-            <span class="op-name" id="op-label">SYS.MAIN // RECON_V4.0 // SECURE</span>
+            <span class="op-name" id="op-label">SYS.MAIN // RECON_V4.1 // SECURE</span>
         </div>
         <div class="controls">
             <div class="control-group">
@@ -268,7 +266,6 @@
     </div>
 
     <div class="main">
-        <!-- CONTROLS SIDEBAR (LEFT) -->
         <div class="sidebar sidebar-left">
             <div class="sidebar-content">
                 <div class="section">
@@ -279,7 +276,7 @@
                         <button class="mode-btn" data-mode="zone">ZONE BUILDER</button>
                         <button class="mode-btn" data-mode="terrain" style="color: #ff9f1c;">TERRAIN LAYER</button>
                     </div>
-                    <div style="font-size: 8px; color: #43586d; margin-top: 5px; text-align: center; letter-spacing: 0.05em; font-weight: bold; border-top: 1px dashed #122236; padding-top: 4px;">💡 PRO TIP: HOLD SHIFT + CLICK TO PING SCANNER</div>
+                    <div style="font-size: 8px; color: #43586d; margin-top: 5px; text-align: center; letter-spacing: 0.05em; font-weight: bold; border-top: 1px dashed #122236; padding-top: 4px;">HOLD SHIFT + CLICK TO PING<br><span style="color:#ff3366;">CTRL+CLICK ON A UNIT TO TOGGLE KIA Status</span></div>
                 </div>
 
                 <div class="section">
@@ -352,22 +349,18 @@
             </div>
         </div>
 
-        <!-- CENTER MATRIX WORKSPACE -->
         <div style="flex:1; display:flex; flex-direction:column; position:relative;">
             <div class="canvas-container" id="canvas-holder">
                 <canvas id="tactical-grid"></canvas>
             </div>
-            <!-- REAL-TIME CONSOLE FEED -->
             <div class="log-terminal" id="system-log">
-                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // ENVIRONMENTAL MATRIX UPDATE v4.0 ENGAGED</div>
+                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // LOGISTICAL MATRIX UPDATE v4.1 ONLINE</div>
             </div>
         </div>
 
-        <!-- MONITORING REGISTRY (RIGHT) -->
         <div class="sidebar sidebar-right">
             <div class="sidebar-content">
                 
-                <!-- THEATER SECTOR SELECTION SYSTEM -->
                 <div class="section">
                     <div class="section-title">THEATER GRID MATRIX</div>
                     <div class="button-grid">
@@ -408,7 +401,6 @@
         </div>
     </div>
 
-    <!-- NOTIFICATION DIALOG SYSTEM -->
     <div class="modal-overlay" id="overlay-shield"></div>
     <div class="modal" id="modal-box">
         <div class="modal-title" id="m-title">ALERT // REQUIRE CRITICAL CONFIRMATION</div>
@@ -419,7 +411,6 @@
         </div>
     </div>
 
-    <!-- CORE SIM ENGINE SCRIPT -->
     <script>
         const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TARGET: '#ffcc00' };
 
@@ -761,7 +752,7 @@
             document.getElementById('phase-clone').addEventListener('click', () => {
                 recordState();
                 const parent = STATE.phases[STATE.phaseIdx];
-                const cleanAssets = parent.assets.map(a => ({ id: Math.random(), x: a.x, y: a.y, faction: a.faction, type: a.type }));
+                const cleanAssets = parent.assets.map(a => ({ id: Math.random(), x: a.x, y: a.y, faction: a.faction, type: a.type, kia: a.kia || false }));
                 STATE.phases.push({
                     intel: `${parent.intel} [CLONE]`,
                     assets: cleanAssets,
@@ -845,7 +836,7 @@
             if(selectedAsset) {
                 infoBox.innerHTML = `<div>SYS_ID // OBJ-${selectedAsset.id.toString().substring(2,7)}</div>
                                      <div>CLASS  // ${selectedAsset.type.toUpperCase()}</div>
-                                     <div>TEAM   // <span style="color:${COLORS[selectedAsset.faction]}">${selectedAsset.faction}</span></div>
+                                     <div>TEAM   // <span style="color:${selectedAsset.kia ? '#43586d' : COLORS[selectedAsset.faction]}">${selectedAsset.faction} ${selectedAsset.kia ? '[KIA]' : ''}</span></div>
                                      <div>LOC    // X:${Math.round(selectedAsset.x)} Y:${Math.round(selectedAsset.y)}</div>`;
             } else {
                 infoBox.innerHTML = `<span style="color: #43586d; text-align:center;">AWAITING SELECTION TARGET</span>`;
@@ -873,6 +864,19 @@
             if (STATE.animating) return;
             const activePhase = STATE.phases[STATE.phaseIdx];
 
+            // CTRL+CLICK FOR TOGGLING KIA STATUS
+            if (e.ctrlKey) {
+                const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 18);
+                if (found) {
+                    recordState();
+                    found.kia = !found.kia;
+                    pushTerminalLog(`Asset OBJ-${found.id.toString().substring(2,7)} metric status changed: ${found.kia ? 'KIA // LOSS REGISTERED' : 'ACTIVE // RETURNED TO SERVICE'}`);
+                    STATE.selectedId = found.id;
+                    syncInterface();
+                }
+                return;
+            }
+
             if (STATE.mode === 'deploy') {
                 const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 18);
                 if (found) {
@@ -881,7 +885,7 @@
                     pushTerminalLog(`Linked command matrix to asset: OBJ-${found.id.toString().substring(2,7)}`);
                 } else {
                     recordState();
-                    const created = { id: Math.random(), x: pt.x, y: pt.y, faction: STATE.faction, type: STATE.unitType };
+                    const created = { id: Math.random(), x: pt.x, y: pt.y, faction: STATE.faction, type: STATE.unitType, kia: false };
                     activePhase.assets.push(created);
                     STATE.selectedId = created.id;
                     dragAnchor = created;
@@ -982,6 +986,7 @@
         function bindUnitsToRoutes() {
             const activePhase = STATE.phases[STATE.phaseIdx];
             activePhase.assets.forEach(asset => {
+                if(asset.kia) return; // Skip routes for fallen assets
                 let bestRoute = null;
                 let minimumDistance = 35; 
 
@@ -1004,9 +1009,10 @@
             });
         }
 
-        function drawMilitarySymbol(ctx, x, y, type, color) {
+        function drawMilitarySymbol(ctx, x, y, type, color, isKia = false) {
             ctx.save();
-            ctx.strokeStyle = color;
+            const symbolColor = isKia ? '#43586d' : color;
+            ctx.strokeStyle = symbolColor;
             ctx.fillStyle = '#010306';
             ctx.lineWidth = 2;
 
@@ -1045,6 +1051,19 @@
             } else if (type === 'Air') {
                 ctx.beginPath(); ctx.moveTo(size + 4, 0); ctx.lineTo(-size, -size - 2); ctx.lineTo(-size + 4, 0); ctx.lineTo(-size, size + 2); ctx.closePath(); ctx.fill(); ctx.stroke();
             }
+
+            // RENDERING CASUALTY SIGNIFIER OVERLAY STROKES
+            if(isKia) {
+                ctx.strokeStyle = '#ff3366';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(-size - 4, -size - 4);
+                ctx.lineTo(size + 4, size + 4);
+                ctx.moveTo(size + 4, -size - 4);
+                ctx.lineTo(-size - 4, size + 4);
+                ctx.stroke();
+            }
+
             ctx.restore();
         }
 
@@ -1069,7 +1088,6 @@
             }
         }
 
-        // PROCEDURAL RADAR TERRAIN RENDERING HARNESS v4.0
         function renderTacticalTerrain(t) {
             if (!t.points || t.points.length < 2) return;
             
@@ -1078,7 +1096,6 @@
             ctx.lineJoin = "round";
 
             if (t.type === 'trench') {
-                // Fortified Trench System: Heavy, dual-reinforced bunker channel walls
                 ctx.lineWidth = 26;
                 ctx.strokeStyle = "rgba(0, 242, 254, 0.05)";
                 strokePathPoints(t.points);
@@ -1087,25 +1104,21 @@
                 ctx.strokeStyle = "#08111e";
                 strokePathPoints(t.points);
 
-                // Structural structural reinforcement hatches
                 ctx.lineWidth = 14;
                 ctx.strokeStyle = createHatchPattern('#122b47');
                 strokePathPoints(t.points);
 
-                // Inner parapet path outline limits
                 ctx.lineWidth = 12;
                 ctx.strokeStyle = "rgba(0, 242, 254, 0.3)";
                 ctx.setLineDash([4, 12]);
                 strokePathPoints(t.points);
                 
             } else if (t.type === 'ridge') {
-                // Canyon Chokepoint Cliffs: Nested structural topographic slope brackets
                 for (let w = 45; w >= 15; w -= 10) {
                     ctx.lineWidth = w;
                     ctx.strokeStyle = `rgba(255, 159, 28, ${0.03 + (45 - w) * 0.003})`;
                     strokePathPoints(t.points);
                 }
-                // High ground edge alert parameters
                 ctx.lineWidth = 15;
                 ctx.strokeStyle = "rgba(255, 159, 28, 0.15)";
                 ctx.setLineDash([2, 8]);
@@ -1117,7 +1130,6 @@
                 strokePathPoints(t.points);
 
             } else if (t.type === 'hazard') {
-                // Unstable Energy Hazard/Deep Channels: Shifting neon threat zones
                 ctx.lineWidth = 35;
                 ctx.strokeStyle = "rgba(255, 51, 102, 0.04)";
                 strokePathPoints(t.points);
@@ -1130,7 +1142,6 @@
                 ctx.strokeStyle = "#1a050b";
                 strokePathPoints(t.points);
 
-                // Volatile core line core trace
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = "#ff3366";
                 ctx.setLineDash([30, 15]);
@@ -1220,9 +1231,9 @@
 
             // PROXIMITY ENGAGEMENT SECTOR DETECTIONS
             current.assets.forEach(a1 => {
-                if(a1.faction !== 'GAR') return;
+                if(a1.faction !== 'GAR' || a1.kia) return; // Fallen units don't scan proxy locks
                 current.assets.forEach(a2 => {
-                    if(a2.faction !== 'OPFOR') return;
+                    if(a2.faction !== 'OPFOR' || a2.kia) return;
                     let dist = Math.hypot(a1.x - a2.x, a1.y - a2.y);
                     if(dist < 110) {
                         ctx.save(); ctx.strokeStyle = 'rgba(255, 51, 102, 0.25)'; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
@@ -1273,12 +1284,13 @@
 
                 if (asset.id === STATE.selectedId) {
                     ctx.save();
-                    ctx.strokeStyle = 'rgba(0, 242, 254, 0.5)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+                    ctx.strokeStyle = asset.kia ? 'rgba(67, 88, 109, 0.5)' : 'rgba(0, 242, 254, 0.5)'; 
+                    ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
                     ctx.beginPath(); ctx.arc(rx, ry, 18, 0, Math.PI * 2); ctx.stroke(); 
                     ctx.restore();
                 }
 
-                drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction]);
+                drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction], asset.kia);
             });
 
             // SCANNER PING RENDERING
