@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical Commander // Operational Core v4.5</title>
+    <title>Tactical Commander // Operational Core v4.6</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
@@ -236,7 +236,7 @@
     <div class="header">
         <div class="op-title">
             <div class="op-indicator"></div>
-            <span class="op-name" id="op-label">SYS.MAIN // RECON_V4.2 // SECURE</span>
+            <span class="op-name" id="op-label">SYS.MAIN // RECON_V4.3 // SECURE</span>
         </div>
         <div class="controls">
             <div class="control-group">
@@ -343,7 +343,7 @@
                 <canvas id="tactical-grid"></canvas>
             </div>
             <div class="log-terminal" id="system-log">
-                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // LOGISTICAL MATRIX UPDATE v4.5 ONLINE</div>
+                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // LOGISTICAL MATRIX UPDATE v4.6 ONLINE</div>
             </div>
         </div>
 
@@ -705,7 +705,6 @@
                 if(!STATE.animating) { 
                     if(activePathBuilding) commitCurrentPath();
                     
-                    // FIX: Snap assets back to spawn points before calculating routes
                     const activePhase = STATE.phases[STATE.phaseIdx];
                     activePhase.assets.forEach(a => {
                         a.x = a.spawnX;
@@ -716,11 +715,10 @@
                     STATE.animating = true; 
                     STATE.animProgress = 0;
                     document.getElementById('ctrl-play').classList.add('active');
-                    pushTerminalLog("COMMENCING COORDINATED MULTI-DIRECTIONAL DISPLACEMENT SIMULATION FROM SPAWN ANCHORS.");
+                    pushTerminalLog("COMMENCING COORDINATED FACTION-LOCKED ROUTING MATRIX SIMULATION.");
                 }
             });
 
-            // FIX: Reset button fully snaps assets back to spawn configurations
             document.getElementById('ctrl-reset').addEventListener('click', () => {
                 recordState();
                 STATE.phases[STATE.phaseIdx].assets.forEach(a => { 
@@ -751,7 +749,6 @@
             document.getElementById('phase-clone').addEventListener('click', () => {
                 recordState();
                 const parent = STATE.phases[STATE.phaseIdx];
-                // FIX: Ensure cloned units also retain their spawn points properly
                 const cleanAssets = parent.assets.map(a => ({ 
                     id: Math.random(), 
                     x: a.spawnX, y: a.spawnY, 
@@ -889,7 +886,6 @@
                     pushTerminalLog(`Linked command matrix to asset: OBJ-${found.id.toString().substring(2,7)}`);
                 } else {
                     recordState();
-                    // FIX: Establish spawnX and spawnY permanent anchor coordinates on deploy
                     const created = { 
                         id: Math.random(), 
                         x: pt.x, y: pt.y, 
@@ -907,11 +903,13 @@
             } else if (STATE.mode === 'path') {
                 if (STATE.pStyle === 'straight') {
                     isInteracting = true;
-                    activePathBuilding = { id: Math.random(), type: 'straight', points: [pt, {x: pt.x, y: pt.y}] };
+                    // FIX: Path now strictly inherits the faction drawing it
+                    activePathBuilding = { id: Math.random(), type: 'straight', faction: STATE.faction, points: [pt, {x: pt.x, y: pt.y}] };
                 } else if (STATE.pStyle === 'stencil') {
                     if (!activePathBuilding) {
-                        activePathBuilding = { id: Math.random(), type: 'stencil', points: [pt] };
-                        pushTerminalLog("Began interconnected elbow stencil trace layout.");
+                        // FIX: Path now strictly inherits the faction drawing it
+                        activePathBuilding = { id: Math.random(), type: 'stencil', faction: STATE.faction, points: [pt] };
+                        pushTerminalLog(`Began interconnected ${STATE.faction}-locked elbow stencil trace layout.`);
                     } else {
                         activePathBuilding.points.push(pt);
                         pushTerminalLog("Added stencil trajectory node.");
@@ -939,7 +937,6 @@
             if (STATE.mode === 'deploy' && dragAnchor) {
                 dragAnchor.x = pt.x;
                 dragAnchor.y = pt.y;
-                // FIX: Moving the unit update its permanent deployment spawn point configuration
                 dragAnchor.spawnX = pt.x;
                 dragAnchor.spawnY = pt.y;
             } else if (STATE.mode === 'path' && activePathBuilding) {
@@ -965,7 +962,7 @@
                 if (STATE.pStyle === 'straight' && isInteracting && activePathBuilding) {
                     recordState();
                     activePhase.paths.push(activePathBuilding);
-                    pushTerminalLog("Committed straight line routing vector.");
+                    pushTerminalLog(`Committed straight line routing vector for ${activePathBuilding.faction}.`);
                     activePathBuilding = null;
                 }
             } else if (STATE.mode === 'zone' && isInteracting && activeZonePreview) {
@@ -984,7 +981,7 @@
             if(activePathBuilding.type === 'stencil' && activePathBuilding.points.length >= 2) {
                 recordState();
                 STATE.phases[STATE.phaseIdx].paths.push(activePathBuilding);
-                pushTerminalLog("Elbow stencil network committed cleanly.");
+                pushTerminalLog(`Elbow stencil network committed cleanly for ${activePathBuilding.faction}.`);
             }
             activePathBuilding = null;
             syncInterface();
@@ -999,16 +996,20 @@
             return { dist: Math.hypot(p.x - interceptPoint.x, p.y - interceptPoint.y), point: interceptPoint, t: t };
         }
 
+        // FIX: The proximity engine now strictly isolates and searches only paths matching the unit's faction
         function bindUnitsToRoutes() {
             const activePhase = STATE.phases[STATE.phaseIdx];
             activePhase.assets.forEach(asset => {
                 if(asset.kia) return; 
                 let bestRoute = null;
-                let minimumDistance = 120; // Expanded snapping check bounds radius
+                let minimumDistance = 120; 
                 let bestSegmentIdx = 0;
                 let bestInterceptPoint = null;
 
-                activePhase.paths.forEach(path => {
+                // CRITICAL FILTER: Ignore all paths that do not belong to this unit's faction
+                const factionCompatiblePaths = activePhase.paths.filter(path => path.faction === asset.faction);
+
+                factionCompatiblePaths.forEach(path => {
                     for(let i = 0; i < path.points.length - 1; i++) {
                         let res = findDistanceToSegment(asset, path.points[i], path.points[i+1]);
                         if(res.dist < minimumDistance) {
@@ -1043,7 +1044,7 @@
                     }
 
                     asset.runtimePoints = dynamicTraversalPoints;
-                    pushTerminalLog(`Routing orientation synchronized for asset OBJ-${asset.id.toString().substring(2,7)}`);
+                    pushTerminalLog(`Locked asset OBJ-${asset.id.toString().substring(2,7)} to ${asset.faction} routing grid.`);
                 } else {
                     asset.runtimePoints = null;
                 }
@@ -1230,7 +1231,8 @@
                 for(let i = 1; i < path.points.length; i++) ctx.lineTo(path.points[i].x, path.points[i].y);
                 ctx.stroke();
 
-                ctx.strokeStyle = '#00f2fe';
+                // FIX: Path color matches its assigned faction instead of defaulting to generic blue
+                ctx.strokeStyle = COLORS[path.faction] || '#00f2fe';
                 ctx.lineWidth = 1.5;
                 ctx.setLineDash([8, 6]);
                 ctx.lineDashOffset = dynamicDashOffset;
@@ -1238,7 +1240,7 @@
                 ctx.restore();
 
                 path.points.forEach((pt, idx) => {
-                    ctx.fillStyle = idx === 0 ? '#00ffaa' : '#00f2fe';
+                    ctx.fillStyle = idx === 0 ? '#00ffaa' : (COLORS[path.faction] || '#00f2fe');
                     ctx.beginPath(); ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2); ctx.fill();
                 });
             });
@@ -1246,7 +1248,8 @@
             if (activePathBuilding) {
                 ctx.save();
                 ctx.lineWidth = 1.5;
-                ctx.strokeStyle = 'rgba(0, 242, 254, 0.5)';
+                // FIX: Path preview colored by active drawing faction
+                ctx.strokeStyle = COLORS[activePathBuilding.faction] + '88';
                 ctx.setLineDash([4, 4]);
                 ctx.beginPath();
                 ctx.moveTo(activePathBuilding.points[0].x, activePathBuilding.points[0].y);
@@ -1285,7 +1288,6 @@
                 if(STATE.animProgress >= 1) {
                     STATE.animating = false;
                     recordState();
-                    // FIX: Final positions are committed to asset x/y upon completion cleanly
                     current.assets.forEach(a => {
                         if (a.runtimePoints && a.runtimePoints.length > 0) {
                             const dest = a.runtimePoints[a.runtimePoints.length - 1];
