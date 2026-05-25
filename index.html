@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical Commander // Operational Core v2.0</title>
+    <title>Tactical Commander // Operational Core v3.0</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
@@ -203,7 +203,6 @@
 </head>
 <body>
 
-    <!-- SECURITY AUTHORIZATION -->
     <div class="password-screen" id="auth-screen">
         <div class="password-box">
             <div class="password-title">TACTICAL COMMAND SURFACE</div>
@@ -214,11 +213,10 @@
         </div>
     </div>
 
-    <!-- MAIN INTERFACE HEADER -->
     <div class="header">
         <div class="op-title">
             <div class="op-indicator"></div>
-            <span class="op-name" id="op-label">OPERATION RECON // MAIN</span>
+            <span class="op-name" id="op-label">OPERATION CORE // RECON v3.0</span>
         </div>
         <div class="controls">
             <div class="control-group">
@@ -237,7 +235,6 @@
     </div>
 
     <div class="main">
-        <!-- CONTROLS SIDEBAR (LEFT) -->
         <div class="sidebar sidebar-left">
             <div class="sidebar-content">
                 <div class="section">
@@ -245,13 +242,31 @@
                     <div class="button-grid">
                         <button class="mode-btn active" data-mode="deploy">DEPLOY</button>
                         <button class="mode-btn" data-mode="path">ROUTING</button>
-                        <button class="mode-btn" data-mode="zone">ZONE</button>
-                        <button class="mode-btn" data-mode="fog" style="color: #9d4edd;">FOG MASK</button>
+                        <button class="mode-btn" data-mode="zone">ZONES / FOB</button>
+                        <button class="mode-btn" data-mode="terrain" style="color: #ff9f1c;">TERRAIN</button>
                     </div>
                 </div>
 
                 <div class="section">
-                    <div class="section-title">FACTION LAYERS</div>
+                    <div class="section-title">THEATER SECTORS & MATRICES</div>
+                    <div class="button-grid">
+                        <button class="zone-type-btn active" data-ztype="rect">BOUNDARY RECT</button>
+                        <button class="zone-type-btn" data-ztype="circle">BOUNDARY CIRC</button>
+                        <button class="zone-type-btn" data-ztype="fob" style="color:#00f2fe;">FOB ZONE</button>
+                        <button class="zone-type-btn" data-ztype="noman" style="color:#e63946;">NO MAN'S LAND</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">TERRAIN STRUCTURE CLASS</div>
+                    <div class="button-grid">
+                        <button class="terrain-btn active" data-tstyle="trench">TRENCH LINE</button>
+                        <button class="terrain-btn" data-tstyle="ridge">ELEVATED RIDGE</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">FACTION LAYER</div>
                     <div class="button-grid">
                         <button class="faction-btn active" data-faction="GAR">GAR</button>
                         <button class="faction-btn" data-faction="OPFOR" style="color:#ff3366;">OPFOR</button>
@@ -272,22 +287,6 @@
                     </div>
                 </div>
 
-                <div class="section">
-                    <div class="section-title">ROUTE INTERPOLATION</div>
-                    <div class="button-grid">
-                        <button class="path-style-btn active" data-pstyle="linear">STRAIGHT</button>
-                        <button class="path-style-btn" data-pstyle="elbow">ELBOW</button>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">ZONE BOUNDARY STYLE</div>
-                    <div class="button-grid">
-                        <button class="zone-shape-btn" data-shape="rect">RECTANGLE</button>
-                        <button class="zone-shape-btn" data-shape="circle">CIRCULAR</button>
-                    </div>
-                </div>
-
                 <div class="divider"></div>
 
                 <div class="section">
@@ -302,25 +301,22 @@
             </div>
         </div>
 
-        <!-- CENTER MATRIX WORKSPACE -->
         <div style="flex:1; display:flex; flex-direction:column; position:relative;">
             <div class="canvas-container" id="canvas-holder">
                 <canvas id="tactical-grid"></canvas>
             </div>
-            <!-- REAL-TIME CONSOLE FEED -->
             <div class="log-terminal" id="system-log">
-                <div class="log-line"><span class="log-time">[00:00:00]</span> CIC INITIALIZED // INPUT PIN SECURE ENCRYPT CODE ENTRY KEY</div>
+                <div class="log-line"><span class="log-time">[00:00:00]</span> CIC INITIALIZED // WORLD GRID MATRICES STABILIZED V3.0</div>
             </div>
         </div>
 
-        <!-- MONITORING REGISTRY (RIGHT) -->
         <div class="sidebar sidebar-right">
             <div class="sidebar-content">
                 <div class="section">
                     <div class="section-title">TACTICAL TELEMETRY</div>
                     <div class="stat"><span>ASSETS IN THEATER:</span><span class="stat-val" id="tele-units">0</span></div>
-                    <div class="stat"><span>REGISTERED ZONES:</span><span class="stat-val" id="tele-zones">0</span></div>
-                    <div class="stat"><span>FOG SHROUDS MAPPED:</span><span class="stat-val" id="tele-fogs">0</span></div>
+                    <div class="stat"><span>TACTICAL PATTERNS:</span><span class="stat-val" id="tele-zones">0</span></div>
+                    <div class="stat"><span>INDEPENDENT PATHS:</span><span class="stat-val" id="tele-paths">0</span></div>
                 </div>
 
                 <div class="divider"></div>
@@ -344,7 +340,6 @@
         </div>
     </div>
 
-    <!-- NOTIFICATION DIALOG SYSTEM -->
     <div class="modal-overlay" id="overlay-shield"></div>
     <div class="modal" id="modal-box">
         <div class="modal-title" id="m-title">ALERT // REQUIRE CRITICAL CONFIRMATION</div>
@@ -378,20 +373,20 @@
             }
         }
 
-        // RE-ENGINEERED STATE CONTROL ARCHITECTURE
+        // REDESIGNED ARCHITECTURE WITH GLOBAL DECOUPLED PATHS
         const STATE = {
             opName: 'OPERATION AXE-RECON',
-            mode: 'deploy', // deploy, path, zone, fog
+            mode: 'deploy', // deploy, path, zone, terrain
+            zType: 'rect',  // rect, circle, fob, noman
+            tStyle: 'trench', // trench, ridge
             faction: 'GAR',
             unitType: 'Infantry',
-            pathStyle: 'linear',
-            zoneShape: 'rect',
             gridOn: true,
             phaseIdx: 0,
             animating: false,
             animProgress: 0,
             selectedId: null,
-            phases: [{ intel: 'SECURE LANDING ZONES // SHROUD ENEMY RADAR VECTOR MATRICES', assets: [], zones: [], fogs: [] }]
+            phases: [{ intel: 'SECURE COORD SECTORS // LAY DOWN FOB HUBS AND ROUTE VECTORS', assets: [], zones: [], paths: [], terrain: [] }]
         };
 
         let systemHistory = [];
@@ -434,13 +429,14 @@
         let dragAnchor = null;
         let activeZonePreview = null;
         let dynamicDashOffset = 0;
+        let activePathBuilding = null;
 
         function bootstrapSystem() {
             resizeTacticalSurface();
             window.addEventListener('resize', resizeTacticalSurface);
             attachInterfaceListeners();
             recordState();
-            pushTerminalLog("CIC Core online. Rasterizing navigation tracking meshes...");
+            pushTerminalLog("CIC v3.0 Core online. Sandbox routing engine primed.");
             syncInterface();
             runRenderLoop();
         }
@@ -461,28 +457,24 @@
             terminalLog.scrollTop = terminalLog.scrollHeight;
         }
 
-        // HARDBOUND INTERFACE MATRIX SWITCHES
         function legaliseControlState() {
-            const deployButtons = document.querySelectorAll('.unit-btn, .faction-btn');
-            const styleButtons = document.querySelectorAll('.path-style-btn');
-            const zoneButtons = document.querySelectorAll('.zone-shape-btn');
-
-            deployButtons.forEach(b => b.disabled = (STATE.mode !== 'deploy'));
-            styleButtons.forEach(b => b.disabled = (STATE.mode !== 'path'));
-            zoneButtons.forEach(b => b.disabled = (STATE.mode !== 'zone'));
+            document.querySelectorAll('.unit-btn, .faction-btn').forEach(b => b.disabled = (STATE.mode !== 'deploy'));
+            document.querySelectorAll('.zone-type-btn').forEach(b => b.disabled = (STATE.mode !== 'zone'));
+            document.querySelectorAll('.terrain-btn').forEach(b => b.disabled = (STATE.mode !== 'terrain'));
 
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === STATE.mode));
             document.querySelectorAll('.faction-btn').forEach(b => b.classList.toggle('active', b.dataset.faction === STATE.faction));
             document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('active', b.dataset.unit === STATE.unitType));
-            document.querySelectorAll('.path-style-btn').forEach(b => b.classList.toggle('active', b.dataset.pstyle === STATE.pathStyle));
-            document.querySelectorAll('.zone-shape-btn').forEach(b => b.classList.toggle('active', b.dataset.shape === STATE.zoneShape));
+            document.querySelectorAll('.zone-type-btn').forEach(b => b.classList.toggle('active', b.dataset.ztype === STATE.zType));
+            document.querySelectorAll('.terrain-btn').forEach(b => b.classList.toggle('active', b.dataset.tstyle === STATE.tStyle));
         }
 
         function attachInterfaceListeners() {
             document.querySelectorAll('.mode-btn').forEach(b => {
                 b.addEventListener('click', (e) => {
                     STATE.mode = e.target.dataset.mode;
-                    pushTerminalLog(`Command interface shifted to ${STATE.mode} matrix mode.`);
+                    pushTerminalLog(`Interface core shifted to ${STATE.mode} layer layout.`);
+                    if(STATE.mode !== 'path') activePathBuilding = null;
                     legaliseControlState();
                 });
             });
@@ -495,12 +487,12 @@
                 b.addEventListener('click', (e) => { STATE.unitType = e.target.dataset.unit; legaliseControlState(); });
             });
 
-            document.querySelectorAll('.path-style-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.pathStyle = e.target.dataset.pstyle; legaliseControlState(); });
+            document.querySelectorAll('.zone-type-btn').forEach(b => {
+                b.addEventListener('click', (e) => { STATE.zType = e.target.dataset.ztype; legaliseControlState(); });
             });
 
-            document.querySelectorAll('.zone-shape-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.zoneShape = e.target.dataset.shape; legaliseControlState(); });
+            document.querySelectorAll('.terrain-btn').forEach(b => {
+                b.addEventListener('click', (e) => { STATE.tStyle = e.target.dataset.tstyle; legaliseControlState(); });
             });
 
             document.getElementById('ctrl-grid').addEventListener('click', (e) => {
@@ -513,51 +505,53 @@
 
             document.getElementById('ctrl-play').addEventListener('click', () => {
                 if(!STATE.animating) { 
+                    bindUnitsToIntersectingPaths();
                     STATE.animating = true; 
                     STATE.animProgress = 0;
-                    pushTerminalLog("COMMENCING REAL-TIME DISPLACEMENT VECTORS SIMULATION RUN.");
+                    pushTerminalLog("COMMENCING COORDINATED SIM DISPLACEMENT MOVEMENT.");
                 }
             });
 
             document.getElementById('ctrl-reset').addEventListener('click', () => {
                 recordState();
-                STATE.phases[STATE.phaseIdx].assets.forEach(a => a.routing = []);
+                STATE.phases[STATE.phaseIdx].assets.forEach(a => { a.runtimePoints = null; });
                 STATE.animating = false;
                 STATE.animProgress = 0;
-                pushTerminalLog("Simulation telemetry counters cleared.");
+                pushTerminalLog("Simulation positions reset to timeline origins.");
                 syncInterface();
             });
 
             document.getElementById('phase-add').addEventListener('click', () => {
                 recordState();
-                STATE.phases.push({ intel: `PHASE ${STATE.phases.length + 1} DIRECTIVES`, assets: [], zones: [], fogs: [] });
+                STATE.phases.push({ intel: `PHASE ${STATE.phases.length + 1} DIRECTIVES`, assets: [], zones: [], paths: [], terrain: [] });
                 STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog(`Instantiated clean timeline layer: Phase ${STATE.phaseIdx + 1}`);
+                pushTerminalLog(`New phase window opened: Phase ${STATE.phaseIdx + 1}`);
                 syncInterface();
             });
 
             document.getElementById('phase-clone').addEventListener('click', () => {
                 recordState();
                 const parent = STATE.phases[STATE.phaseIdx];
-                const cleanAssets = parent.assets.map(a => ({ id: Math.random(), x: a.x, y: a.y, faction: a.faction, type: a.type, routing: [] }));
+                const cleanAssets = parent.assets.map(a => ({ id: Math.random(), x: a.x, y: a.y, faction: a.faction, type: a.type }));
                 STATE.phases.push({
                     intel: `${parent.intel} [CLONE]`,
                     assets: cleanAssets,
                     zones: JSON.parse(JSON.stringify(parent.zones)),
-                    fogs: JSON.parse(JSON.stringify(parent.fogs || []))
+                    paths: JSON.parse(JSON.stringify(parent.paths)),
+                    terrain: JSON.parse(JSON.stringify(parent.terrain || []))
                 });
                 STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog(`Cloned parent phase assets into layer position ${STATE.phaseIdx + 1}`);
+                pushTerminalLog(`Cloned timeline structures into layer ${STATE.phaseIdx + 1}`);
                 syncInterface();
             });
 
             document.getElementById('phase-delete').addEventListener('click', () => {
                 if(STATE.phases.length > 1) {
-                    showWarningBox('PURGE TARGET STRATEGIC PHASE?', () => {
+                    showWarningBox('PURGE STRATEGIC PHASE ARRAY?', () => {
                         recordState();
                         STATE.phases.splice(STATE.phaseIdx, 1);
                         STATE.phaseIdx = Math.max(0, STATE.phaseIdx - 1);
-                        pushTerminalLog("Target timeline sector cleanly removed from memory.");
+                        pushTerminalLog("Timeline coordinate array cleanly excised.");
                         syncInterface();
                     });
                 }
@@ -568,18 +562,19 @@
                     recordState();
                     let current = STATE.phases[STATE.phaseIdx];
                     current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
-                    pushTerminalLog(`Target asset code index ${STATE.selectedId.toString().substring(2,7)} cleanly removed.`);
+                    pushTerminalLog(`Target micro-unit removed from operational memory.`);
                     STATE.selectedId = null;
                     syncInterface();
                 }
             });
 
             document.getElementById('board-wipe').addEventListener('click', () => {
-                showWarningBox('WIPE ACTIVE CANVAS LAYER MATRICES?', () => {
+                showWarningBox('CLEAR LAYER AND RESET MAP MATRICES?', () => {
                     recordState();
-                    STATE.phases[STATE.phaseIdx] = { intel: '', assets: [], zones: [], fogs: [] };
+                    STATE.phases[STATE.phaseIdx] = { intel: '', assets: [], zones: [], paths: [], terrain: [] };
                     STATE.selectedId = null;
-                    pushTerminalLog("Wiped active phase core array fields completely.", true);
+                    activePathBuilding = null;
+                    pushTerminalLog("Wiped active workspace parameters cleanly.", true);
                     syncInterface();
                 });
             });
@@ -604,13 +599,13 @@
                 const node = document.createElement('button');
                 node.className = `tab ${idx === STATE.phaseIdx ? 'active' : ''}`;
                 node.innerText = `PH-${idx + 1}`;
-                node.addEventListener('click', () => { STATE.phaseIdx = idx; STATE.selectedId = null; syncInterface(); });
+                node.addEventListener('click', () => { STATE.phaseIdx = idx; STATE.selectedId = null; activePathBuilding = null; syncInterface(); });
                 phaseContainer.appendChild(node);
             });
 
             document.getElementById('tele-units').innerText = activePhase.assets.length;
             document.getElementById('tele-zones').innerText = activePhase.zones.length;
-            document.getElementById('tele-fogs').innerText = (activePhase.fogs || []).length;
+            document.getElementById('tele-paths').innerText = activePhase.paths.length;
 
             const selectedAsset = activePhase.assets.find(a => a.id === STATE.selectedId);
             const infoBox = document.getElementById('info-display');
@@ -618,8 +613,7 @@
                 infoBox.innerHTML = `<div>SYSTEM ID: OBJ-${selectedAsset.id.toString().substring(2,7)}</div>
                                      <div>DESIGNATION: ${selectedAsset.type.toUpperCase()}</div>
                                      <div>FACTION: <span style="color:${COLORS[selectedAsset.faction]}">${selectedAsset.faction}</span></div>
-                                     <div>COORDINATES: X ${Math.round(selectedAsset.x)} // Y ${Math.round(selectedAsset.y)}</div>
-                                     <div>ROUTING NODES MAPPED: ${selectedAsset.routing.length}</div>`;
+                                     <div>COORDINATES: X ${Math.round(selectedAsset.x)} // Y ${Math.round(selectedAsset.y)}</div>`;
             } else {
                 infoBox.innerHTML = `<span style="color: #4a617c;">AWAITING SELECTION TARGET</span>`;
             }
@@ -630,97 +624,116 @@
             return { x: e.clientX - rect.left, y: e.clientY - rect.top };
         }
 
-        // TACTICAL SELECTION AND PLACEMENT ALGORITHMS
+        // DECOUPLED INDEPENDENT PATH PLACEMENT ENGINE
         function pointerDown(e) {
             if (STATE.animating) return;
             const pt = readPointer(e);
             const activePhase = STATE.phases[STATE.phaseIdx];
 
             if (STATE.mode === 'deploy') {
-                const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 12);
+                const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 14);
                 if (found) {
                     STATE.selectedId = found.id;
                     dragAnchor = found;
-                    pushTerminalLog(`Target linked: OBJ-${found.id.toString().substring(2,7)} under command lock.`);
+                    pushTerminalLog(`Linked command matrix to: OBJ-${found.id.toString().substring(2,7)}`);
                 } else {
                     recordState();
-                    const created = { id: Math.random(), x: pt.x, y: pt.y, faction: STATE.faction, type: STATE.unitType, routing: [] };
+                    const created = { id: Math.random(), x: pt.x, y: pt.y, faction: STATE.faction, type: STATE.unitType };
                     activePhase.assets.push(created);
                     STATE.selectedId = created.id;
                     dragAnchor = created;
-                    pushTerminalLog(`New micro-asset registered: ${STATE.unitType.toUpperCase()} deployed to coordinates.`);
+                    pushTerminalLog(`Asset operational: ${STATE.unitType.toUpperCase()} initialized at grid location.`);
                 }
-            } else if (STATE.mode === 'path' && STATE.selectedId) {
-                const candidate = activePhase.assets.find(a => a.id === STATE.selectedId);
-                if (candidate) {
-                    recordState();
-                    isInteracting = true;
-                    const startX = candidate.routing.length > 0 ? candidate.routing[candidate.routing.length - 1].x : candidate.x;
-                    const startY = candidate.routing.length > 0 ? candidate.routing[candidate.routing.length - 1].y : candidate.y;
-                    dragAnchor = { asset: candidate, startX: startX, startY: startY };
+            } else if (STATE.mode === 'path') {
+                recordState();
+                isInteracting = true;
+                if (!activePathBuilding) {
+                    activePathBuilding = { id: Math.random(), points: [pt] };
+                    activePhase.paths.push(activePathBuilding);
+                    pushTerminalLog("New independent path trace started.");
+                } else {
+                    activePathBuilding.points.push(pt);
+                    pushTerminalLog("Added coordinate waypoint to running vector lane.");
                 }
-            } else if (STATE.mode === 'zone' || STATE.mode === 'fog') {
+                dragAnchor = pt;
+            } else if (STATE.mode === 'zone') {
                 isInteracting = true;
                 dragAnchor = pt;
-                activeZonePreview = { shape: STATE.mode === 'fog' ? 'rect' : STATE.zoneShape, fx: pt.x, fy: pt.y, tx: pt.x, ty: pt.y, faction: STATE.faction, type: STATE.mode };
+                activeZonePreview = { type: STATE.zType, fx: pt.x, fy: pt.y, tx: pt.x, ty: pt.y, faction: STATE.faction };
+            } else if (STATE.mode === 'terrain') {
+                recordState();
+                isInteracting = true;
+                dragAnchor = { type: STATE.tStyle, points: [pt] };
+                if(!activePhase.terrain) activePhase.terrain = [];
+                activePhase.terrain.push(dragAnchor);
+                pushTerminalLog(`Constructing localized strategic ${STATE.tStyle.toUpperCase()} network.`);
             }
             syncInterface();
         }
 
         function pointerMove(e) {
-            if (!dragAnchor || STATE.animating) return;
             const pt = readPointer(e);
+            if (!dragAnchor || STATE.animating) return;
 
             if (STATE.mode === 'deploy') {
                 dragAnchor.x = pt.x;
                 dragAnchor.y = pt.y;
-            } else if (STATE.mode === 'path' && isInteracting) {
-                let endX = pt.x; let endY = pt.y;
-                if (STATE.pathStyle === 'elbow') {
-                    if (Math.abs(pt.x - dragAnchor.startX) > Math.abs(pt.y - dragAnchor.startY)) {
-                        endY = dragAnchor.startY;
-                    } else {
-                        endX = dragAnchor.startX;
-                    }
-                }
-                activeZonePreview = { shape: 'line', fx: dragAnchor.startX, fy: dragAnchor.startY, tx: endX, ty: endY };
-            } else if ((STATE.mode === 'zone' || STATE.mode === 'fog') && isInteracting) {
+            } else if (STATE.mode === 'path' && isInteracting && activePathBuilding) {
+                // Render real-time line stretching preview
+                activeZonePreview = { type: 'line-preview', fx: activePathBuilding.points[activePathBuilding.points.length - 1].x, fy: activePathBuilding.points[activePathBuilding.points.length - 1].y, tx: pt.x, ty: pt.y };
+            } else if (STATE.mode === 'zone' && isInteracting) {
                 activeZonePreview.tx = pt.x;
                 activeZonePreview.ty = pt.y;
+            } else if (STATE.mode === 'terrain' && isInteracting) {
+                const lastPt = dragAnchor.points[dragAnchor.points.length - 1];
+                if (Math.hypot(pt.x - lastPt.x, pt.y - lastPt.y) > 15) {
+                    dragAnchor.points.push(pt);
+                }
             }
         }
 
-        function pointerUp() {
+        function pointerUp(e) {
             if (STATE.animating) return;
             const activePhase = STATE.phases[STATE.phaseIdx];
             
-            if (STATE.mode === 'path' && isInteracting && activeZonePreview) {
-                dragAnchor.asset.routing.push({ x: activeZonePreview.tx, y: activeZonePreview.ty });
-                pushTerminalLog(`Displacement routing line attached to active unit vector registry.`);
-            } else if (isInteracting && activeZonePreview) {
+            if (STATE.mode === 'path' && isInteracting) {
+                // Left unchecked, right click context mimics path ending. We end layout if clicking close to final nodes.
+                activeZonePreview = null;
+            } else if (STATE.mode === 'zone' && isInteracting && activeZonePreview) {
                 recordState();
-                if (STATE.mode === 'fog') {
-                    if(!activePhase.fogs) activePhase.fogs = [];
-                    activePhase.fogs.push({ fx: activeZonePreview.fx, fy: activeZonePreview.fy, tx: activeZonePreview.tx, ty: activeZonePreview.ty });
-                    pushTerminalLog(`Atmospheric Fog shroud projected over tactical landscape.`);
-                } else {
-                    activePhase.zones.push(activeZonePreview);
-                    pushTerminalLog(`New Tactical boundary area registered.`);
-                }
+                activePhase.zones.push(activeZonePreview);
+                pushTerminalLog(`New strategic field zone registered: ${activeZonePreview.type.toUpperCase()}`);
+                activeZonePreview = null;
+            } else if (STATE.mode === 'terrain') {
+                pushTerminalLog(`Structural topography adjustments committed to local map layer.`);
             }
             isInteracting = false;
             dragAnchor = null;
-            activeZonePreview = null;
             syncInterface();
         }
 
-        // REFINED MICRO-GEOMETRIC SYMBOLOGY VECTORS (REDUCED BY 40%)
+        // DYNAMIC PATTERN SWITCH SCANNER (UNIT SEEPAGE TO SEPARATE PATHS)
+        function bindUnitsToIntersectingPaths() {
+            const activePhase = STATE.phases[STATE.phaseIdx];
+            activePhase.assets.forEach(asset => {
+                // Find paths where the first node is directly under or very close (within 28px) to the asset
+                let matchingPath = activePhase.paths.find(p => p.points.length > 0 && Math.hypot(p.points[0].x - asset.x, p.points[0].y - asset.y) < 28);
+                if (matchingPath) {
+                    asset.runtimePoints = [...matchingPath.points];
+                    pushTerminalLog(`Lock-on system synced: OBJ-${asset.id.toString().substring(2,7)} captured intersecting path lines.`);
+                } else {
+                    asset.runtimePoints = null;
+                }
+            });
+        }
+
+        // ULTRA-REFINED GEOMETRIC SYMBOLOGY VECTORS (RADIUS 9PX)
         function drawMilitarySymbol(ctx, x, y, type, color) {
             ctx.strokeStyle = color;
             ctx.fillStyle = '#03060f';
             ctx.lineWidth = 1.5;
 
-            const size = 9; // Ultra refined radius footprint scaling
+            const size = 9; 
             ctx.save();
             ctx.translate(x, y);
 
@@ -728,263 +741,53 @@
                 ctx.beginPath(); ctx.arc(0, 0, size - 1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(-size - 2, 0); ctx.lineTo(size + 2, 0); ctx.moveTo(0, -size - 2); ctx.lineTo(0, size + 2); ctx.stroke();
             } else if (type === 'Specialist') {
-                ctx.beginPath();
-                ctx.moveTo(0, -size); ctx.lineTo(size, 0); ctx.lineTo(0, size); ctx.lineTo(-size, 0);
-                ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, -size); ctx.lineTo(size, 0); ctx.lineTo(0, size); ctx.lineTo(-size, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
                 ctx.beginPath(); ctx.arc(0, 0, 2, 0, Math.PI * 2); ctx.stroke();
             } else if (type === 'Armoured') {
                 ctx.beginPath();
-                for (let i = 0; i < 6; i++) {
-                    ctx.lineTo(Math.cos(i * Math.PI / 3) * size, Math.sin(i * Math.PI / 3) * size);
-                }
+                for (let i = 0; i < 6; i++) ctx.lineTo(Math.cos(i * Math.PI / 3) * size, Math.sin(i * Math.PI / 3) * size);
                 ctx.closePath(); ctx.fill(); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(-size + 3, 0); ctx.lineTo(size - 3, 0); ctx.stroke();
             } else if (type === 'Tank') {
-                ctx.fillRect(-size, -size + 2, size * 2, size * 2 - 4);
-                ctx.strokeRect(-size, -size + 2, size * 2, size * 2 - 4);
+                ctx.fillRect(-size, -size + 2, size * 2, size * 2 - 4); ctx.strokeRect(-size, -size + 2, size * 2, size * 2 - 4);
                 ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(size + 5, 0); ctx.lineWidth = 2.5; ctx.stroke();
             } else if (type === 'Walker') {
-                ctx.beginPath();
-                ctx.moveTo(-size, size); ctx.lineTo(-size + 3, -2); ctx.lineTo(size - 3, -2); ctx.lineTo(size, size);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-size, size); ctx.lineTo(-size + 3, -2); ctx.lineTo(size - 3, -2); ctx.lineTo(size, size); ctx.stroke();
                 ctx.strokeRect(-4, -size, 8, size - 2);
             } else if (type === 'Air') {
-                ctx.beginPath();
-                ctx.moveTo(0, -size - 2); ctx.lineTo(size, size - 1); ctx.lineTo(0, size - 4); ctx.lineTo(-size, size - 1);
-                ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, -size - 2); ctx.lineTo(size, size - 1); ctx.lineTo(0, size - 4); ctx.lineTo(-size, size - 1); ctx.closePath(); ctx.fill(); ctx.stroke();
             }
             ctx.restore();
         }
 
-        // TACTICAL AMBIENCE RENDERING ENGINE
+        // AMBIENT FIELD RENDER CONSOLE
         function renderCanvasGrid() {
-            ctx.fillStyle = '#03060f';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#03060f'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             if (STATE.gridOn) {
-                // Dual-Tier Digital Grid Layout Lines
                 ctx.lineWidth = 1;
-                
-                // Minor Grid Nodes
                 ctx.strokeStyle = 'rgba(0, 242, 254, 0.015)';
-                for (let x = 0; x < canvas.width; x += 25) {
-                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-                }
-                for (let y = 0; y < canvas.height; y += 25) {
-                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-                }
+                for (let x = 0; x < canvas.width; x += 25) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+                for (let y = 0; y < canvas.height; y += 25) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
 
-                // Major Control Channels
                 ctx.strokeStyle = 'rgba(0, 242, 254, 0.04)';
-                for (let x = 0; x < canvas.width; x += 100) {
-                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-                }
-                for (let y = 0; y < canvas.height; y += 100) {
-                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-                }
+                for (let x = 0; x < canvas.width; x += 100) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+                for (let y = 0; y < canvas.height; y += 100) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
             }
         }
 
         function runRenderLoop() {
-            dynamicDashOffset = (dynamicDashOffset - 0.5) % 20;
+            dynamicDashOffset = (dynamicDashOffset - 0.4) % 20;
             renderCanvasGrid();
 
             const current = STATE.phases[STATE.phaseIdx];
 
-            // Render Zones
-            current.zones.forEach(z => renderZoneBounds(z));
-
-            // Real-Time Dynamic Target Intercept Bracket Computations
-            current.assets.forEach(a1 => {
-                if(a1.faction !== 'GAR') return;
-                current.assets.forEach(a2 => {
-                    if(a2.faction !== 'OPFOR') return;
-                    let dist = Math.hypot(a1.x - a2.x, a1.y - a2.y);
-                    if(dist < 110) { // Threat Engagement Acquisition Proximity Lock
-                        ctx.save();
-                        ctx.strokeStyle = 'rgba(255, 51, 102, 0.18)';
-                        ctx.lineWidth = 1;
-                        ctx.setLineDash([2, 4]);
-                        ctx.beginPath(); ctx.moveTo(a1.x, a1.y); ctx.lineTo(a2.x, a2.y); ctx.stroke();
-                        
-                        // Render Bracket Center Marks
-                        let mx = (a1.x + a2.x)/2; let my = (a1.y + a2.y)/2;
-                        ctx.strokeStyle = '#ff3366';
-                        ctx.lineWidth = 1;
-                        ctx.setLineDash([]);
-                        ctx.strokeRect(mx - 4, my - 4, 8, 8);
-                        ctx.restore();
-                    }
-                });
-            });
-
-            if (activeZonePreview) {
-                if (activeZonePreview.shape === 'line') {
+            // Render painted terrain layers underneath assets
+            if(current.terrain) {
+                current.terrain.forEach(t => {
+                    if (t.points.length < 2) return;
                     ctx.save();
-                    ctx.strokeStyle = 'rgba(0, 242, 254, 0.5)';
-                    ctx.lineWidth = 1.5;
-                    ctx.setLineDash([2, 2]);
-                    ctx.beginPath(); ctx.moveTo(activeZonePreview.fx, activeZonePreview.fy); ctx.lineTo(activeZonePreview.tx, activeZonePreview.ty); ctx.stroke();
-                    ctx.restore();
-                } else if(STATE.mode === 'fog') {
-                    ctx.fillStyle = 'rgba(157, 78, 221, 0.15)';
-                    ctx.strokeStyle = '#9d4edd';
-                    ctx.lineWidth = 1;
-                    const w = activeZonePreview.tx - activeZonePreview.fx; const h = activeZonePreview.ty - activeZonePreview.fy;
-                    ctx.fillRect(activeZonePreview.fx, activeZonePreview.fy, w, h);
-                    ctx.strokeRect(activeZonePreview.fx, activeZonePreview.fy, w, h);
-                } else {
-                    renderZoneBounds(activeZonePreview);
-                }
-            }
-
-            if (STATE.animating) {
-                STATE.animProgress += 0.004;
-                if(STATE.animProgress >= 1) {
-                    STATE.animating = false;
-                    recordState();
-                    current.assets.forEach(a => {
-                        if (a.routing.length > 0) {
-                            const dest = a.routing[a.routing.length - 1];
-                            a.x = dest.x; a.y = dest.y; a.routing = [];
-                        }
-                    });
-                    STATE.animProgress = 0;
-                    pushTerminalLog("Vector relocation tracking complete. Unit arrays locked at locations.");
-                    syncInterface();
-                }
-            }
-
-            // Draw Paths
-            current.assets.forEach(asset => {
-                if (asset.routing.length === 0) return;
-                let tracks = [{ x: asset.x, y: asset.y }, ...asset.routing];
-                ctx.save();
-                ctx.lineWidth = 8; // Refined narrower vector tracks
-                ctx.strokeStyle = COLORS[asset.faction] + '12';
-                ctx.beginPath(); ctx.moveTo(tracks[0].x, tracks[0].y);
-                for(let i = 1; i < tracks.length; i++) ctx.lineTo(tracks[i].x, tracks[i].y);
-                ctx.stroke();
-
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = COLORS[asset.faction] + '66';
-                ctx.setLineDash([4, 12]);
-                ctx.lineDashOffset = dynamicDashOffset;
-                ctx.stroke();
-                ctx.restore();
-            });
-
-            // Draw Asset Positions
-            current.assets.forEach(asset => {
-                let rx = asset.x; let ry = asset.y;
-
-                if (STATE.animating && asset.routing.length > 0) {
-                    let tracks = [{ x: asset.x, y: asset.y }, ...asset.routing];
-                    let absoluteProgress = STATE.animProgress * (tracks.length - 1);
-                    let baseIdx = Math.floor(absoluteProgress);
-                    let fractional = absoluteProgress - baseIdx;
-
-                    if (baseIdx < tracks.length - 1) {
-                        rx = tracks[baseIdx].x + (tracks[baseIdx + 1].x - tracks[baseIdx].x) * fractional;
-                        ry = tracks[baseIdx].y + (tracks[baseIdx + 1].y - tracks[baseIdx].y) * fractional;
-                    } else {
-                        rx = tracks[tracks.length - 1].x; ry = tracks[tracks.length - 1].y;
-                    }
-                }
-
-                if (asset.id === STATE.selectedId) {
-                    ctx.strokeStyle = 'rgba(0, 242, 254, 0.25)';
-                    ctx.lineWidth = 1;
-                    ctx.setLineDash([2, 2]);
-                    ctx.beginPath(); ctx.arc(rx, ry, 18, 0, Math.PI * 2); ctx.stroke();
-                    ctx.setLineDash([]);
-                }
-
-                drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction]);
-            });
-
-            // Render Fog of War layers securely over top matrices
-            if(current.fogs) {
-                current.fogs.forEach(f => {
-                    ctx.save();
-                    ctx.fillStyle = createHexFogPattern();
-                    const w = f.tx - f.fx; const h = f.ty - f.fy;
-                    ctx.fillRect(f.fx, f.fy, w, h);
-                    ctx.strokeStyle = 'rgba(157, 78, 221, 0.2)';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(f.fx, f.fy, w, h);
-                    ctx.restore();
-                });
-            }
-
-            requestAnimationFrame(runRenderLoop);
-        }
-
-        function renderZoneBounds(z) {
-            ctx.save();
-            const color = COLORS[z.faction];
-            ctx.strokeStyle = color + '88';
-            ctx.lineWidth = 1;
-            ctx.fillStyle = createStripedPattern(color);
-
-            if (z.shape === 'rect') {
-                const w = z.tx - z.fx; const h = z.ty - z.fy;
-                ctx.fillRect(z.fx, z.fy, w, h);
-                ctx.strokeRect(z.fx, z.fy, w, h);
-            } else if (z.shape === 'circle') {
-                const r = Math.hypot(z.tx - z.fx, z.ty - z.fy);
-                ctx.beginPath(); ctx.arc(z.fx, z.fy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-            }
-            ctx.restore();
-        }
-
-        function createStripedPattern(color) {
-            const pCanvas = document.createElement('canvas');
-            pCanvas.width = 12; pCanvas.height = 12;
-            const pCtx = pCanvas.getContext('2d');
-            pCtx.strokeStyle = color + '15';
-            pCtx.lineWidth = 1;
-            pCtx.beginPath(); pCtx.moveTo(0, 12); pCtx.lineTo(12, 0); pCtx.stroke();
-            return ctx.createPattern(pCanvas, 'repeat');
-        }
-
-        function createHexFogPattern() {
-            const pCanvas = document.createElement('canvas');
-            pCanvas.width = 16; pCanvas.height = 16;
-            const pCtx = pCanvas.getContext('2d');
-            pCtx.fillStyle = 'rgba(10, 5, 20, 0.65)'; // Deep dark shroud tone overlay
-            pCtx.fillRect(0,0,16,16);
-            pCtx.strokeStyle = 'rgba(157, 78, 221, 0.08)';
-            pCtx.lineWidth = 1;
-            pCtx.strokeRect(0, 0, 16, 16);
-            return ctx.createPattern(pCanvas, 'repeat');
-        }
-
-        const mOverlay = document.getElementById('overlay-shield');
-        const mBox = document.getElementById('modal-box');
-        let confirmationCallback = null;
-
-        function showWarningBox(msg, callback) {
-            document.getElementById('m-msg').innerText = msg;
-            confirmationCallback = callback;
-            mOverlay.classList.add('active');
-            mBox.classList.add('active');
-        }
-
-        function hideWarningBox() {
-            mOverlay.classList.remove('active');
-            mBox.classList.remove('active');
-            confirmationCallback = null;
-        }
-
-        document.getElementById('m-confirm').addEventListener('click', () => { if(confirmationCallback) confirmationCallback(); hideWarningBox(); });
-        document.getElementById('m-cancel').addEventListener('click', hideWarningBox);
-
-        function handleKeydown(e) {
-            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-            if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); triggerUndo(); }
-            if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); triggerRedo(); }
-        }
-    </script>
-</body>
-</html>
+                    ctx.lineWidth = t.type === 'trench' ? 7 : 12;
+                    ctx.strokeStyle = t.type === 'trench' ? '#1c2536' : '#2b2017';
+                    ctx.beginPath(); ctx.moveTo(t.points[0].x, t.points[0].y);
+                    for(let i=1; i
