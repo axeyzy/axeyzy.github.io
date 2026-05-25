@@ -772,19 +772,25 @@
             animProgress: 0,
             selectedId: null,
             activeTheater: 'default',
-            phases: [{ intel: 'SECURE RECON COORD LAYERS // ASSIGN STRUCTURAL LANES', assets: [], zones: [], paths: [], terrain: [] }]
+            phases: [{ name: "PHASE 1", intel: 'SECURE RECON COORD LAYERS // ASSIGN STRUCTURAL LANES', assets: [], zones: [], paths: [], terrain: [] }]
         };
 
         let systemHistory = [];
         let systemHistoryIdx = -1;
         let activePings = []; 
 
-        // Media Recording & Cinematic State Variables
+        // Media Recording, Vector Animation, & Sweep Transition State Machine Properties
         let mediaRecorder = null;
         let recordedChunks = [];
         let isRecording = false;
         let isRecordingIntro = false;
         let recIntroStartTime = null;
+
+        let transitionState = 0; // 0 = Idle, 1 = Active Swipe Animation running
+        let transitionStartTime = null;
+        let transitionAlpha = 0;
+        let transOldIdx = 0;
+        let transNewIdx = 0;
 
         function recordState() {
             if (systemHistoryIdx < systemHistory.length - 1) {
@@ -792,6 +798,18 @@
             }
             systemHistory.push(JSON.stringify(STATE.phases));
             systemHistoryIdx++;
+        }
+
+        // Automated transition pipeline hook to run beautiful swipe vectors
+        function triggerPhaseTransitionAnimation(newIdx) {
+            if (transitionState > 0 || isRecordingIntro) return;
+            transOldIdx = STATE.phaseIdx;
+            transNewIdx = newIdx;
+            transitionState = 1;
+            transitionStartTime = null;
+            activePathBuilding = null;
+            isInteracting = false;
+            dragAnchor = null;
         }
 
         function triggerUndo() {
@@ -833,11 +851,11 @@
             recordState();
             pushTerminalLog("Operational baseline synchronized successfully.");
             
-            // Initial title generation pass
             updateMasterTitle();
-            
             syncInterface();
-            runRenderLoop();
+            
+            // Start precision hardware-timestamp loop execution
+            requestAnimationFrame(runRenderLoop);
             runMettCalculationSync();
         }
 
@@ -886,8 +904,8 @@
                 recordedChunks = [];
                 
                 try {
-                    const stream = canvas.captureStream(30);
-                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                    const stream = canvas.captureStream(60); // Upgrade stream frame allocation to standard 60 FPS
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 5000000 });
                     
                     mediaRecorder.ondataavailable = function(e) {
                         if (e.data.size > 0) recordedChunks.push(e.data);
@@ -942,7 +960,6 @@
             ctx.fillStyle = '#050608';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Scanning layout effects
             ctx.fillStyle = 'rgba(0, 242, 254, 0.05)';
             for(let i=0; i<canvas.height; i+=4) { ctx.fillRect(0, i, canvas.width, 1); }
 
@@ -1072,33 +1089,40 @@
                 recordState();
                 const profile = THEATERS[STATE.activeTheater];
                 STATE.phases.push({ 
+                    name: `PHASE ${STATE.phases.length + 1}`,
                     intel: `PHASE ${STATE.phases.length + 1} DIRECTIVES`, 
                     assets: [], zones: [], paths: [], 
                     terrain: JSON.parse(JSON.stringify(profile.terrain || [])) 
                 });
-                STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog(`New phase window mapped: Phase ${STATE.phaseIdx + 1}`);
+                triggerPhaseTransitionAnimation(STATE.phases.length - 1);
                 syncInterface();
             });
 
             document.getElementById('phase-clone').addEventListener('click', () => {
                 recordState();
                 const parent = STATE.phases[STATE.phaseIdx];
-                const cleanAssets = parent.assets.map(a => ({ 
-                    id: Math.random(), 
-                    x: a.spawnX, y: a.spawnY, 
-                    spawnX: a.spawnX, spawnY: a.spawnY, 
-                    faction: a.faction, type: a.type, kia: a.kia || false 
-                }));
+                
+                // Enforce carryover logic: Assets initialize at their final Phase 1 terminal point positions
+                const inheritedAssets = parent.assets.map(a => {
+                    let targetX = a.x;
+                    let targetY = a.y;
+                    return { 
+                        id: Math.random(), 
+                        x: targetX, y: targetY, 
+                        spawnX: targetX, spawnY: targetY, 
+                        faction: a.faction, type: a.type, kia: a.kia || false 
+                    };
+                });
+
                 STATE.phases.push({
+                    name: `PHASE ${STATE.phases.length + 1}`,
                     intel: `${parent.intel} [CLONE]`,
-                    assets: cleanAssets,
+                    assets: inheritedAssets,
                     zones: JSON.parse(JSON.stringify(parent.zones)),
                     paths: JSON.parse(JSON.stringify(parent.paths)),
                     terrain: JSON.parse(JSON.stringify(parent.terrain || []))
                 });
-                STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog(`Cloned timeline layers into position ${STATE.phaseIdx + 1}`);
+                triggerPhaseTransitionAnimation(STATE.phases.length - 1);
                 syncInterface();
             });
 
@@ -1107,7 +1131,8 @@
                     showWarningBox('PURGE ACTIVE STRATEGIC PHASE ARRAY?', () => {
                         recordState();
                         STATE.phases.splice(STATE.phaseIdx, 1);
-                        STATE.phaseIdx = Math.max(0, STATE.phaseIdx - 1);
+                        let targetIdx = Math.max(0, STATE.phaseIdx - 1);
+                        triggerPhaseTransitionAnimation(targetIdx);
                         pushTerminalLog("Timeline coordinate array cleanly excised.");
                         syncInterface();
                     });
@@ -1128,7 +1153,7 @@
             document.getElementById('board-wipe').addEventListener('click', () => {
                 showWarningBox('CLEAR CURRENT WORKSPACE MAP MATRICES?', () => {
                     recordState();
-                    STATE.phases[STATE.phaseIdx] = { intel: '', assets: [], zones: [], paths: [], terrain: [] };
+                    STATE.phases[STATE.phaseIdx] = { name: `PHASE ${STATE.phaseIdx + 1}`, intel: '', assets: [], zones: [], paths: [], terrain: [] };
                     STATE.selectedId = null;
                     activePathBuilding = null;
                     pushTerminalLog("Wiped active workspace parameters cleanly.", true);
@@ -1245,7 +1270,12 @@
                 const node = document.createElement('button');
                 node.className = `tab ${idx === STATE.phaseIdx ? 'active' : ''}`;
                 node.innerText = `PH-${idx + 1}`;
-                node.addEventListener('click', () => { STATE.phaseIdx = idx; STATE.selectedId = null; activePathBuilding = null; syncInterface(); });
+                node.addEventListener('click', () => { 
+                    triggerPhaseTransitionAnimation(idx); 
+                    STATE.selectedId = null; 
+                    activePathBuilding = null; 
+                    syncInterface(); 
+                });
                 phaseContainer.appendChild(node);
             });
 
@@ -1283,7 +1313,7 @@
                 return;
             }
 
-            if (STATE.animating) return;
+            if (STATE.animating || transitionState > 0) return;
             const activePhase = STATE.phases[STATE.phaseIdx];
 
             if (e.ctrlKey) {
@@ -1350,7 +1380,7 @@
         function pointerMove(e) {
             const pt = readPointer(e);
             mouseCurrentPos = pt;
-            if (STATE.animating) return;
+            if (STATE.animating || transitionState > 0) return;
 
             if (STATE.mode === 'deploy' && dragAnchor) {
                 dragAnchor.x = pt.x;
@@ -1373,7 +1403,7 @@
         }
 
         function pointerUp(e) {
-            if (STATE.animating) return;
+            if (STATE.animating || transitionState > 0) return;
             const activePhase = STATE.phases[STATE.phaseIdx];
             
             if (STATE.mode === 'path') {
@@ -1460,7 +1490,6 @@
                     }
 
                     asset.runtimePoints = dynamicTraversalPoints;
-                    pushTerminalLog(`Locked asset OBJ-${asset.id.toString().substring(2,7)} to ${asset.faction} routing grid.`);
                 } else {
                     asset.runtimePoints = null;
                 }
@@ -1629,32 +1658,18 @@
             return ctx.createPattern(pCanvas, 'repeat');
         }
 
-        function runRenderLoop(time) {
-            if (isRecordingIntro) {
-                if (!recIntroStartTime) recIntroStartTime = performance.now();
-                let elapsed = performance.now() - recIntroStartTime;
-                if (elapsed > 3000) {
-                    isRecordingIntro = false;
-                } else {
-                    drawRecordingIntro(elapsed);
-                    requestAnimationFrame(runRenderLoop);
-                    return;
-                }
+        // Standardized tactical visual draw frame module layer
+        function renderActivePhaseLayer(phaseData) {
+            if (!phaseData) return;
+
+            if(phaseData.terrain) {
+                phaseData.terrain.forEach(t => renderTacticalTerrain(t));
             }
 
-            dynamicDashOffset = (dynamicDashOffset - 0.5) % 24;
-            renderCanvasGrid();
+            phaseData.zones.forEach(z => renderZoneBounds(z));
+            if (activeZonePreview && phaseData === STATE.phases[STATE.phaseIdx]) renderZoneBounds(activeZonePreview);
 
-            const current = STATE.phases[STATE.phaseIdx];
-
-            if(current.terrain) {
-                current.terrain.forEach(t => renderTacticalTerrain(t));
-            }
-
-            current.zones.forEach(z => renderZoneBounds(z));
-            if (activeZonePreview) renderZoneBounds(activeZonePreview);
-
-            current.paths.forEach(path => {
+            phaseData.paths.forEach(path => {
                 ctx.save();
                 ctx.lineWidth = 4;
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
@@ -1675,7 +1690,7 @@
                 });
             });
 
-            if (activePathBuilding) {
+            if (activePathBuilding && phaseData === STATE.phases[STATE.phaseIdx]) {
                 ctx.save();
                 ctx.lineWidth = 1.5;
                 ctx.strokeStyle = COLORS[activePathBuilding.faction] + '88';
@@ -1697,9 +1712,9 @@
                 });
             }
 
-            current.assets.forEach(a1 => {
+            phaseData.assets.forEach(a1 => {
                 if(a1.faction !== 'GAR' || a1.kia) return; 
-                current.assets.forEach(a2 => {
+                phaseData.assets.forEach(a2 => {
                     if(a2.faction !== 'OPFOR' || a2.kia) return;
                     let dist = Math.hypot(a1.x - a2.x, a1.y - a2.y);
                     if(dist < 110) {
@@ -1712,25 +1727,7 @@
                 });
             });
 
-            if (STATE.animating) {
-                STATE.animProgress += 0.003;
-                if(STATE.animProgress >= 1) {
-                    STATE.animating = false;
-                    recordState();
-                    current.assets.forEach(a => {
-                        if (a.runtimePoints && a.runtimePoints.length > 0) {
-                            const dest = a.runtimePoints[a.runtimePoints.length - 1];
-                            a.x = dest.x; a.y = dest.y; a.runtimePoints = null;
-                        }
-                    });
-                    STATE.animProgress = 0;
-                    document.getElementById('ctrl-play').classList.remove('active');
-                    pushTerminalLog("Sim flight positioning iterations completed.");
-                    syncInterface();
-                }
-            }
-
-            current.assets.forEach(asset => {
+            phaseData.assets.forEach(asset => {
                 let rx = asset.x; let ry = asset.y;
 
                 if (STATE.animating && asset.runtimePoints && asset.runtimePoints.length > 0) {
@@ -1745,9 +1742,14 @@
                         rx = asset.runtimePoints[asset.runtimePoints.length - 1].x;
                         ry = asset.runtimePoints[asset.runtimePoints.length - 1].y;
                     }
+                    
+                    // Force state parameters sync up so end-point coordinate transfers stay accurate
+                    if(phaseData === STATE.phases[STATE.phaseIdx]) {
+                        asset.x = rx; asset.y = ry;
+                    }
                 }
 
-                if (asset.id === STATE.selectedId) {
+                if (asset.id === STATE.selectedId && phaseData === STATE.phases[STATE.phaseIdx]) {
                     ctx.save();
                     ctx.strokeStyle = asset.kia ? 'rgba(67, 88, 109, 0.5)' : getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() + '88'; 
                     ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
@@ -1757,25 +1759,125 @@
 
                 drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction], asset.kia);
             });
+        }
 
-            for (let i = activePings.length - 1; i >= 0; i--) {
-                let p = activePings[i];
-                p.radius += p.expansionRate;
-                p.alpha = 1.0 - (p.radius / p.maxRadius);
-
-                if (p.alpha <= 0) {
-                    activePings.splice(i, 1);
-                    continue;
+        function runRenderLoop(time) {
+            if (isRecordingIntro) {
+                if (!recIntroStartTime) recIntroStartTime = time;
+                let elapsed = time - recIntroStartTime;
+                if (elapsed > 3000) {
+                    isRecordingIntro = false;
+                } else {
+                    drawRecordingIntro(elapsed);
+                    requestAnimationFrame(runRenderLoop);
+                    return;
                 }
+            }
 
+            dynamicDashOffset = (dynamicDashOffset - 0.5) % 24;
+            renderCanvasGrid();
+
+            // Handle glowing laser scan horizontal sweep timeline transition checks
+            let swipeProgress = 0;
+            if (transitionState === 1) {
+                if (!transitionStartTime) transitionStartTime = time;
+                let elapsedTransition = time - transitionStartTime;
+                
+                if (elapsedTransition < 600) {
+                    swipeProgress = elapsedTransition / 600;
+                } else {
+                    STATE.phaseIdx = transNewIdx;
+                    transitionState = 0;
+                    transitionStartTime = null;
+                    swipeProgress = 1.0;
+                    syncInterface();
+                }
+            }
+
+            if (STATE.animating && transitionState === 0) {
+                STATE.animProgress += 0.003;
+                if(STATE.animProgress >= 1) {
+                    STATE.animating = false;
+                    recordState();
+                    
+                    // Capture terminal points explicitly so units hold position perfectly 
+                    STATE.phases[STATE.phaseIdx].assets.forEach(a => {
+                        if (a.runtimePoints && a.runtimePoints.length > 0) {
+                            const dest = a.runtimePoints[a.runtimePoints.length - 1];
+                            a.x = dest.x; a.y = dest.y;
+                            a.spawnX = dest.x; a.spawnY = dest.y; 
+                            a.runtimePoints = null;
+                        }
+                    });
+                    
+                    STATE.animProgress = 0;
+                    document.getElementById('ctrl-play').classList.remove('active');
+                    pushTerminalLog("Sim flight positioning iterations completed.");
+                    
+                    // Chain playback cascade loop down into next phase grid if recording mode is active
+                    if (isRecording && STATE.phaseIdx < STATE.phases.length - 1) {
+                        triggerPhaseTransitionAnimation(STATE.phaseIdx + 1);
+                        setTimeout(() => {
+                            document.getElementById('ctrl-play').click();
+                        }, 700);
+                    } else {
+                        syncInterface();
+                    }
+                }
+            }
+
+            // Draw operational phase frames depending on active state machine mode
+            if (transitionState === 0) {
+                renderActivePhaseLayer(STATE.phases[STATE.phaseIdx]);
+            } else if (transitionState === 1) {
+                let splitX = canvas.width * swipeProgress;
+                
+                // Draw new oncoming layer on left split architecture block
                 ctx.save();
-                ctx.globalAlpha = p.alpha;
-                ctx.strokeStyle = p.color;
-                ctx.lineWidth = 2.5;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.stroke();
-                ctx.fillStyle = p.color;
-                ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.rect(0, 0, splitX, canvas.height); ctx.clip();
+                renderActivePhaseLayer(STATE.phases[transNewIdx]);
                 ctx.restore();
+                
+                // Draw existing leaving layer on right split architecture block
+                ctx.save();
+                ctx.beginPath(); ctx.rect(splitX, 0, canvas.width - splitX, canvas.height); ctx.clip();
+                renderActivePhaseLayer(STATE.phases[transOldIdx]);
+                ctx.restore();
+                
+                // Project glowing horizontal separation beam line matrix
+                if (swipeProgress > 0 && swipeProgress < 1) {
+                    ctx.save();
+                    ctx.beginPath(); ctx.moveTo(splitX, 0); ctx.lineTo(splitX, canvas.height);
+                    const systemAccent = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim();
+                    ctx.strokeStyle = systemAccent;
+                    ctx.lineWidth = 3;
+                    ctx.shadowColor = systemAccent;
+                    ctx.shadowBlur = 12;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
+            if (transitionState === 0) {
+                for (let i = activePings.length - 1; i >= 0; i--) {
+                    let p = activePings[i];
+                    p.radius += p.expansionRate;
+                    p.alpha = 1.0 - (p.radius / p.maxRadius);
+
+                    if (p.alpha <= 0) {
+                        activePings.splice(i, 1);
+                        continue;
+                    }
+
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.strokeStyle = p.color;
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.stroke();
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill();
+                    ctx.restore();
+                }
             }
 
             // MGRS-Style Floating Crosshair Coordinate Overlay Rendering Matrix
