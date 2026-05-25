@@ -1834,6 +1834,103 @@ ${customC ? customC : ''}`;
             if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); triggerRedo(); }
             if (e.key === 'Escape') { if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath(); }
         }
+// 1. Core State Tracking
+let activeTab = "geospatial"; // "geospatial" or "strategic"
+let mappingSuiteActive = false;
+let currentView = "main"; // "main" or "analysis_core"
+
+// 2. Tab Switching Logic
+function setTab(tabName) {
+    activeTab = tabName;
+    
+    // Automatically reset sub-views when changing primary tabs 
+    // to prevent getting stuck or showing tools in the wrong tab
+    mappingSuiteActive = false;
+    currentView = "main";
+    
+    renderUI();
+}
+
+// 3. Conditional Tool Rendering (The Gatekeeper)
+function renderTools() {
+    // Exclusively enabled on Strategic Console
+    if (activeTab !== "strategic") {
+        return `<div class="disabled-notice">Tools locked. Switch to Strategic Console tab.</div>`;
+    }
+
+    if (currentView === "analysis_core") {
+        return `
+            <div class="analysis-panel">
+                <div class="panel-header">
+                    <h3>SYSTEM ANALYSIS CORE</h3>
+                    <!-- FIX: Added working Back Button -->
+                    <button class="btn-back" onclick="setView('main')">← BACK TO CONSOLE</button>
+                </div>
+                <div class="panel-body">
+                    <p>Core diagnostics, telemetry processing, and raw systemic data stream active...</p>
+                </div>
+            </div>
+        `;
+    }
+
+    // Default Main Strategic Console View
+    return `
+        <div class="console-controls">
+            <!-- FIX: Mapping suite now toggles an active state -->
+            <button class="btn ${mappingSuiteActive ? 'active' : ''}" onclick="toggleMappingSuite()">
+                ${mappingSuiteActive ? 'DISABLE MAPPING SUITE' : 'ENABLE MAPPING SUITE'}
+            </button>
+            
+            <button class="btn" onclick="setView('analysis_core')">OPEN ANALYSIS CORE</button>
+        </div>
+        
+        <!-- FIX: The visual mission plan map window -->
+        <div class="mission-display-pane">
+            ${renderMissionVisual()}
+        </div>
+    `;
+}
+
+// 4. Mission Visual Map Renderer
+function renderMissionVisual() {
+    if (!mappingSuiteActive) {
+        return `<div class="map-placeholder">MAPPING SUITE OFFLINE - Toggle suite above to initialize track feeds</div>`;
+    }
+    
+    // Returns the active tactical HUD visualization when mapping suite is pressed
+    return `
+        <div class="hud-container">
+            <div class="hud-header">MISSION EVENT: OP-RECOVERY-01</div>
+            <div class="hud-map-grid">
+                <!-- SVG or visual layout representing the tactical route -->
+                <svg viewBox="0 0 400 200" class="hud-svg">
+                    <circle cx="50" cy="150" r="6" fill="#00ffcc" />
+                    <text x="45" y="170" fill="#00ffcc" font-size="10">BASE</text>
+                    
+                    <line x1="50" y1="150" x2="180" y2="80" stroke="#00ffcc" stroke-width="2" stroke-dasharray="4" />
+                    <circle cx="180" cy="80" r="4" fill="#ffcc00" />
+                    <text x="175" y="70" fill="#ffcc00" font-size="10">STR1</text>
+                    
+                    <line x1="180" y1="80" x2="320" y2="110" stroke="#00ffcc" stroke-width="2" stroke-dasharray="4" />
+                    <circle cx="320" cy="110" r="4" fill="#ffcc00" />
+                    <text x="315" y="100" fill="#ffcc00" font-size="10">STR2</text>
+                </svg>
+            </div>
+            <div class="hud-footer">SYSTEM ACTIVE // ROUTE DATA FEED // ETA: 2.4 MIN</div>
+        </div>
+    `;
+}
+
+// 5. State Mutators
+function toggleMappingSuite() {
+    mappingSuiteActive = !mappingSuiteActive;
+    renderUI();
+}
+
+function setView(viewName) {
+    currentView = viewName;
+    renderUI();
+}
     </script>
 </body>
 </html>
