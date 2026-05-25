@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical Commander // Operational Core v4.1</title>
+    <title>Tactical Commander // Operational Core v4.2</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
@@ -247,7 +247,7 @@
     <div class="header">
         <div class="op-title">
             <div class="op-indicator"></div>
-            <span class="op-name" id="op-label">SYS.MAIN // RECON_V4.1 // SECURE</span>
+            <span class="op-name" id="op-label">SYS.MAIN // RECON_V4.2 // SECURE</span>
         </div>
         <div class="controls">
             <div class="control-group">
@@ -276,7 +276,7 @@
                         <button class="mode-btn" data-mode="zone">ZONE BUILDER</button>
                         <button class="mode-btn" data-mode="terrain" style="color: #ff9f1c;">TERRAIN LAYER</button>
                     </div>
-                    <div style="font-size: 8px; color: #43586d; margin-top: 5px; text-align: center; letter-spacing: 0.05em; font-weight: bold; border-top: 1px dashed #122236; padding-top: 4px;">HOLD SHIFT + CLICK TO PING<br><span style="color:#ff3366;">CTRL+CLICK ON A UNIT TO TOGGLE KIA Status</span></div>
+                    <div style="font-size: 8px; color: #43586d; margin-top: 5px; text-align: center; letter-spacing: 0.05em; font-weight: bold; border-top: 1px dashed #122236; padding-top: 4px;">💡 PRO TIP: HOLD SHIFT+CLICK TO PING SCANNER<br><span style="color:#ff3366;">CTRL+CLICK ON A UNIT TO TOGGLE KIA STATUS</span></div>
                 </div>
 
                 <div class="section">
@@ -354,7 +354,7 @@
                 <canvas id="tactical-grid"></canvas>
             </div>
             <div class="log-terminal" id="system-log">
-                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // LOGISTICAL MATRIX UPDATE v4.1 ONLINE</div>
+                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // LOGISTICAL MATRIX UPDATE v4.2 ONLINE</div>
             </div>
         </div>
 
@@ -416,7 +416,7 @@
 
         // PLANETARY PRESET PROFILES DATA MATRIX WITH PROCEDURAL SATELLITE CONTOUR RENDERING CONTEXTS
         const THEATERS = {
-            default: { name: "CORE BASILINE MATRIX", bg: "#010306", gridColor: "rgba(0, 242, 254, 0.012)", drawSatelliteMap: null, terrain: [] },
+            default: { name: "CORE BASELINE MATRIX", bg: "#010306", gridColor: "rgba(0, 242, 254, 0.012)", drawSatelliteMap: null, terrain: [] },
             
             christophsis: { 
                 name: "THEATER: CHRISTOPHSIS // URBAN CRYSTAL MESH", bg: "#020712", gridColor: "rgba(0, 242, 254, 0.03)",
@@ -722,7 +722,7 @@
                     STATE.animating = true; 
                     STATE.animProgress = 0;
                     document.getElementById('ctrl-play').classList.add('active');
-                    pushTerminalLog("COMMENCING COORDINATED DISPLACEMENT SIMULATION.");
+                    pushTerminalLog("COMMENCING COORDINATED MULTI-DIRECTIONAL DISPLACEMENT SIMULATION.");
                 }
             });
 
@@ -977,32 +977,61 @@
 
         function findDistanceToSegment(p, v, w) {
             const l2 = Math.hypot(v.x - w.x, v.y - w.y) ** 2;
-            if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+            if (l2 === 0) return { dist: Math.hypot(p.x - v.x, p.y - v.y), point: v };
             let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
             t = Math.max(0, Math.min(1, t));
-            return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+            const interceptPoint = { x: v.x + t * (w.x - v.x), y: v.y + t * (w.y - v.y) };
+            return { dist: Math.hypot(p.x - interceptPoint.x, p.y - interceptPoint.y), point: interceptPoint, t: t };
         }
 
         function bindUnitsToRoutes() {
             const activePhase = STATE.phases[STATE.phaseIdx];
             activePhase.assets.forEach(asset => {
-                if(asset.kia) return; // Skip routes for fallen assets
+                if(asset.kia) return; 
                 let bestRoute = null;
-                let minimumDistance = 35; 
+                let minimumDistance = 60; // Max snap threshold radius
+                let bestSegmentIdx = 0;
+                let bestInterceptPoint = null;
 
                 activePhase.paths.forEach(path => {
                     for(let i = 0; i < path.points.length - 1; i++) {
-                        let dist = findDistanceToSegment(asset, path.points[i], path.points[i+1]);
-                        if(dist < minimumDistance) {
-                            minimumDistance = dist;
+                        let res = findDistanceToSegment(asset, path.points[i], path.points[i+1]);
+                        if(res.dist < minimumDistance) {
+                            minimumDistance = res.dist;
                             bestRoute = path;
+                            bestSegmentIdx = i;
+                            bestInterceptPoint = res.point;
                         }
                     }
                 });
 
                 if (bestRoute) {
-                    asset.runtimePoints = [...bestRoute.points];
-                    pushTerminalLog(`Routing sync: Asset locked to path line vector.`);
+                    // Determine vector movement orientation based on closest path extremity
+                    const firstNode = bestRoute.points[0];
+                    const lastNode = bestRoute.points[bestRoute.points.length - 1];
+                    const distToStart = Math.hypot(asset.x - firstNode.x, asset.y - firstNode.y);
+                    const distToEnd = Math.hypot(asset.x - lastNode.x, asset.y - lastNode.y);
+
+                    let dynamicTraversalPoints = [];
+
+                    if (distToStart <= distToEnd) {
+                        // Moving forward along the path: start at current position, step to intercept point, then continue forward
+                        dynamicTraversalPoints.push({ x: asset.x, y: asset.y });
+                        dynamicTraversalPoints.push(bestInterceptPoint);
+                        for (let j = bestSegmentIdx + 1; j < bestRoute.points.length; j++) {
+                            dynamicTraversalPoints.push(bestRoute.points[j]);
+                        }
+                    } else {
+                        // Moving backward along the path: reverse execution flow
+                        dynamicTraversalPoints.push({ x: asset.x, y: asset.y });
+                        dynamicTraversalPoints.push(bestInterceptPoint);
+                        for (let j = bestSegmentIdx; j >= 0; j--) {
+                            dynamicTraversalPoints.push(bestRoute.points[j]);
+                        }
+                    }
+
+                    asset.runtimePoints = dynamicTraversalPoints;
+                    pushTerminalLog(`Routing orientation synchronized for asset OBJ-${asset.id.toString().substring(2,7)}`);
                 } else {
                     asset.runtimePoints = null;
                 }
@@ -1231,7 +1260,7 @@
 
             // PROXIMITY ENGAGEMENT SECTOR DETECTIONS
             current.assets.forEach(a1 => {
-                if(a1.faction !== 'GAR' || a1.kia) return; // Fallen units don't scan proxy locks
+                if(a1.faction !== 'GAR' || a1.kia) return; 
                 current.assets.forEach(a2 => {
                     if(a2.faction !== 'OPFOR' || a2.kia) return;
                     let dist = Math.hypot(a1.x - a2.x, a1.y - a2.y);
