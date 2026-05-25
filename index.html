@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical Commander // Operational Core v3.6</title>
+    <title>Tactical Commander // Operational Core v3.7</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
@@ -246,7 +246,7 @@
     <div class="header">
         <div class="op-title">
             <div class="op-indicator"></div>
-            <span class="op-name" id="op-label">SYS.MAIN // RECON_V3.6 // SECURE</span>
+            <span class="op-name" id="op-label">SYS.MAIN // RECON_V3.7 // SECURE</span>
         </div>
         <div class="controls">
             <div class="control-group">
@@ -272,10 +272,11 @@
                     <div class="section-title">COMMAND SELECTION</div>
                     <div class="button-grid">
                         <button class="mode-btn active" data-mode="deploy">DEPLOY UNITS</button>
-                        <button class="mode-btn" data-mode="path">ROUTING VECTORS</button>
+                        <button class="mode-btn" data-mode="path">ROUTING ZONES</button>
                         <button class="mode-btn" data-mode="zone">ZONE BUILDER</button>
                         <button class="mode-btn" data-mode="terrain" style="color: #ff9f1c;">TERRAIN LAYER</button>
                     </div>
+                    <div style="font-size: 8px; color: #43586d; margin-top: 5px; text-align: center; letter-spacing: 0.05em; font-weight: bold; border-top: 1px dashed #122236; padding-top: 4px;">💡 PRO TIP: HOLD SHIFT + CLICK TO PING SCANNER</div>
                 </div>
 
                 <div class="section">
@@ -312,7 +313,7 @@
                 </div>
 
                 <div class="section">
-                    <div class="section-title">FACTION SELECTION</div>
+                    <div class="section-title">FACTION SELECTION // PING COLOR</div>
                     <div class="button-grid">
                         <button class="faction-btn active" data-faction="GAR">GAR (CYAN)</button>
                         <button class="faction-btn" data-faction="OPFOR" style="color:#ff3366;">OPFOR (RED)</button>
@@ -354,7 +355,7 @@
             </div>
             <!-- REAL-TIME CONSOLE FEED -->
             <div class="log-terminal" id="system-log">
-                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // BASILINE STRUCTURAL MATRIX ONLINE v3.6</div>
+                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // BASILINE STRUCTURAL MATRIX ONLINE v3.7</div>
             </div>
         </div>
 
@@ -445,6 +446,7 @@
 
         let systemHistory = [];
         let systemHistoryIdx = -1;
+        let activePings = []; // Visual overlay ping records tracking animations
 
         function recordState() {
             if (systemHistoryIdx < systemHistory.length - 1) {
@@ -702,8 +704,24 @@
         }
 
         function pointerDown(e) {
-            if (STATE.animating) return;
             const pt = readPointer(e);
+            
+            // SCREENSHARE PING TRACE INTERCEPT LOOP
+            if (e.shiftKey) {
+                activePings.push({
+                    x: pt.x,
+                    y: pt.y,
+                    color: COLORS[STATE.faction],
+                    radius: 2,
+                    maxRadius: 65,
+                    alpha: 1.0,
+                    expansionRate: 2.2
+                });
+                pushTerminalLog(`COMS BRIEF PING: BROADCAST APPLIED AT FIELD SECTOR X:${Math.round(pt.x)} Y:${Math.round(pt.y)}`);
+                return; // Cease execution immediately to prevent changing canvas items
+            }
+
+            if (STATE.animating) return;
             const activePhase = STATE.phases[STATE.phaseIdx];
 
             if (STATE.mode === 'deploy') {
@@ -1032,6 +1050,36 @@
 
                 drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction]);
             });
+
+            // SCREENSHARE COMS PING RENDERING LOGIC LOOP
+            for (let i = activePings.length - 1; i >= 0; i--) {
+                let p = activePings[i];
+                p.radius += p.expansionRate;
+                p.alpha = 1.0 - (p.radius / p.maxRadius);
+
+                if (p.alpha <= 0) {
+                    activePings.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = 2.5;
+                
+                // Ring ripple
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Static crosshair center dot
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
 
             requestAnimationFrame(runRenderLoop);
         }
