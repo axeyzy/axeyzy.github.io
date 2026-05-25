@@ -223,14 +223,12 @@
 
         /* METT-TC Panel Styles */
         .mett-header-tabs { display: flex; gap: 2px; background: #010307; padding: 2px; border: 1px solid #122236; }
-        .mett-tab { padding: 6px 2px; font-size: 9px; flex: 1; text-align: center; border: 1px solid transparent; cursor: pointer; color: #43586d;
-            font-weight: bold; }
+        .mett-tab { padding: 6px 2px; font-size: 9px; flex: 1; text-align: center; border: 1px solid transparent; cursor: pointer; color: #43586d; font-weight: bold; }
         .mett-tab.active { background: rgba(0, 242, 254, 0.08); border-color: #00f2fe; color: #00f2fe; }
         .mett-pane { display: none; flex-direction: column; gap: 10px; margin-top: 8px; }
         .mett-pane.active { display: flex; }
         .mett-subrow { display: flex; gap: 6px; align-items: center; }
-        .mett-custom-item { display: flex; justify-content: space-between; align-items: center; background: rgba(30,53,77,0.15); border: 1px solid #1e354d; padding: 4px 6px; font-size: 9px;
-            margin-top: 4px; }
+        .mett-custom-item { display: flex; justify-content: space-between; align-items: center; background: rgba(30,53,77,0.15); border: 1px solid #1e354d; padding: 4px 6px; font-size: 9px; margin-top: 4px; }
         .mett-custom-del { color: #ff3366; cursor: pointer; font-weight: bold; font-size: 10px; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -520,7 +518,7 @@
         </div>
 
         <div style="flex:1; display:flex; flex-direction:column; position:relative;">
-            <div id="mett-tab-header" style="display:none; background:#040914; border-bottom:1px solid #122236; height:32px; align-items:center; padding:0 12px; gap:4px; z-index:4;">
+            <div id="mett-tab-header" style="display:none; background:#040914; border-bottom:1px solid #122236; height:32px; display:flex; align-items:center; padding:0 12px; gap:4px; z-index:4;">
                 <button class="tab active" id="mett-toggle-map" style="padding:4px 12px;">GEOSPATIAL THEATER MAP</button>
                 <button class="tab" id="mett-toggle-mett" style="padding:4px 12px; color:#00f2fe;">METT-TC STRATEGIC CONSOLE</button>
             </div>
@@ -614,507 +612,110 @@
                 drawSatelliteMap: (ctx, w, h) => {
                     ctx.strokeStyle = "rgba(255, 159, 28, 0.03)"; ctx.lineWidth = 1.5;
                     for(let i = -200; i < h; i += 60) { ctx.beginPath(); ctx.moveTo(0, i); ctx.bezierCurveTo(w * 0.25, i + 120, w * 0.75, i - 120, w, i + 50); ctx.stroke(); }
-                    ctx.fillStyle = "rgba(255, 159, 28, 0.01)"; ctx.beginPath(); ctx.arc(w*0.2, h*0.3, 140, 0, Math.PI*2); ctx.fill();
-                    ctx.beginPath(); ctx.arc(w*0.8, h*0.7, 180, 0, Math.PI*2); ctx.fill();
                 }
             },
             kashyyyk: {
-                name: "THEATER: KASHYYYK // KACHIRO BEACHHEAD", bg: "#031206", gridColor: "rgba(0, 255, 170, 0.02)",
-                terrain: [ { type: 'hazard', points: [{x:0, y:150}, {x:220, y:180}, {x:450, y:130}, {x:800, y:160}] } ],
+                name: "THEATER: KASHYYYK // ARCHIPELAGO DEFENSE MESH", bg: "#02120b", gridColor: "rgba(0, 255, 170, 0.02)",
+                terrain: [{ type: 'hazard', points: [{x:200, y:300}, {x:350, y:280}, {x:400, y:420}, {x:250, y:450}] }],
                 drawSatelliteMap: (ctx, w, h) => {
-                    ctx.strokeStyle = "rgba(0, 255, 170, 0.025)"; ctx.lineWidth = 1;
-                    for (let d = 0; d < 80; d += 20) { ctx.beginPath(); ctx.moveTo(0, 150 + d); ctx.bezierCurveTo(w*0.3, 120+d, w*0.6, 220+d, w, 140+d); ctx.stroke(); }
-                    ctx.fillStyle = "rgba(0, 255, 170, 0.012)"; ctx.beginPath(); ctx.moveTo(0, 150); ctx.bezierCurveTo(w*0.3, 120, w*0.6, 220, w, 140); ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
+                    ctx.fillStyle = "rgba(0, 255, 170, 0.01)"; ctx.beginPath(); ctx.arc(w*0.3, h*0.4, 180, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(w*0.7, h*0.6, 220, 0, Math.PI*2); ctx.fill();
                 }
             },
             coruscant: {
-                name: "THEATER: CORUSCANT // TACTICAL HQ SURFACE", bg: "#050b14", gridColor: "rgba(209, 223, 236, 0.015)", terrain: [],
+                name: "THEATER: CORUSCANT // COMS HQ MATRIX GRID", bg: "#080b11", gridColor: "rgba(209, 223, 236, 0.025)", terrain: [],
                 drawSatelliteMap: (ctx, w, h) => {
-                    ctx.strokeStyle = "rgba(0, 242, 254, 0.03)"; ctx.lineWidth = 0.5;
-                    for(let x=0; x<w; x+=40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-                    for(let y=0; y<h; y+=40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-                    ctx.fillStyle = "rgba(0, 242, 254, 0.02)"; ctx.fillRect(w/2 - 120, h/2 - 120, 240, 240);
-                    ctx.strokeStyle = "rgba(0, 242, 254, 0.1)"; ctx.strokeRect(w/2 - 120, h/2 - 120, 240, 240);
+                    ctx.strokeStyle = "rgba(209, 223, 236, 0.03)"; ctx.lineWidth = 0.5;
+                    for(let i = 0; i < w; i += 40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke(); }
                 }
             },
             corellia: {
-                name: "THEATER: CORELLIA // SHIPYARDS ASSEMBLY GRID", bg: "#0d0406", gridColor: "rgba(230, 57, 70, 0.015)",
-                terrain: [ { type: 'ridge', points: [{x:200, y:0}, {x:260, y:0}, {x:260, y:600}, {x:200, y:600}] } ],
+                name: "THEATER: CORELLIA // SHIPYARD CONCOURSE MESH", bg: "#140404", gridColor: "rgba(230, 57, 70, 0.02)", terrain: [],
                 drawSatelliteMap: (ctx, w, h) => {
-                    ctx.strokeStyle = "rgba(230, 57, 70, 0.04)"; ctx.lineWidth = 1;
-                    ctx.beginPath(); ctx.arc(w/2, h/2, 220, 0, Math.PI*2); ctx.stroke(); ctx.beginPath(); ctx.arc(w/2, h/2, 100, 0, Math.PI*2); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(w, h); ctx.moveTo(w, 0); ctx.lineTo(0, h); ctx.stroke();
+                    ctx.strokeStyle = "rgba(230, 57, 70, 0.04)"; ctx.lineWidth = 2; ctx.strokeRect(80, 80, w - 160, h - 160); ctx.strokeRect(180, 180, w - 360, h - 360);
                 }
             }
         };
 
         let STATE = {
-            mode: 'deploy', faction: 'GAR', unitType: 'Infantry', pStyle: 'straight', zType: 'rect', zStyle: 'faction', tStyle: 'trench',
-            activeTheater: 'default', gridVisible: true, phases: [], currentPhaseIdx: 0, undoStack: [], redoStack: [], customMettItems: []
+            activeTheater: 'default', activePhaseIdx: 0,
+            mode: 'deploy', faction: 'GAR', unitType: 'Infantry',
+            pathStyle: 'straight', zoneType: 'rect', zoneStyle: 'faction', terrainStyle: 'trench',
+            gridEnabled: true, simRunning: false, selectedId: null, selectedType: null
         };
 
+        let PHASES = [ { units: [], zones: [], paths: [], terrain: [], logs: ["INITIALIZATION SEQUENCE COMPLETE // MATRIX STABLE"] } ];
+        let historyUndo = []; let historyRedo = [];
+
+        // METT-TC Isolated State Engine Variables
+        let mettCustomVariables = [];
+
         const canvas = document.getElementById('tactical-grid'); const ctx = canvas.getContext('2d');
-        let selectedEntity = null; let activePathBuilding = null; let draggingEntity = null; let dragOffset = {x:0, y:0};
-        let isSimulating = false; let simulationTimer = null;
+        let activePathBuilding = null; let activeZoneBuilding = null; let activeTerrainBuilding = null;
+        let isDraggingAsset = false; let dragTargetRef = null;
 
-        const ADMIN_UNLOCK_KEYS = ["SECURE_ALPHA", "METT_TC_4.7", "COMMANDER_VALID", "66", "ADMIN"];
+        function logAction(msg, isAlert = false) {
+            const container = document.getElementById('system-log'); const timestamp = new Date().toLocaleTimeString();
+            PHASES[STATE.activePhaseIdx].logs.push(`[${timestamp}] ${msg}`);
+            const row = document.createElement('div'); row.className = 'log-line';
+            if (isAlert) row.classList.add('log-alert');
+            row.innerHTML = `<span class="log-time">[${timestamp}]</span> <span>${msg}</span>`;
+            container.appendChild(row); container.scrollTop = container.scrollHeight;
+        }
 
-        function createDefaultPhase() { return { units: [], zones: [], paths: [], logs: ["PHASE INITIALIZED // READY"] }; }
-        function getCurPhase() { if(STATE.phases.length === 0) STATE.phases.push(createDefaultPhase()); return STATE.phases[STATE.currentPhaseIdx]; }
+        function reloadLogConsole() {
+            const container = document.getElementById('system-log'); container.innerHTML = '';
+            PHASES[STATE.activePhaseIdx].logs.forEach(line => {
+                const row = document.createElement('div'); row.className = 'log-line';
+                if(line.includes("ALERT") || line.includes("PURGE") || line.includes("WIPE") || line.includes("KIA")) row.classList.add('log-alert');
+                const tMatch = line.match(/^\[.*?\]/);
+                if (tMatch) {
+                    row.innerHTML = `<span class="log-time">${tMatch[0]}</span> <span>${line.replace(tMatch[0], '').trim()}</span>`;
+                } else {
+                    row.innerHTML = `<span>${line}</span>`;
+                }
+                container.appendChild(row);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
 
-        function saveState() {
-            const snapshot = JSON.stringify(STATE.phases); STATE.undoStack.push(snapshot); STATE.redoStack = [];
-            if(STATE.undoStack.length > 30) STATE.undoStack.shift();
+        function saveHistoryState() {
+            historyUndo.push(JSON.stringify(PHASES)); historyRedo = [];
         }
         function triggerUndo() {
-            if(STATE.undoStack.length === 0) { logToTerminal("SYSTEM // CANNOT UNDO // STACK EMPTY", true); return; }
-            STATE.redoStack.push(JSON.stringify(STATE.phases)); STATE.phases = JSON.parse(STATE.undoStack.pop());
-            if(STATE.currentPhaseIdx >= STATE.phases.length) STATE.currentPhaseIdx = STATE.phases.length - 1;
-            selectedEntity = null; activePathBuilding = null; rebuildPhaseTabs(); updateTelemetry(); triggerRepaint(); logToTerminal("SYSTEM // ACTIONS REVERTED SUCCESSFULLY");
+            if (!historyUndo.length) return; historyRedo.push(JSON.stringify(PHASES));
+            PHASES = JSON.parse(historyUndo.pop()); if (STATE.activePhaseIdx >= PHASES.length) STATE.activePhaseIdx = PHASES.length - 1;
+            buildTimelineUI(); reloadLogConsole(); render();
         }
         function triggerRedo() {
-            if(STATE.redoStack.length === 0) { logToTerminal("SYSTEM // CANNOT REDO // STACK EMPTY", true); return; }
-            STATE.undoStack.push(JSON.stringify(STATE.phases)); STATE.phases = JSON.parse(STATE.redoStack.pop());
-            selectedEntity = null; activePathBuilding = null; rebuildPhaseTabs(); updateTelemetry(); triggerRepaint(); logToTerminal("SYSTEM // ACTIONS RE-APPLIED SUCCESSFULLY");
-        }
-
-        function logToTerminal(msg, isAlert=false) {
-            const logBox = document.getElementById('system-log'); const timestamp = new Date().toTimeString().split(' ')[0];
-            const line = document.createElement('div'); line.className = 'log-line' + (isAlert ? ' log-alert' : '');
-            line.innerHTML = `<span class="log-time">[${timestamp}]</span> ${msg}`; logBox.appendChild(line); logBox.scrollTop = logBox.scrollHeight;
-        }
-
-        function updateTelemetry() {
-            const p = getCurPhase(); document.getElementById('tele-units').innerText = p.units.length;
-            document.getElementById('tele-zones').innerText = p.zones.length; document.getElementById('tele-paths').innerText = p.paths.length;
+            if (!historyRedo.length) return; historyUndo.push(JSON.stringify(PHASES));
+            PHASES = JSON.parse(historyRedo.pop()); buildTimelineUI(); reloadLogConsole(); render();
         }
 
         function resizeCanvas() {
-            const box = document.getElementById('canvas-holder'); canvas.width = box.clientWidth; canvas.height = box.clientHeight; triggerRepaint();
+            const holder = document.getElementById('canvas-holder');
+            canvas.width = holder.clientWidth; canvas.height = holder.clientHeight; render();
         }
+        window.addEventListener('resize', resizeCanvas);
 
-        function setupInterfaceHooks() {
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active');
-                STATE.mode = e.target.dataset.mode; if(activePathBuilding) commitCurrentPath(); selectedEntity = null; updateSelectedDisplay(); triggerRepaint();
-            }));
-
-            document.querySelectorAll('.faction-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.faction-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.faction = e.target.dataset.faction;
-            }));
-
-            document.querySelectorAll('.unit-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.unitType = e.target.dataset.unit;
-            }));
-
-            document.querySelectorAll('.path-style-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.path-style-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.pStyle = e.target.dataset.pstyle;
-            }));
-
-            document.querySelectorAll('.zone-type-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.zone-type-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.zType = e.target.dataset.ztype;
-            }));
-
-            document.querySelectorAll('.zone-style-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.zone-style-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.zStyle = e.target.dataset.zstyle;
-            }));
-
-            document.querySelectorAll('.terrain-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.terrain-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); STATE.tStyle = e.target.dataset.tstyle;
-            }));
-
-            document.querySelectorAll('.theater-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.theater-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active');
-                STATE.activeTheater = e.target.dataset.theater; logToTerminal("GRID CHANGE // " + THEATERS[STATE.activeTheater].name); triggerRepaint();
-            }));
-
-            document.getElementById('ctrl-grid').addEventListener('click', (e) => {
-                STATE.gridVisible = !STATE.gridVisible; e.target.classList.toggle('active', STATE.gridVisible); e.target.innerText = STATE.gridVisible ? "ON" : "OFF"; triggerRepaint();
-            });
-
-            document.getElementById('ctrl-undo').addEventListener('click', triggerUndo); document.getElementById('ctrl-redo').addEventListener('click', triggerRedo);
-
-            document.getElementById('ctrl-reset').addEventListener('click', () => {
-                showWarningBox("Resetting simulator will reload original entities inside current phase window. Proceed?", () => {
-                    const p = getCurPhase(); p.units.forEach(u => { u.x = u.originX; u.y = u.originY; u.kia = false; });
-                    stopSimulationPlayback(); triggerRepaint(); logToTerminal("SIM CORE // ENTITY POSITIONS TRACKED BACK TO BASELINE");
-                });
-            });
-
-            document.getElementById('board-wipe').addEventListener('click', () => {
-                showWarningBox("Purge absolute workspace state? This completely wipes layout models inside the current operational timeline window.", () => {
-                    saveState(); const p = getCurPhase(); p.units = []; p.zones = []; p.paths = []; selectedEntity = null; activePathBuilding = null;
-                    stopSimulationPlayback(); updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal("CORE SYSTEM // ACTIVE MATRIX CLEARED // BLANK SLATE");
-                });
-            });
-
-            document.getElementById('asset-purge').addEventListener('click', () => {
-                if(!selectedEntity) return; saveState(); const p = getCurPhase();
-                if(selectedEntity.type === 'unit') p.units = p.units.filter(u => u.id !== selectedEntity.id);
-                else if(selectedEntity.type === 'zone') p.zones = p.zones.filter(z => z.id !== selectedEntity.id);
-                else if(selectedEntity.type === 'path') p.paths = p.paths.filter(pa => pa.id !== selectedEntity.id);
-                selectedEntity = null; updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal("SYSTEM // REMOVED MANUALLY CONTROLLED ELEMENT");
-            });
-
-            document.getElementById('phase-add').addEventListener('click', () => {
-                saveState(); STATE.phases.push(createDefaultPhase()); STATE.currentPhaseIdx = STATE.phases.length - 1;
-                selectedEntity = null; rebuildPhaseTabs(); updateTelemetry(); triggerRepaint(); logToTerminal(`TIMELINE // CREATED OPERATIONAL STEP [PHASE ${STATE.currentPhaseIdx + 1}]`);
-            });
-
-            document.getElementById('phase-clone').addEventListener('click', () => {
-                saveState(); const currentSrc = getCurPhase(); const clone = JSON.parse(JSON.stringify(currentSrc));
-                STATE.phases.push(clone); STATE.currentPhaseIdx = STATE.phases.length - 1;
-                selectedEntity = null; rebuildPhaseTabs(); updateTelemetry(); triggerRepaint(); logToTerminal(`TIMELINE // DUPLICATED MATRIX INTO NEW [PHASE ${STATE.currentPhaseIdx + 1}]`);
-            });
-
-            document.getElementById('phase-delete').addEventListener('click', () => {
-                if(STATE.phases.length <= 1) { logToTerminal("TIMELINE // CRITICAL // UNABLE TO PURGE BASE MATRIX LAYER", true); return; }
-                showWarningBox("Delete the active tactical phase? This truncates the timeline branch directly.", () => {
-                    saveState(); STATE.phases.splice(STATE.currentPhaseIdx, 1);
-                    if(STATE.currentPhaseIdx >= STATE.phases.length) STATE.currentPhaseIdx = STATE.phases.length - 1;
-                    selectedEntity = null; rebuildPhaseTabs(); updateTelemetry(); triggerRepaint(); logToTerminal("TIMELINE // SYSTEM BRANCH PURGED");
-                });
-            });
-
-            document.getElementById('intel-field').addEventListener('input', (e) => { if(selectedEntity) { selectedEntity.notes = e.target.value; } });
-
-            document.getElementById('ctrl-play').addEventListener('click', () => {
-                if(isSimulating) stopSimulationPlayback(); else startSimulationPlayback();
-            });
-
-            // Master view toggling at top
-            document.getElementById('mett-toggle-map').addEventListener('click', () => { switchMasterInterfaceTab('map'); });
-            document.getElementById('mett-toggle-mett').addEventListener('click', () => { switchMasterInterfaceTab('mett'); });
-
-            // METT-TC Panel Tabs
-            document.querySelectorAll('.mett-tab').forEach(t => t.addEventListener('click', (e) => {
-                document.querySelectorAll('.mett-tab').forEach(b => b.classList.remove('active')); e.target.classList.add('active');
-                document.querySelectorAll('.mett-pane').forEach(p => p.classList.remove('active'));
-                document.getElementById(`mett-${e.target.dataset.mpane}`).classList.add('active');
-            }));
-
-            document.getElementById('mett-ti-hours').addEventListener('input', recalculateMettTimes);
-            document.getElementById('mett-custom-add').addEventListener('click', injectCustomMettParam);
-
-            const mettInputs = ['mett-m-friendly','mett-m-enemy','mett-m-purpose','mett-5w-who','mett-5w-what','mett-5w-when','mett-5w-where','mett-5w-why',
-                                'mett-e-disp','mett-e-coa','mett-t-key','mett-t-weather','mett-tr-status','mett-tr-log','mett-c-risk','mett-c-roe'];
-            mettInputs.forEach(id => document.getElementById(id).addEventListener('change', refreshMettLiveSynopsis));
-            mettInputs.forEach(id => { const el = document.getElementById(id); if(el.tagName === 'INPUT') el.addEventListener('input', refreshMettLiveSynopsis); });
-
-            window.addEventListener('resize', resizeCanvas); window.addEventListener('keydown', handleKeydown);
-            setupCanvasClickListeners();
-        }
-
-        function switchMasterInterfaceTab(target) {
-            const mapToggle = document.getElementById('mett-toggle-map'); const mettToggle = document.getElementById('mett-toggle-mett');
-            const mapSidePanel = document.getElementById('panel-mapping'); const mettSidePanel = document.getElementById('panel-mett-core');
-
-            if(target === 'map') {
-                mapToggle.classList.add('active'); mettToggle.classList.remove('active');
-                mapSidePanel.style.display = 'flex'; mettSidePanel.style.display = 'none';
-            } else {
-                mapToggle.classList.remove('active'); mettToggle.classList.add('active');
-                mapSidePanel.style.display = 'none'; mettSidePanel.style.display = 'flex';
-                refreshMettLiveSynopsis();
-            }
-        }
-
-        function setupAuthGate() {
-            const screen = document.getElementById('auth-screen'); const btn = document.getElementById('auth-submit');
-            const input = document.getElementById('auth-input'); const err = document.getElementById('auth-error');
-
-            function performUnlock() {
-                const pass = input.value.trim();
-                if(pass === "" || ADMIN_UNLOCK_KEYS.includes(pass.toUpperCase()) || ADMIN_UNLOCK_KEYS.includes(pass)) {
-                    screen.classList.add('hidden');
-                    if(pass !== "") {
-                        document.getElementById('mett-tab-header').style.display = 'flex';
-                        logToTerminal("SECURITY SYSTEM // COMS ENCRYPTION CORRELATION PASSED // EXPERT MODE ONLINE");
-                    } else {
-                        logToTerminal("SECURITY SYSTEM // DEFAULT COMS ACCESS GRANTED");
-                    }
-                    resizeCanvas();
-                } else {
-                    err.style.display = 'block'; setTimeout(() => { err.style.display = 'none'; }, 2000);
-                }
-            }
-            btn.addEventListener('click', performUnlock);
-            input.addEventListener('keydown', (e) => { if(e.key === 'Enter') performUnlock(); });
-        }
-
-        function rebuildPhaseTabs() {
-            const container = document.getElementById('phase-container'); container.innerHTML = '';
-            STATE.phases.forEach((_, idx) => {
-                const tab = document.createElement('div'); tab.className = 'tab' + (idx === STATE.currentPhaseIdx ? ' active' : '');
-                tab.innerText = `P-${idx + 1}`; tab.addEventListener('click', () => {
-                    if(isSimulating) stopSimulationPlayback(); STATE.currentPhaseIdx = idx; selectedEntity = null; activePathBuilding = null;
-                    rebuildPhaseTabs(); updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal(`TIMELINE // SWITCHED TO STEP INDEX [PHASE ${idx+1}]`);
-                }); container.appendChild(tab);
-            });
-        }
-
-        function triggerRepaint() { requestAnimationFrame(paintTacticalSurface); }
-
-        function paintTacticalSurface() {
-            ctx.fillStyle = THEATERS[STATE.activeTheater].bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            if(THEATERS[STATE.activeTheater].drawSatelliteMap) THEATERS[STATE.activeTheater].drawSatelliteMap(ctx, canvas.width, canvas.height);
-            if(STATE.gridVisible) renderCoordinateGridMesh();
-
-            renderTerrainObjects(); const phase = getCurPhase();
-            phase.zones.forEach(drawTacticalZone); phase.paths.forEach(drawRouteVectorPath);
-            if(activePathBuilding) drawRouteVectorPath(activePathBuilding);
-            phase.units.forEach(drawTacticalUnit);
-
-            if(selectedEntity && selectedEntity.type === 'zone') {
-                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
-                if(selectedEntity.shape === 'rect') ctx.strokeRect(selectedEntity.x - selectedEntity.w/2 - 4, selectedEntity.y - selectedEntity.h/2 - 4, selectedEntity.w + 8, selectedEntity.h + 8);
-                else { ctx.beginPath(); ctx.arc(selectedEntity.x, selectedEntity.y, selectedEntity.r + 4, 0, Math.PI*2); ctx.stroke(); } ctx.setLineDash([]);
-            }
-        }
-
-        function renderCoordinateGridMesh() {
-            ctx.strokeStyle = THEATERS[STATE.activeTheater].gridColor || "rgba(0, 242, 254, 0.015)"; ctx.lineWidth = 1;
-            const size = 35;
-            for(let x = 0; x < canvas.width; x += size) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
-            for(let y = 0; y < canvas.height; y += size) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
-        }
-
-        function renderTerrainObjects() {
-            const terrain = THEATERS[STATE.activeTheater].terrain || [];
-            terrain.forEach(t => {
-                ctx.beginPath(); t.points.forEach((p, i) => { if(i===0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
-                if(t.type === 'trench') { ctx.strokeStyle = 'rgba(0,242,254,0.15)'; ctx.lineWidth = 6; ctx.stroke(); ctx.strokeStyle = '#02050a'; ctx.lineWidth = 2; ctx.stroke(); }
-                else if(t.type === 'ridge') { ctx.fillStyle = 'rgba(255,159,28,0.04)'; ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(255,159,28,0.15)'; ctx.lineWidth = 1.5; ctx.stroke(); }
-                else if(t.type === 'hazard') { ctx.strokeStyle = 'rgba(255,51,102,0.12)'; ctx.lineWidth = 12; ctx.stroke(); ctx.fillStyle = generatePatternFill('#ff3366'); ctx.fill(); }
-            });
-        }
-
-        function generatePatternFill(color) {
+        function createNoiseGridPattern(color) {
             const pCanvas = document.createElement('canvas'); pCanvas.width = 14; pCanvas.height = 14;
-            const pCtx = pCanvas.getContext('2d'); pCtx.strokeStyle = color + '18'; pCtx.lineWidth = 1; pCtx.strokeRect(0, 0, 14, 14);
+            const pCtx = pCanvas.getContext('2d');
+            pCtx.strokeStyle = color + '18'; pCtx.lineWidth = 1;
+            pCtx.strokeRect(0, 0, 14, 14);
             return ctx.createPattern(pCanvas, 'repeat');
         }
 
-        function drawTacticalUnit(u) {
-            ctx.save(); ctx.translate(u.x, u.y); const clr = COLORS[u.faction];
-            ctx.fillStyle = clr; ctx.strokeStyle = clr; ctx.lineWidth = 2;
+        const mOverlay = document.getElementById('overlay-shield');
+        const mBox = document.getElementById('modal-box');
+        let confirmationCallback = null;
 
-            if(u.kia) { ctx.strokeStyle = '#43586d'; ctx.fillStyle = 'rgba(67, 88, 109, 0.2)'; }
-
-            ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI*2); ctx.stroke();
-            if(selectedEntity && selectedEntity.id === u.id) { ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI*2); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.stroke(); }
-
-            ctx.fillStyle = u.kia ? '#43586d' : clr; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
-            ctx.fillText(getUnitCodeSymbol(u.className), 0, 3);
-            ctx.font = '7px monospace'; ctx.textAlign = 'left';
-            ctx.fillText(u.name + (u.kia ? " [KIA]" : ""), 11, 3);
-            ctx.restore();
-        }
-
-        function getUnitCodeSymbol(c) {
-            if(c==='Infantry') return 'I'; if(c==='Specialist') return 'S'; if(c==='Armoured') return 'A';
-            if(c==='Tank') return 'T'; if(c==='ATTE') return 'X'; if(c==='Air') return 'F'; return 'U';
-        }
-
-        function drawTacticalZone(z) {
-            const baseColor = z.style === 'faction' ? COLORS[z.faction] : (z.style === 'fob' ? '#00f2fe' : '#e63946');
-            ctx.strokeStyle = baseColor + 'aa'; ctx.lineWidth = 1.5; ctx.fillStyle = baseColor + '10';
-
-            if(z.shape === 'rect') {
-                ctx.fillRect(z.x - z.w/2, z.y - z.h/2, z.w, z.h); ctx.strokeRect(z.x - z.w/2, z.y - z.h/2, z.w, z.h);
-                ctx.fillStyle = baseColor + '44'; ctx.font = '7px monospace'; ctx.fillText(z.name, z.x - z.w/2 + 4, z.y - z.h/2 + 10);
-            } else {
-                ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = baseColor + '44'; ctx.font = '7px monospace'; ctx.fillText(z.name, z.x - z.r + 6, z.y + 3);
-            }
-        }
-
-        function drawRouteVectorPath(p) {
-            if(p.waypoints.length === 0) return;
-            ctx.strokeStyle = COLORS[p.faction] || '#00f2fe'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]);
-
-            ctx.beginPath(); ctx.moveTo(p.waypoints[0].x, p.waypoints[0].y);
-            for(let i=1; i<p.waypoints.length; i++) {
-                if(p.style === 'stencil') {
-                    ctx.lineTo(p.waypoints[i].x, p.waypoints[i-1].y); ctx.lineTo(p.waypoints[i].x, p.waypoints[i].y);
-                } else { ctx.lineTo(p.waypoints[i].x, p.waypoints[i].y); }
-            }
-            ctx.stroke(); ctx.setLineDash([]);
-
-            p.waypoints.forEach((w, idx) => {
-                ctx.fillStyle = idx === p.waypoints.length - 1 ? '#ffcc00' : '#ffffff'; ctx.fillRect(w.x-2, w.y-2, 4, 4);
-            });
-
-            if(selectedEntity && selectedEntity.id === p.id) {
-                ctx.fillStyle = '#ffffff'; ctx.font = '7px monospace';
-                const last = p.waypoints[p.waypoints.length - 1]; if(last) ctx.fillText(`VEC // ${p.id.substring(0,5)}`, last.x + 6, last.y - 2);
-            }
-        }
-
-        function setupCanvasClickListeners() {
-            canvas.addEventListener('mousedown', (e) => {
-                const rect = canvas.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
-                const phase = getCurPhase();
-
-                if(e.shiftKey) { triggerSonarPingScanner(mouseX, mouseY); return; }
-
-                if(STATE.mode === 'deploy') {
-                    let clickedUnit = [...phase.units].reverse().find(u => Math.hypot(u.x - mouseX, u.y - mouseY) < 12);
-                    if(clickedUnit) {
-                        if(e.ctrlKey) { saveState(); clickedUnit.kia = !clickedUnit.kia; logToTerminal(`STATUS CHANGE // ${clickedUnit.name} TO ${clickedUnit.kia?'KIA':'ACTIVE'}`); triggerRepaint(); return; }
-                        selectedEntity = clickedUnit; draggingEntity = clickedUnit; dragOffset.x = mouseX - clickedUnit.x; dragOffset.y = mouseY - clickedUnit.y;
-                        updateSelectedDisplay(); triggerRepaint(); return;
-                    }
-                    saveState(); const id = 'un-' + Math.random().toString(36).substr(2, 5);
-                    const count = phase.units.filter(u => u.className === STATE.unitType).length + 1;
-                    const newUnit = { id, type: 'unit', className: STATE.unitType, faction: STATE.faction, x: mouseX, y: mouseY, originX: mouseX, originY: mouseY, name: `${STATE.faction}_${STATE.unitType.toUpperCase()}_${count}`, kia: false, notes: "" };
-                    phase.units.push(newUnit); selectedEntity = newUnit; updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal(`DEPLOYED // ${newUnit.name} POSITIONED`);
-                }
-                else if(STATE.mode === 'path') {
-                    if(!activePathBuilding) {
-                        const targetUnit = phase.units.find(u => Math.hypot(u.x - mouseX, u.y - mouseY) < 14);
-                        activePathBuilding = { id: 'pa-' + Math.random().toString(36).substr(2, 5), type: 'path', faction: targetUnit ? targetUnit.faction : STATE.faction, style: STATE.pStyle, waypoints: [{x: mouseX, y: mouseY}], unitId: targetUnit ? targetUnit.id : null, notes: "" };
-                    } else { activePathBuilding.waypoints.push({x: mouseX, y: mouseY}); } triggerRepaint();
-                }
-                else if(STATE.mode === 'zone') {
-                    let clickedZone = [...phase.zones].reverse().find(z => z.shape === 'rect' ? (Math.abs(z.x - mouseX) < z.w/2 && Math.abs(z.y - mouseY) < z.h/2) : (Math.hypot(z.x - mouseX, z.y - mouseY) < z.r));
-                    if(clickedZone) { selectedEntity = clickedZone; draggingEntity = clickedZone; dragOffset.x = mouseX - clickedZone.x; dragOffset.y = mouseY - clickedZone.y; updateSelectedDisplay(); triggerRepaint(); return; }
-                    saveState(); const id = 'zo-' + Math.random().toString(36).substr(2, 5);
-                    const count = phase.zones.length + 1;
-                    const newZone = { id, type: 'zone', name: `ZONE_MATRIX_${count}`, shape: STATE.zType, faction: STATE.faction, style: STATE.zStyle, x: mouseX, y: mouseY, w: 90, h: 60, r: 45, notes: "" };
-                    phase.zones.push(newZone); selectedEntity = newZone; updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal(`CONSTRUCTED // ${newZone.name} BROUGHT ONLINE`);
-                }
-                else if(STATE.mode === 'terrain') {
-                    let clickedPath = [...phase.paths].reverse().find(p => p.waypoints.some(w => Math.hypot(w.x - mouseX, w.y - mouseY) < 8));
-                    if(clickedPath) { selectedEntity = clickedPath; updateSelectedDisplay(); triggerRepaint(); }
-                }
-            });
-
-            canvas.addEventListener('mousemove', (e) => {
-                if(!draggingEntity) return; const rect = canvas.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
-                draggingEntity.x = mouseX - dragOffset.x; draggingEntity.y = mouseY - dragOffset.y;
-                if(draggingEntity.type === 'unit') { draggingEntity.originX = draggingEntity.x; draggingEntity.originY = draggingEntity.y; }
-                triggerRepaint();
-            });
-
-            canvas.addEventListener('mouseup', () => { draggingEntity = null; });
-        }
-
-        function commitCurrentPath() {
-            if(!activePathBuilding || activePathBuilding.waypoints.length < 2) { activePathBuilding = null; triggerRepaint(); return; }
-            saveState(); const phase = getCurPhase(); phase.paths.push(activePathBuilding); selectedEntity = activePathBuilding;
-            activePathBuilding = null; updateTelemetry(); updateSelectedDisplay(); triggerRepaint(); logToTerminal("VECTOR ROUTE // APPLIED VECTOR CHAIN");
-        }
-
-        function triggerSonarPingScanner(cx, cy) {
-            logToTerminal(`SCANNER // PING DISPATCHED AT POINT [X:${Math.round(cx)} Y:${Math.round(cy)}]`);
-            let r = 0; function step() {
-                r += 6; paintTacticalSurface(); ctx.strokeStyle = COLORS[STATE.faction]; ctx.lineWidth = 1.5; ctx.globalAlpha = Math.max(0, 1 - r/160);
-                ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1; if(r < 160) requestAnimationFrame(step); else triggerRepaint();
-            } requestAnimationFrame(step);
-        }
-
-        function updateSelectedDisplay() {
-            const display = document.getElementById('info-display'); const area = document.getElementById('intel-field');
-            if(!selectedEntity) { display.innerHTML = '<span style="color: #43586d; text-align:center;">AWAITING SELECTION TARGET</span>'; area.value = ""; return; }
-            area.value = selectedEntity.notes || "";
-
-            if(selectedEntity.type === 'unit') {
-                display.innerHTML = `<div class="stat"><span>DESIGNATOR:</span><span class="stat-val">${selectedEntity.name}</span></div>
-                                     <div class="stat"><span>CLASS CODES:</span><span class="stat-val">${selectedEntity.className}</span></div>
-                                     <div class="stat"><span>AFFILIATION:</span><span class="stat-val" style="color:${COLORS[selectedEntity.faction]}">${selectedEntity.faction}</span></div>
-                                     <div class="stat"><span>MATRIX ADDR:</span><span class="stat-val">X:${Math.round(selectedEntity.x)} Y:${Math.round(selectedEntity.y)}</span></div>
-                                     <div class="stat"><span>SURVIVAL:</span><span class="stat-val" style="color:${selectedEntity.kia?'#ff3366':'#00ffaa'}">${selectedEntity.kia?'KIA / DESTROYED':'FMC STATUS'}</span></div>`;
-            } else if(selectedEntity.type === 'zone') {
-                display.innerHTML = `<div class="stat"><span>SECTOR GRID:</span><span class="stat-val">${selectedEntity.name}</span></div>
-                                     <div class="stat"><span>BOUND SHAPE:</span><span class="stat-val">${selectedEntity.shape.toUpperCase()}</span></div>
-                                     <div class="stat"><span>PRESET PATTERN:</span><span class="stat-val">${selectedEntity.style.toUpperCase()}</span></div>
-                                     <div class="stat"><span>CENTER POINT:</span><span class="stat-val">X:${Math.round(selectedEntity.x)} Y:${Math.round(selectedEntity.y)}</span></div>`;
-            } else if(selectedEntity.type === 'path') {
-                display.innerHTML = `<div class="stat"><span>VECTOR TRACE:</span><span class="stat-val">${selectedEntity.id}</span></div>
-                                     <div class="stat"><span>STYLE MODIFIER:</span><span class="stat-val">${selectedEntity.style.toUpperCase()}</span></div>
-                                     <div class="stat"><span>WAYPOINTS:</span><span class="stat-val">${selectedEntity.waypoints.length} POINTS</span></div>`;
-            }
-        }
-
-        function startSimulationPlayback() {
-            const phase = getCurPhase(); if(phase.paths.length === 0 || phase.units.length === 0) { logToTerminal("SIM CORE // ABORT // NO VECTOR PATHS OR UNTIS INSTANCED", true); return; }
-            isSimulating = true; document.getElementById('ctrl-play').innerText = "STOP SIM"; document.getElementById('ctrl-play').classList.add('active');
-            logToTerminal("SIM CORE // PLOTTING PREDICTIVE FLUIDITY STEP MATRIX");
-
-            phase.units.forEach(u => {
-                u.originX = u.x; u.originY = u.y; const route = phase.paths.find(p => p.unitId === u.id || (p.faction === u.faction && Math.hypot(p.waypoints[0].x - u.x, p.waypoints[0].y - u.y) < 35));
-                if(route) { u.simRoute = route; u.simTargetIdx = 1; }
-            });
-
-            simulationTimer = setInterval(() => {
-                let activeMovements = false;
-                phase.units.forEach(u => {
-                    if(u.kia || !u.simRoute || u.simTargetIdx >= u.simRoute.waypoints.length) return;
-                    activeMovements = true; const dest = u.simRoute.waypoints[u.simTargetIdx];
-                    let stepX = dest.x; let stepY = dest.y;
-
-                    if(u.simRoute.style === 'stencil') {
-                        const prev = u.simRoute.waypoints[u.simTargetIdx - 1];
-                        if(Math.abs(u.x - dest.x) > 1 && Math.abs(u.y - prev.y) > 1) { stepX = dest.x; stepY = prev.y; }
-                    }
-
-                    const dist = Math.hypot(stepX - u.x, stepY - u.y);
-                    if(dist < 2.5) { u.x = stepX; u.y = stepY; if(stepX === dest.x && stepY === dest.y) u.simTargetIdx++; }
-                    else { u.x += ((stepX - u.x) / dist) * 2; u.y += ((stepY - u.y) / dist) * 2; }
-                });
-                triggerRepaint(); if(!activeMovements) { stopSimulationPlayback(); logToTerminal("SIM CORE // SIMULATION TERMINATED // OBJECTIVES REACHED"); }
-            }, 30);
-        }
-
-        function stopSimulationPlayback() {
-            isSimulating = false; clearInterval(simulationTimer);
-            document.getElementById('ctrl-play').innerText = "EXECUTE SIM"; document.getElementById('ctrl-play').classList.remove('active');
-        }
-
-        function recalculateMettTimes() {
-            const val = parseFloat(document.getElementById('mett-ti-hours').value) || 0;
-            document.getElementById('mett-calc-plan').innerText = (val * (1/3)).toFixed(1) + " hrs";
-            document.getElementById('mett-calc-prep').innerText = (val * (2/3)).toFixed(1) + " hrs";
-            document.getElementById('mett-warno-box').innerText = `WARNORD // IMMEDIATE PREPARATION ENFORCED\n---------------------------------------\nOPERATION H-HOUR ALLOCATION: ${val} HOURS TOTAL.\nCOMMAND PLANNING HIGHER WINDOW: ${(val*(1/3)).toFixed(1)} HRS.\nSUBORDINATE PREPARATION SQUAD BOUND: ${(val*(2/3)).toFixed(1)} HRS.\nEXECUTE STEP 2 TLP PROCEDURES IMMEDIATELY.`;
-            refreshMettLiveSynopsis();
-        }
-
-        function injectCustomMettParam() {
-            const input = document.getElementById('mett-custom-input'); const val = input.value.trim(); if(!val) return;
-            const item = { id: Date.now(), text: val.toUpperCase() }; STATE.customMettItems.push(item); input.value = "";
-            const list = document.getElementById('mett-custom-list'); const wrapper = document.createElement('div');
-            wrapper.className = 'mett-custom-item'; wrapper.id = `m-item-${item.id}`;
-            wrapper.innerHTML = `<span>▫ ${item.text}</span><span class="mett-custom-del">×</span>`;
-            wrapper.querySelector('.mett-custom-del').addEventListener('click', () => {
-                STATE.customMettItems = STATE.customMettItems.filter(i => i.id !== item.id); wrapper.remove(); refreshMettLiveSynopsis();
-            }); list.appendChild(wrapper); refreshMettLiveSynopsis();
-        }
-
-        function refreshMettLiveSynopsis() {
-            const h = document.getElementById('mett-ti-hours').value;
-            let str = `[ TACTICAL ASSESSMENT STRATEGIC DATA BLOCK ]\n`;
-            str += `MISSION: RESTATED FOCUS IS TO ${document.getElementById('mett-m-friendly').value.toUpperCase()} TO EFFECT ${document.getElementById('mett-m-enemy').value.toUpperCase()} REASONING PURPOSES: ${document.getElementById('mett-m-purpose').value.toUpperCase()}.\n`;
-            str += `5W ELEMENT: ${document.getElementById('mett-5w-who').value || 'ALL'} WILL ${document.getElementById('mett-5w-what').value || 'ENGAGE'} AT ${document.getElementById('mett-5w-when').value || 'ASAP'} LOCATED NEAR ${document.getElementById('mett-5w-where').value || 'GRID'} TO ${document.getElementById('mett-5w-why').value || 'ACHIEVE COMMAND INTENT'}.\n\n`;
-            str += `ENEMY PROFILE: DISPOSITION CODE IS [${document.getElementById('mett-e-disp').value.toUpperCase()}]. COA TRACKS PREDICTIONS: [${document.getElementById('mett-e-coa').value.toUpperCase()}].\n\n`;
-            str += `TERRAIN/WEATHER MATRIX: CRITICAL OAKOC ELEM: [${document.getElementById('mett-t-key').value.toUpperCase()}]. ENVIRONMENTAL OBSCURATION CONSTRAINTS: [${document.getElementById('mett-t-weather').value.toUpperCase()}].\n\n`;
-            str += `TROOP SPECS: FORCE RATIO EFFECTIVENESS APPLIED AS [${document.getElementById('mett-tr-status').value.toUpperCase()}] WITH RE-SUPPLY CAPABILITIES RATED AT [${document.getElementById('mett-tr-log').value.toUpperCase()}].\n\n`;
-            str += `CIVILIAN CONSIDERATIONS: COLLATERAL THREAT INDEX IS [${document.getElementById('mett-c-risk').value.toUpperCase()}] GOVERNED BY THE RULES OF ENGAGEMENT MODIFIER: [${document.getElementById('mett-c-roe').value.toUpperCase()}].\n\n`;
-            str += `TIME CRITICAL COMPONENT: CRITICAL BOUND TIMELINE TO PREPARE ASSIGNED UNITS SET AT ${h} HOURS EXACT.`;
-
-            if(STATE.customMettItems.length > 0) {
-                str += `\n\nINJECTED SYSTEM PARAMS:\n`; STATE.customMettItems.forEach(i => { str += ` - ${i.text}\n`; });
-            }
-            document.getElementById('mett-live-synopsis').innerText = str;
-        }
-
-        const mOverlay = document.getElementById('overlay-shield'); const mBox = document.getElementById('modal-box'); let confirmationCallback = null;
         function showWarningBox(msg, callback) {
             document.getElementById('m-msg').innerText = msg; confirmationCallback = callback;
             mOverlay.classList.add('active'); mBox.classList.add('active');
         }
+
         function hideWarningBox() { mOverlay.classList.remove('active'); mBox.classList.remove('active'); confirmationCallback = null; }
+
         document.getElementById('m-confirm').addEventListener('click', () => { if(confirmationCallback) confirmationCallback(); hideWarningBox(); });
         document.getElementById('m-cancel').addEventListener('click', hideWarningBox);
 
@@ -1124,9 +725,533 @@
             if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); triggerRedo(); }
             if (e.key === 'Escape') { if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath(); }
         }
+        window.addEventListener('keydown', handleKeydown);
 
-        // Initialize elements
-        setupInterfaceHooks(); setupAuthGate(); recalculateMettTimes();
+        function getMouseCoords(e) {
+            const bounds = canvas.getBoundingClientRect(); return { x: e.clientX - bounds.left, y: e.clientY - bounds.top };
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const coords = getMouseCoords(e);
+            if (e.shiftKey) { triggerMapPing(coords.x, coords.y); return; }
+
+            const currentData = PHASES[STATE.activePhaseIdx];
+
+            if (e.ctrlKey) {
+                let targetUnit = currentData.units.find(u => Math.hypot(u.x - coords.x, u.y - coords.y) < 16);
+                if (targetUnit) {
+                    saveHistoryState(); targetUnit.kia = !targetUnit.kia;
+                    logAction(`UNIT ${targetUnit.label} STATE TOGGLED // KIA STATUS: ${targetUnit.kia ? "ACTIVE" : "INACTIVE"}`, targetUnit.kia);
+                    render(); return;
+                }
+            }
+
+            // Object Selection Intercept Loop
+            let foundAsset = null;
+            for (let u of currentData.units) {
+                if (Math.hypot(u.x - coords.x, u.y - coords.y) < 16) { foundAsset = { id: u.id, type: 'unit', ref: u }; break; }
+            }
+            if (!foundAsset) {
+                for (let z of currentData.zones) {
+                    if (z.type === 'rect' && coords.x >= z.x && coords.x <= z.x+z.w && coords.y >= z.y && coords.y <= z.y+z.h) { foundAsset = { id: z.id, type: 'zone', ref: z }; break; }
+                    if (z.type === 'circle' && Math.hypot(z.x - coords.x, z.y - coords.y) < z.r) { foundAsset = { id: z.id, type: 'zone', ref: z }; break; }
+                }
+            }
+
+            if (foundAsset) {
+                STATE.selectedId = foundAsset.id; STATE.selectedType = foundAsset.type;
+                updateInspectorPanel(foundAsset.ref);
+                if (STATE.mode === 'deploy' && foundAsset.type === 'unit') { isDraggingAsset = true; dragTargetRef = foundAsset.ref; saveHistoryState(); }
+                render(); return;
+            }
+
+            STATE.selectedId = null; STATE.selectedType = null; updateInspectorPanel(null);
+
+            if (STATE.mode === 'deploy') {
+                saveHistoryState(); const uCount = currentData.units.filter(u=>u.faction===STATE.faction).length + 1;
+                const newUnit = {
+                    id: 'unit_' + Date.now() + Math.random().toString(36).substr(2, 5),
+                    type: STATE.unitType, faction: STATE.faction, x: coords.x, y: coords.y,
+                    label: `${STATE.faction}_${STATE.unitType.toUpperCase().substring(0,3)}_${uCount}`, kia: false
+                };
+                currentData.units.push(newUnit); logAction(`DEPLOYED ${newUnit.label} AT POS CORE MATRIX GRID`);
+            }
+            else if (STATE.mode === 'path') {
+                if (!activePathBuilding) {
+                    activePathBuilding = { id: 'path_' + Date.now(), style: STATE.pathStyle, points: [coords], faction: STATE.faction };
+                } else {
+                    activePathBuilding.points.push(coords);
+                }
+            }
+            else if (STATE.mode === 'zone') {
+                activeZoneBuilding = { x1: coords.x, y1: coords.y, x2: coords.x, y2: coords.y };
+            }
+            else if (STATE.mode === 'terrain') {
+                if (!activeTerrainBuilding) {
+                    activeTerrainBuilding = { type: STATE.terrainStyle, points: [coords] };
+                } else {
+                    activeTerrainBuilding.points.push(coords);
+                }
+            }
+            render();
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const coords = getMouseCoords(e);
+            if (isDraggingAsset && dragTargetRef) {
+                dragTargetRef.x = coords.x; dragTargetRef.y = coords.y; updateInspectorPanel(dragTargetRef); render(); return;
+            }
+            if (STATE.mode === 'zone' && activeZoneBuilding) {
+                activeZoneBuilding.x2 = coords.x; activeZoneBuilding.y2 = coords.y; render(); return;
+            }
+            if (STATE.mode === 'path' && activePathBuilding) { render(); renderGhostLine(coords); return; }
+            if (STATE.mode === 'terrain' && activeTerrainBuilding) { render(); renderTerrainGhostLine(coords); }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            if (isDraggingAsset) { isDraggingAsset = false; dragTargetRef = null; return; }
+            if (STATE.mode === 'zone' && activeZoneBuilding) {
+                saveHistoryState();
+                const currentData = PHASES[STATE.activePhaseIdx];
+                const x = Math.min(activeZoneBuilding.x1, activeZoneBuilding.x2);
+                const y = Math.min(activeZoneBuilding.y1, activeZoneBuilding.y2);
+                let w = Math.abs(activeZoneBuilding.x1 - activeZoneBuilding.x2);
+                let h = Math.abs(activeZoneBuilding.x1 - activeZoneBuilding.x2);
+                if (STATE.zoneType === 'rect') { h = Math.abs(activeZoneBuilding.y1 - activeZoneBuilding.y2); }
+                const radius = Math.hypot(activeZoneBuilding.x1 - activeZoneBuilding.x2, activeZoneBuilding.y1 - activeZoneBuilding.y2);
+                const newZone = {
+                    id: 'zone_' + Date.now(), type: STATE.zoneType, style: STATE.zoneStyle, faction: STATE.faction,
+                    x: STATE.zoneType === 'circle' ? activeZoneBuilding.x1 : x, y: STATE.zoneType === 'circle' ? activeZoneBuilding.y1 : y,
+                    w: w, h: h, r: radius, label: `ZONE_${STATE.zoneStyle.toUpperCase()}_${currentData.zones.length + 1}`
+                };
+                currentData.zones.push(newZone); activeZoneBuilding = null; logAction(`CONSTRUCTED ${newZone.label} LAYER BOUNDS`); render();
+            }
+        });
+
+        canvas.addEventListener('dblclick', (e) => {
+            if (STATE.mode === 'path' && activePathBuilding) { commitCurrentPath(); }
+            else if (STATE.mode === 'terrain' && activeTerrainBuilding) { commitCurrentTerrain(); }
+        });
+
+        function commitCurrentPath() {
+            if (!activePathBuilding || activePathBuilding.points.length < 2) { activePathBuilding = null; return; }
+            saveHistoryState(); const currentData = PHASES[STATE.activePhaseIdx];
+            currentData.paths.push(activePathBuilding); logAction(`VECTOR ROUTE COMMITTED // POINTS: ${activePathBuilding.points.length}`);
+            activePathBuilding = null; render();
+        }
+
+        function commitCurrentTerrain() {
+            if (!activeTerrainBuilding || activeTerrainBuilding.points.length < 2) { activeTerrainBuilding = null; return; }
+            saveHistoryState(); const currentData = PHASES[STATE.activePhaseIdx];
+            currentData.terrain.push(activeTerrainBuilding); logAction(`ENVIRONMENTAL LAYER INJECTED // CLASS: ${activeTerrainBuilding.type.toUpperCase()}`);
+            activeTerrainBuilding = null; render();
+        }
+
+        let mapPings = [];
+        function triggerMapPing(x, y) {
+            mapPings.push({ x: x, y: y, radius: 0, opacity: 1 }); if (mapPings.length === 1) requestAnimationFrame(stepPingAnimation);
+        }
+        function stepPingAnimation() {
+            if (!mapPings.length) return;
+            mapPings.forEach((p, idx) => { p.radius += 3; p.opacity -= 0.02; if(p.opacity <= 0) mapPings.splice(idx, 1); });
+            render(); requestAnimationFrame(stepPingAnimation);
+        }
+
+        function renderGhostLine(mouseCoords) {
+            if (!activePathBuilding) return; const lastPt = activePathBuilding.points[activePathBuilding.points.length - 1];
+            ctx.save(); ctx.strokeStyle = COLORS[activePathBuilding.faction]; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.moveTo(lastPt.x, lastPt.y);
+            if (activePathBuilding.style === 'stencil') { ctx.lineTo(mouseCoords.x, lastPt.y); ctx.lineTo(mouseCoords.x, mouseCoords.y); }
+            else { ctx.lineTo(mouseCoords.x, mouseCoords.y); }
+            ctx.stroke(); ctx.restore();
+        }
+
+        function renderTerrainGhostLine(mouseCoords) {
+            if (!activeTerrainBuilding) return; const lastPt = activeTerrainBuilding.points[activeTerrainBuilding.points.length - 1];
+            ctx.save(); ctx.strokeStyle = '#ff9f1c'; ctx.lineWidth = 1.5; ctx.setLineDash([2, 2]);
+            ctx.beginPath(); ctx.moveTo(lastPt.x, lastPt.y); ctx.lineTo(mouseCoords.x, mouseCoords.y); ctx.stroke(); ctx.restore();
+        }
+
+        function render() {
+            const currentTheater = THEATERS[STATE.activeTheater];
+            ctx.fillStyle = currentTheater.bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (currentTheater.drawSatelliteMap) { currentTheater.drawSatelliteMap(ctx, canvas.width, canvas.height); }
+
+            if (STATE.gridEnabled) {
+                const pattern = createNoiseGridPattern(currentTheater.gridColor.substring(0, 7) || '#00f2fe');
+                if (pattern) { ctx.fillStyle = pattern; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+            }
+
+            const activePhaseData = PHASES[STATE.activePhaseIdx];
+
+            // Render Permanent Theater Terrain Elements + Active Phase Terrain Additions
+            const cumulativeTerrain = [...currentTheater.terrain, ...activePhaseData.terrain];
+            cumulativeTerrain.forEach(t => {
+                if(!t.points || t.points.length < 2) return;
+                ctx.save();
+                if(t.type === 'trench') { ctx.strokeStyle = '#00f2fe'; ctx.lineWidth = 4; ctx.lineJoin = 'round'; }
+                else if(t.type === 'ridge') { ctx.strokeStyle = '#ff9f1c'; ctx.lineWidth = 6; ctx.lineJoin = 'miter'; }
+                else { ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 3; }
+                ctx.beginPath(); ctx.moveTo(t.points[0].x, t.points[0].y);
+                for(let i=1; i<t.points.length; i++) { ctx.lineTo(t.points[i].x, t.points[i].y); }
+                ctx.stroke(); ctx.restore();
+            });
+
+            // Render Zones
+            activePhaseData.zones.forEach(z => {
+                ctx.save(); const fColor = COLORS[z.faction] || '#00f2fe';
+                if(z.style === 'faction') { ctx.fillStyle = fColor + '15'; ctx.strokeStyle = fColor + '60'; }
+                else if(z.style === 'fob') { ctx.fillStyle = 'rgba(0, 242, 254, 0.08)'; ctx.strokeStyle = '#00f2fe'; ctx.setLineDash([4, 2]); }
+                else { ctx.fillStyle = 'rgba(230, 57, 70, 0.05)'; ctx.strokeStyle = '#e63946'; }
+                ctx.lineWidth = 1.5;
+                if (z.type === 'rect') {
+                    ctx.fillRect(z.x, z.y, z.w, z.h); ctx.strokeRect(z.x, z.y, z.w, z.h);
+                } else {
+                    ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                }
+                ctx.fillStyle = ctx.strokeStyle; ctx.font = '8px "JetBrains Mono"'; ctx.fillText(z.label, z.x + 5, z.y + 12);
+                if (STATE.selectedId === z.id) { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.strokeRect(z.x-3, z.y-3, (z.w||z.r*2)+6, (z.h||z.r*2)+6); }
+                ctx.restore();
+            });
+
+            // Render Vector Paths
+            activePhaseData.paths.forEach(p => {
+                ctx.save(); ctx.strokeStyle = COLORS[p.faction] || '#00f2fe'; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+                ctx.beginPath(); ctx.moveTo(p.points[0].x, p.points[0].y);
+                for(let i=1; i<p.points.length; i++) {
+                    if (p.style === 'stencil') { ctx.lineTo(p.points[i].x, p.points[i-1].y); ctx.lineTo(p.points[i].x, p.points[i].y); }
+                    else { ctx.lineTo(p.points[i].x, p.points[i].y); }
+                }
+                ctx.stroke();
+                // Draw terminal direction marker chevron
+                const last = p.points[p.points.length - 1]; ctx.fillStyle = ctx.strokeStyle;
+                ctx.beginPath(); ctx.arc(last.x, last.y, 4, 0, Math.PI*2); ctx.fill();
+                ctx.restore();
+            });
+
+            // Render Tactical Units Symbol Set
+            activePhaseData.units.forEach(u => {
+                ctx.save(); const uColor = COLORS[u.faction];
+                ctx.strokeStyle = uColor; ctx.lineWidth = 2;
+                ctx.fillStyle = STATE.selectedId === u.id ? 'rgba(255,255,255,0.15)' : 'rgba(4, 9, 20, 0.85)';
+
+                // Standardized Symbol Design Matrix Bounds Box
+                ctx.beginPath(); ctx.rect(u.x - 12, u.y - 12, 24, 24); ctx.fill(); ctx.stroke();
+
+                // Unique Internal Symbol Set Render Rules
+                ctx.lineWidth = 1.5; ctx.beginPath();
+                if (u.type === 'Infantry') { ctx.moveTo(u.x-12, u.y-12); ctx.lineTo(u.x+12, u.y+12); ctx.moveTo(u.x+12, u.y-12); ctx.lineTo(u.x-12, u.y+12); }
+                else if (u.type === 'Specialist') { ctx.arc(u.x, u.y, 5, 0, Math.PI*2); }
+                else if (u.type === 'Armoured') { ctx.moveTo(u.x-8, u.y); ctx.lineTo(u.x+8, u.y); ctx.lineTo(u.x, u.y-6); ctx.closePath(); }
+                else if (u.type === 'Tank') { ctx.rect(u.x-7, u.y-5, 14, 10); ctx.moveTo(u.x, u.y-5); ctx.lineTo(u.x, u.y-9); }
+                else if (u.type === 'ATTE') { ctx.moveTo(u.x-8, u.y+6); ctx.lineTo(u.x-4, u.y-6); ctx.lineTo(u.x+4, u.y-6); ctx.lineTo(u.x+8, u.y+6); }
+                else if (u.type === 'Air') { ctx.moveTo(u.x, u.y-8); ctx.lineTo(u.x+8, u.y+6); ctx.lineTo(u.x, u.y+2); ctx.lineTo(u.x-8, u.y+6); ctx.closePath(); }
+                ctx.stroke();
+
+                // KIA Overstrike Indicator Rule
+                if (u.kia) {
+                    ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 3; ctx.beginPath();
+                    ctx.moveTo(u.x-15, u.y-15); ctx.lineTo(u.x+15, u.y+15); ctx.moveTo(u.x+15, u.y-15); ctx.lineTo(u.x-15, u.y+15); ctx.stroke();
+                }
+
+                // Callout Metadata Labels Tag
+                ctx.fillStyle = u.kia ? '#ff3366' : '#d1dfec'; ctx.font = '9px "JetBrains Mono"'; ctx.textAlign = 'center';
+                ctx.fillText(u.label, u.x, u.y - 16); ctx.restore();
+            });
+
+            // Active ongoing shape preview layers
+            if(STATE.mode === 'zone' && activeZoneBuilding) {
+                ctx.save(); ctx.strokeStyle = COLORS[STATE.faction]; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+                const x = Math.min(activeZoneBuilding.x1, activeZoneBuilding.x2); const y = Math.min(activeZoneBuilding.y1, activeZoneBuilding.y2);
+                const w = Math.abs(activeZoneBuilding.x1 - activeZoneBuilding.x2); const h = Math.abs(activeZoneBuilding.x1 - activeZoneBuilding.x2);
+                if(STATE.zoneType === 'rect') {
+                    ctx.strokeRect(x, y, w, Math.abs(activeZoneBuilding.y1 - activeZoneBuilding.y2));
+                } else {
+                    ctx.beginPath(); ctx.arc(activeZoneBuilding.x1, activeZoneBuilding.x2, Math.hypot(w, h), 0, Math.PI*2); ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            // Live Radar Scan Ping Render loop execution
+            mapPings.forEach(p => {
+                ctx.save(); ctx.strokeStyle = `rgba(0, 242, 254, ${p.opacity})`; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+            });
+
+            document.getElementById('tele-units').innerText = activePhaseData.units.length;
+            document.getElementById('tele-zones').innerText = activePhaseData.zones.length;
+            document.getElementById('tele-paths').innerText = activePhaseData.paths.length;
+        }
+
+        function updateInspectorPanel(asset) {
+            const display = document.getElementById('info-display');
+            if (!asset) { display.innerHTML = '<span style="color: #43586d; text-align:center;">AWAITING SELECTION TARGET</span>'; return; }
+            if (STATE.selectedType === 'unit') {
+                display.innerHTML = `
+                    <span style="color:#00f2fe; font-weight:bold;">ASSET: ${asset.label}</span>
+                    <div>FACTION: <span style="color:${COLORS[asset.faction]}">${asset.faction}</span></div>
+                    <div>CLASS: ${asset.type}</div>
+                    <div>GRID COORDS: X ${Math.round(asset.x)} // Y ${Math.round(asset.y)}</div>
+                    <div>STATUS: ${asset.kia ? '<span style="color:#ff3366; font-weight:bold;">KILLED IN ACTION</span>' : '<span style="color:#00ffaa;">ACTIVE / OPERATIONAL</span>'}</div>
+                `;
+            } else if (STATE.selectedType === 'zone') {
+                display.innerHTML = `
+                    <span style="color:#ffcc00; font-weight:bold;">ZONE: ${asset.label}</span>
+                    <div>GEOMETRY: ${asset.type.toUpperCase()}</div>
+                    <div>STYLE: ${asset.style.toUpperCase()}</div>
+                    <div>FACTION ASSOCIATE: ${asset.faction}</div>
+                `;
+            }
+        }
+
+        // Sidebar Navigation Mode Bindings Matrix
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active'); STATE.mode = e.target.getAttribute('data-mode');
+                if (activePathBuilding) commitCurrentPath(); if (activeTerrainBuilding) commitCurrentTerrain();
+            });
+        });
+        document.querySelectorAll('.path-style-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.path-style-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active'); STATE.pathStyle = e.target.getAttribute('data-pstyle');
+            });
+        });
+        document.querySelectorAll('.zone-type-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.zone-type-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active'); STATE.zoneType = e.target.getAttribute('data-ztype');
+            });
+        });
+        document.querySelectorAll('.zone-style-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.zone-style-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active'); STATE.zoneStyle = e.target.getAttribute('data-zstyle');
+            });
+        });
+        document.querySelectorAll('.terrain-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.terrain-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active'); STATE.terrainStyle = e.target.getAttribute('data-tstyle');
+            });
+        });
+        document.querySelectorAll('.faction-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.faction-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active'); STATE.faction = e.target.getAttribute('data-faction');
+            });
+        });
+        document.querySelectorAll('.unit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active'); STATE.unitType = e.target.getAttribute('data-unit');
+            });
+        });
+        document.querySelectorAll('.theater-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.theater-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active'); STATE.activeTheater = e.target.getAttribute('data-theater');
+                logAction(`THEATER SELECTION TRANSFORMED // LOADED: ${THEATERS[STATE.activeTheater].name}`); render();
+            });
+        });
+
+        // Operational Timeline Phases Logic Block
+        function buildTimelineUI() {
+            const container = document.getElementById('phase-container'); container.innerHTML = '';
+            PHASES.forEach((p, idx) => {
+                const tab = document.createElement('div'); tab.className = `tab ${idx === STATE.activePhaseIdx ? 'active' : ''}`;
+                tab.innerText = `PHASE 0${idx+1}`; tab.addEventListener('click', () => {
+                    if (activePathBuilding) commitCurrentPath(); if (activeTerrainBuilding) commitCurrentTerrain();
+                    STATE.activePhaseIdx = idx; buildTimelineUI(); reloadLogConsole(); render();
+                });
+                container.appendChild(tab);
+            });
+        }
+
+        document.getElementById('phase-add').addEventListener('click', () => {
+            saveHistoryState();
+            PHASES.push({ units: JSON.parse(JSON.stringify(PHASES[PHASES.length-1].units)), zones: [], paths: [], terrain: [], logs: [`PHASE CONTINUUM SEQUENCED // INITIAL ASSETS INHERITED`] });
+            STATE.activePhaseIdx = PHASES.length - 1; buildTimelineUI(); reloadLogConsole(); render();
+        });
+        document.getElementById('phase-clone').addEventListener('click', () => {
+            saveHistoryState(); const src = PHASES[STATE.activePhaseIdx];
+            PHASES.push({ units: JSON.parse(JSON.stringify(src.units)), zones: JSON.parse(JSON.stringify(src.zones)), paths: JSON.parse(JSON.stringify(src.paths)), terrain: JSON.parse(JSON.stringify(src.terrain)), logs: [`PHASE BASE CLONED FROM SEGMENT: 0${STATE.activePhaseIdx+1}`] });
+            STATE.activePhaseIdx = PHASES.length - 1; buildTimelineUI(); reloadLogConsole(); render();
+        });
+        document.getElementById('phase-delete').addEventListener('click', () => {
+            if(PHASES.length <= 1) return;
+            showWarningBox("PURGE CURRENT OPERATIONAL PHASE VECTOR LAYER permanently?", () => {
+                saveHistoryState(); PHASES.splice(STATE.activePhaseIdx, 1);
+                if(STATE.activePhaseIdx >= PHASES.length) STATE.activePhaseIdx = PHASES.length - 1;
+                buildTimelineUI(); reloadLogConsole(); render();
+            });
+        });
+
+        // Global Command Control Button Subscriptions
+        document.getElementById('ctrl-undo').addEventListener('click', triggerUndo);
+        document.getElementById('ctrl-redo').addEventListener('click', triggerRedo);
+        document.getElementById('ctrl-grid').addEventListener('click', (e) => {
+            STATE.gridEnabled = !STATE.gridEnabled; e.target.classList.toggle('active', STATE.gridEnabled);
+            e.target.innerText = STATE.gridEnabled ? "ON" : "OFF"; render();
+        });
+
+        let simInterval = null;
+        document.getElementById('ctrl-play').addEventListener('click', (e) => {
+            STATE.simRunning = !STATE.simRunning; e.target.classList.toggle('active', STATE.simRunning);
+            e.target.innerText = STATE.simRunning ? "HALT SIM" : "EXECUTE SIM";
+            if (STATE.simRunning) {
+                logAction("TACTICAL SIMULATION ENGAGED VIA PHASE TRACE ROUTING");
+                simInterval = setInterval(() => {
+                    PHASES[STATE.activePhaseIdx].paths.forEach(p => {
+                        if(p.points.length < 2) return;
+                        PHASES[STATE.activePhaseIdx].units.forEach(u => {
+                            if(u.faction === p.faction && !u.kia) {
+                                const endPt = p.points[p.points.length-1];
+                                const dist = Math.hypot(endPt.x - u.x, endPt.y - u.y);
+                                if(dist > 2) { u.x += (endPt.x - u.x)/60; u.y += (endPt.y - u.y)/60; }
+                            }
+                        });
+                    });
+                    render();
+                }, 30);
+            } else {
+                clearInterval(simInterval); logAction("TACTICAL SIMULATION ABORTED");
+            }
+        });
+
+        document.getElementById('ctrl-reset').addEventListener('click', () => {
+            showWarningBox("RESET SIM ASSETS BACK TO PHASING LAYER ORIGIN STATUS?", () => {
+                location.reload();
+            });
+        });
+
+        document.getElementById('asset-purge').addEventListener('click', () => {
+            if(!STATE.selectedId) return; saveHistoryState();
+            const data = PHASES[STATE.activePhaseIdx];
+            if(STATE.selectedType === 'unit') { data.units = data.units.filter(u=>u.id!==STATE.selectedId); logAction("PURGED SELECTED UNIT FROM ACTIVE TRACKER LAYER"); }
+            else { data.zones = data.zones.filter(z=>z.id!==STATE.selectedId); logAction("PURGED CONSTRUCTED BOUNDS ZONE SEGMENT"); }
+            STATE.selectedId = null; STATE.selectedType = null; updateInspectorPanel(null); render();
+        });
+
+        document.getElementById('board-wipe').addEventListener('click', () => {
+            showWarningBox("WIPE AND PURGE ENTIRE ACTIVE THEATER MATRIX LAYER?", () => {
+                saveHistoryState(); PHASES[STATE.activePhaseIdx].units = []; PHASES[STATE.activePhaseIdx].zones = [];
+                PHASES[STATE.activePhaseIdx].paths = []; PHASES[STATE.activePhaseIdx].terrain = [];
+                logAction("CRITICAL OPERATION // ACTIVE THEATER RECON BOARD PURGED CLEAN");
+                STATE.selectedId = null; STATE.selectedType = null; updateInspectorPanel(null); render();
+            });
+        });
+
+        // isolated Dual-Panel Switcher Engine System Interface Layout Mapping Hooks
+        document.getElementById('mett-toggle-map').addEventListener('click', (e) => {
+            document.getElementById('panel-mett-core').style.display = "none";
+            document.getElementById('panel-mapping').style.display = "flex";
+            document.getElementById('mett-toggle-mett').classList.remove('active');
+            e.target.classList.add('active');
+        });
+
+        document.getElementById('mett-toggle-mett').addEventListener('click', (e) => {
+            document.getElementById('panel-mapping').style.display = "none";
+            document.getElementById('panel-mett-core').style.display = "flex";
+            document.getElementById('mett-toggle-map').classList.remove('active');
+            e.target.classList.add('active');
+        });
+
+        // Isolated METT-TC Panel Form Control Logic 
+        document.querySelectorAll('.mett-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.mett-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.mett-pane').forEach(p => p.classList.remove('active'));
+                e.target.classList.add('active');
+                document.getElementById(`mett-${e.target.getAttribute('data-mpane')}`).classList.add('active');
+            });
+        });
+
+        // Backward planning calculation script mapping
+        const hrsInput = document.getElementById('mett-ti-hours');
+        function recomputeMettPlanningTimes() {
+            const val = parseFloat(hrsInput.value) || 0;
+            document.getElementById('mett-calc-plan').innerText = (val * (1/3)).toFixed(1) + " hrs";
+            document.getElementById('mett-calc-prep').innerText = (val * (2/3)).toFixed(1) + " hrs";
+            document.getElementById('mett-warno-box').innerText = `WARNORD // IMMEDIATE PREPARATION ENFORCED // OPERATIONAL PLAN ALLOCATION WINDOW REACHES LIMITS AT H-${(val * (1/3)).toFixed(1)} HOURS INDEFINITELY.`;
+            rebuildLiveAssessmentSynopsis();
+        }
+        hrsInput.addEventListener('input', recomputeMettPlanningTimes);
+
+        // Dynamic local addon variables array interface handlers
+        document.getElementById('mett-custom-add').addEventListener('click', () => {
+            const inp = document.getElementById('mett-custom-input'); if(!inp.value.trim()) return;
+            mettCustomVariables.push(inp.value.trim()); inp.value = '';
+            renderMettCustomList(); rebuildLiveAssessmentSynopsis();
+        });
+
+        function renderMettCustomList() {
+            const list = document.getElementById('mett-custom-list'); list.innerHTML = '';
+            mettCustomVariables.forEach((v, idx) => {
+                const row = document.createElement('div'); row.className = 'mett-custom-item';
+                row.innerHTML = `<span>${v}</span><span class="mett-custom-del" data-idx="${idx}">✕</span>`;
+                list.appendChild(row);
+            });
+            document.querySelectorAll('.mett-custom-del').forEach(d => {
+                d.addEventListener('click', (e) => {
+                    mettCustomVariables.splice(parseInt(e.target.getAttribute('data-idx')), 1);
+                    renderMettCustomList(); rebuildLiveAssessmentSynopsis();
+                });
+            });
+        }
+
+        // Live assessment synopsis compiler template routine
+        function rebuildLiveAssessmentSynopsis() {
+            const summary = document.getElementById('mett-live-synopsis');
+            const friendlyTask = document.getElementById('mett-m-friendly').value;
+            const enemyEffect = document.getElementById('mett-m-enemy').value;
+            const purpose = document.getElementById('mett-m-purpose').value;
+            const enemyDisp = document.getElementById('mett-e-disp').value;
+            const enemyCoa = document.getElementById('mett-e-coa').value;
+            const terrainKey = document.getElementById('mett-t-key').value;
+            const terrainWeather = document.getElementById('mett-t-weather').value;
+            const troopStatus = document.getElementById('mett-tr-status').value;
+            const troopLog = document.getElementById('mett-tr-log').value;
+            const civilRisk = document.getElementById('mett-c-risk').value;
+            const civilRoe = document.getElementById('mett-c-roe').value;
+            
+            const wWho = document.getElementById('mett-5w-who').value || '[UNKNOWN UNIT]';
+            const wWhat = document.getElementById('mett-5w-what').value || '[TASK LINE]';
+            const wWhen = document.getElementById('mett-5w-when').value || '[TIME DTG]';
+            const wWhere = document.getElementById('mett-5w-where').value || '[COORDINATES]';
+            const wWhy = document.getElementById('mett-5w-why').value || '[COMMANDER INTENT PURPOSE]';
+
+            let msg = `[STRATEGIC INFERENCE REPORT]\n`;
+            msg += `• MISSION: ${wWho} TO ${friendlyTask.toUpperCase()} BY ${wWhen} AT ${wWhere} IN ORDER TO ${purpose.toUpperCase()} (${wWhy}). ENEMY INTENT EFFECT IS TO ${enemyEffect.toUpperCase()}.\n`;
+            msg += `• DOCTRINAL TASK: ${wWhat}\n`;
+            msg += `• COMPOSITION VALUE: Enemy elements arrayed in ${enemyDisp} posture. Expected course of action profiles to ${enemyCoa}.\n`;
+            msg += `• AREA GEOSPATIAL: Operations cross high-priority ${terrainKey} axis during ${terrainWeather}.\n`;
+            msg += `• TROOP PROFILE: Assets confirm ${troopStatus} readiness status. Supply framework indicates: ${troopLog}.\n`;
+            msg += `• COGNIZANCE LAYER: Civ risk calculation indicates ${civilRisk}. Strict rule-sets enforce ${civilRoe}.\n`;
+            
+            if(mettCustomVariables.length > 0) {
+                msg += `• OPERATIONAL AUX VARIANT ENGINES:\n`;
+                mettCustomVariables.forEach(v => { msg += `  - ${v}\n`; });
+            }
+            summary.innerText = msg;
+        }
+
+        // Setup Event Listeners for all Strategic Planner Form field inputs
+        document.querySelectorAll('#panel-mett-core select, #panel-mett-core input').forEach(el => {
+            el.addEventListener('input', rebuildLiveAssessmentSynopsis);
+        });
+
+        // App Authentication Initialization Sequence
+        document.getElementById('auth-submit').addEventListener('click', () => {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('mett-tab-header').style.display = 'flex';
+            resizeCanvas(); buildTimelineUI(); recomputeMettPlanningTimes();
+        });
+        document.getElementById('auth-input').addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') document.getElementById('auth-submit').click();
+        });
     </script>
 </body>
 </html>
