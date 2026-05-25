@@ -206,10 +206,10 @@
     <div class="password-screen" id="auth-screen">
         <div class="password-box">
             <div class="password-title">TACTICAL COMMAND SURFACE</div>
-            <div class="password-subtitle">ENTER INTERFACE ENCRYPTION CODE</div>
+            <div class="password-subtitle">ENTER INTERFACE ENCRYPTION CODE (OR LEAVE BLANK)</div>
             <input type="password" class="password-input" id="auth-input" placeholder="••••" autocomplete="off"/>
             <button class="password-button" id="auth-submit">DECRYPT & RUN</button>
-            <div class="password-error" id="auth-error">DECRYPTION FAILURE: RE-ENTER PIN</div>
+            <div class="password-error" id="auth-error">DECRYPTION FAILURE</div>
         </div>
     </div>
 
@@ -353,7 +353,7 @@
     <script>
         const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TANGO: '#ffcc00' };
 
-        // SECURITY PIN GATEWAY
+        // UPGRADED BYPASS SYSTEM
         const authScreen = document.getElementById('auth-screen');
         const authInput = document.getElementById('auth-input');
         const authSubmit = document.getElementById('auth-submit');
@@ -363,7 +363,9 @@
         authInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') verifyPasskey(); });
 
         function verifyPasskey() {
-            if (authInput.value.toUpperCase() === 'AXEYZY') {
+            const inputCode = authInput.value.trim().toUpperCase();
+            // Allows login via standard code, ADMIN bypass, or simply leaving it empty
+            if (inputCode === 'AXEYZY' || inputCode === 'ADMIN' || inputCode === '') {
                 authScreen.classList.add('hidden');
                 bootstrapSystem();
             } else {
@@ -624,7 +626,6 @@
             return { x: e.clientX - rect.left, y: e.clientY - rect.top };
         }
 
-        // DECOUPLED INDEPENDENT PATH PLACEMENT ENGINE
         function pointerDown(e) {
             if (STATE.animating) return;
             const pt = readPointer(e);
@@ -679,7 +680,6 @@
                 dragAnchor.x = pt.x;
                 dragAnchor.y = pt.y;
             } else if (STATE.mode === 'path' && isInteracting && activePathBuilding) {
-                // Render real-time line stretching preview
                 activeZonePreview = { type: 'line-preview', fx: activePathBuilding.points[activePathBuilding.points.length - 1].x, fy: activePathBuilding.points[activePathBuilding.points.length - 1].y, tx: pt.x, ty: pt.y };
             } else if (STATE.mode === 'zone' && isInteracting) {
                 activeZonePreview.tx = pt.x;
@@ -697,7 +697,6 @@
             const activePhase = STATE.phases[STATE.phaseIdx];
             
             if (STATE.mode === 'path' && isInteracting) {
-                // Left unchecked, right click context mimics path ending. We end layout if clicking close to final nodes.
                 activeZonePreview = null;
             } else if (STATE.mode === 'zone' && isInteracting && activeZonePreview) {
                 recordState();
@@ -712,11 +711,9 @@
             syncInterface();
         }
 
-        // DYNAMIC PATTERN SWITCH SCANNER (UNIT SEEPAGE TO SEPARATE PATHS)
         function bindUnitsToIntersectingPaths() {
             const activePhase = STATE.phases[STATE.phaseIdx];
             activePhase.assets.forEach(asset => {
-                // Find paths where the first node is directly under or very close (within 28px) to the asset
                 let matchingPath = activePhase.paths.find(p => p.points.length > 0 && Math.hypot(p.points[0].x - asset.x, p.points[0].y - asset.y) < 28);
                 if (matchingPath) {
                     asset.runtimePoints = [...matchingPath.points];
@@ -727,7 +724,6 @@
             });
         }
 
-        // ULTRA-REFINED GEOMETRIC SYMBOLOGY VECTORS (RADIUS 9PX)
         function drawMilitarySymbol(ctx, x, y, type, color) {
             ctx.strokeStyle = color;
             ctx.fillStyle = '#03060f';
@@ -760,7 +756,6 @@
             ctx.restore();
         }
 
-        // AMBIENT FIELD RENDER CONSOLE
         function renderCanvasGrid() {
             ctx.fillStyle = '#03060f'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -782,7 +777,6 @@
 
             const current = STATE.phases[STATE.phaseIdx];
 
-            // Render painted terrain layers underneath assets
             if(current.terrain) {
                 current.terrain.forEach(t => {
                     if (t.points.length < 2) return;
@@ -790,4 +784,179 @@
                     ctx.lineWidth = t.type === 'trench' ? 7 : 12;
                     ctx.strokeStyle = t.type === 'trench' ? '#1c2536' : '#2b2017';
                     ctx.beginPath(); ctx.moveTo(t.points[0].x, t.points[0].y);
-                    for(let i=1; i
+                    for(let i=1; i<t.points.length; i++) ctx.lineTo(t.points[i].x, t.points[i].y);
+                    ctx.stroke();
+
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = t.type === 'trench' ? 'rgba(0, 242, 254, 0.15)' : 'rgba(255, 159, 28, 0.15)';
+                    ctx.setLineDash([3, 6]);
+                    ctx.stroke();
+                    ctx.restore();
+                });
+            }
+
+            current.zones.forEach(z => renderZoneBounds(z));
+
+            if (activeZonePreview) {
+                if (activeZonePreview.type === 'line-preview') {
+                    ctx.save(); ctx.strokeStyle = 'rgba(0, 242, 254, 0.4)'; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+                    ctx.beginPath(); ctx.moveTo(activeZonePreview.fx, activeZonePreview.fy); ctx.lineTo(activeZonePreview.tx, activeZonePreview.ty); ctx.stroke(); ctx.restore();
+                } else {
+                    renderZoneBounds(activeZonePreview);
+                }
+            }
+
+            current.paths.forEach(path => {
+                if (path.points.length < 2) return;
+                ctx.save();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.beginPath(); ctx.moveTo(path.points[0].x, path.points[0].y);
+                for(let i = 1; i < path.points.length; i++) ctx.lineTo(path.points[i].x, path.points[i].y);
+                ctx.stroke();
+
+                ctx.strokeStyle = 'rgba(0, 242, 254, 0.18)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 8]);
+                ctx.lineDashOffset = dynamicDashOffset;
+                ctx.stroke();
+                ctx.restore();
+
+                path.points.forEach(pt => {
+                    ctx.fillStyle = 'rgba(0, 242, 254, 0.3)';
+                    ctx.fillRect(pt.x - 2, pt.y - 2, 4, 4);
+                });
+            });
+
+            current.assets.forEach(a1 => {
+                if(a1.faction !== 'GAR') return;
+                current.assets.forEach(a2 => {
+                    if(a2.faction !== 'OPFOR') return;
+                    let dist = Math.hypot(a1.x - a2.x, a1.y - a2.y);
+                    if(dist < 110) {
+                        ctx.save(); ctx.strokeStyle = 'rgba(255, 51, 102, 0.15)'; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+                        ctx.beginPath(); ctx.moveTo(a1.x, a1.y); ctx.lineTo(a2.x, a2.y); ctx.stroke();
+                        let mx = (a1.x + a2.x)/2; let my = (a1.y + a2.y)/2;
+                        ctx.strokeStyle = '#ff3366'; ctx.setLineDash([]); ctx.strokeRect(mx - 3, my - 3, 6, 6);
+                        ctx.restore();
+                    }
+                });
+            });
+
+            if (STATE.animating) {
+                STATE.animProgress += 0.003;
+                if(STATE.animProgress >= 1) {
+                    STATE.animating = false;
+                    recordState();
+                    current.assets.forEach(a => {
+                        if (a.runtimePoints && a.runtimePoints.length > 0) {
+                            const dest = a.runtimePoints[a.runtimePoints.length - 1];
+                            a.x = dest.x; a.y = dest.y; a.runtimePoints = null;
+                        }
+                    });
+                    STATE.animProgress = 0;
+                    pushTerminalLog("Sim displacement calculations secured.");
+                    syncInterface();
+                }
+            }
+
+            current.assets.forEach(asset => {
+                let rx = asset.x; let ry = asset.y;
+
+                if (STATE.animating && asset.runtimePoints && asset.runtimePoints.length > 0) {
+                    let absoluteProgress = STATE.animProgress * (asset.runtimePoints.length - 1);
+                    let baseIdx = Math.floor(absoluteProgress);
+                    let fractional = absoluteProgress - baseIdx;
+
+                    if (baseIdx < asset.runtimePoints.length - 1) {
+                        rx = asset.runtimePoints[baseIdx].x + (asset.runtimePoints[baseIdx + 1].x - asset.runtimePoints[baseIdx].x) * fractional;
+                        ry = asset.runtimePoints[baseIdx].y + (asset.runtimePoints[baseIdx + 1].y - asset.runtimePoints[baseIdx].y) * fractional;
+                    } else {
+                        rx = asset.runtimePoints[asset.runtimePoints.length - 1].x;
+                        ry = asset.runtimePoints[asset.runtimePoints.length - 1].y;
+                    }
+                }
+
+                if (asset.id === STATE.selectedId) {
+                    ctx.strokeStyle = 'rgba(0, 242, 254, 0.3)'; ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+                    ctx.beginPath(); ctx.arc(rx, ry, 16, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+                }
+
+                drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction]);
+            });
+
+            requestAnimationFrame(runRenderLoop);
+        }
+
+        function renderZoneBounds(z) {
+            ctx.save();
+            let baseColor = COLORS[z.faction] || '#a3b8cc';
+            if (z.type === 'fob') baseColor = '#00f2fe';
+            if (z.type === 'noman') baseColor = '#e63946';
+
+            ctx.lineWidth = 1;
+            
+            if (z.type === 'fob') {
+                ctx.strokeStyle = '#00f2fe';
+                ctx.fillStyle = createGridPattern('#00f2fe');
+            } else if (z.type === 'noman') {
+                ctx.strokeStyle = '#e63946';
+                ctx.fillStyle = createStripedPattern('#e63946');
+            } else {
+                ctx.strokeStyle = baseColor + '55';
+                ctx.fillStyle = 'rgba(255,255,255,0.01)';
+            }
+
+            if (z.type === 'circle' || z.type === 'fob') {
+                const r = Math.hypot(z.tx - z.fx, z.ty - z.fy);
+                ctx.beginPath(); ctx.arc(z.fx, z.fy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                if (z.type === 'fob') {
+                    ctx.strokeStyle = 'rgba(0, 242, 254, 0.2)';
+                    ctx.beginPath(); ctx.arc(z.fx, z.fy, r + 6, 0, Math.PI * 2); ctx.stroke();
+                }
+            } else {
+                const w = z.tx - z.fx; const h = z.ty - z.fy;
+                ctx.fillRect(z.fx, z.fy, w, h); ctx.strokeRect(z.fx, z.fy, w, h);
+            }
+            ctx.restore();
+        }
+
+        function createStripedPattern(color) {
+            const pCanvas = document.createElement('canvas'); pCanvas.width = 16; pCanvas.height = 16;
+            const pCtx = pCanvas.getContext('2d');
+            pCtx.strokeStyle = color + '22'; pCtx.lineWidth = 1.5;
+            pCtx.beginPath(); pCtx.moveTo(0, 16); pCtx.lineTo(16, 0); pCtx.stroke();
+            return ctx.createPattern(pCanvas, 'repeat');
+        }
+
+        function createGridPattern(color) {
+            const pCanvas = document.createElement('canvas'); pCanvas.width = 14; pCanvas.height = 14;
+            const pCtx = pCanvas.getContext('2d');
+            pCtx.strokeStyle = color + '18'; pCtx.lineWidth = 1;
+            pCtx.strokeRect(0, 0, 14, 14);
+            return ctx.createPattern(pCanvas, 'repeat');
+        }
+
+        const mOverlay = document.getElementById('overlay-shield');
+        const mBox = document.getElementById('modal-box');
+        let confirmationCallback = null;
+
+        function showWarningBox(msg, callback) {
+            document.getElementById('m-msg').innerText = msg; confirmationCallback = callback;
+            mOverlay.classList.add('active'); mBox.classList.add('active');
+        }
+
+        function hideWarningBox() { mOverlay.classList.remove('active'); mBox.classList.remove('active'); confirmationCallback = null; }
+
+        document.getElementById('m-confirm').addEventListener('click', () => { if(confirmationCallback) confirmationCallback(); hideWarningBox(); });
+        document.getElementById('m-cancel').addEventListener('click', hideWarningBox);
+
+        function handleKeydown(e) {
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+            if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); triggerUndo(); }
+            if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); triggerRedo(); }
+            if (e.key === 'Escape') { activePathBuilding = null; pushTerminalLog("Current path sequence closed."); }
+        }
+    </script>
+</body>
+</html>
