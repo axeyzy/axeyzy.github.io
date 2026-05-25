@@ -645,8 +645,8 @@
                         ctx.stroke();
                     }
                     ctx.fillStyle = "rgba(255, 159, 28, 0.01)";
-                    ctx.beginPath(); ctx.arc(w*0.2, h*0.3, 140, 0, Math.PI*2); ctx.fill();
-                    ctx.beginPath(); ctx.arc(w*0.8, h*0.7, 180, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(w*0.2, h*0.3, 140, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(w*0.8, h*0.7, 180, 0, Math.PI * 2); ctx.fill();
                 }
             },
             
@@ -787,7 +787,6 @@
 
         let transitionState = 0; 
         let transitionStartTime = null;
-        let transitionAlpha = 0;
         let transOldIdx = 0;
         let transNewIdx = 0;
 
@@ -799,10 +798,25 @@
             systemHistoryIdx++;
         }
 
+        // Dedicated snapshot registry to prevent carryover desynchronizations
+        function capturePhaseSnapshot(index) {
+            const phase = STATE.phases[index];
+            if (!phase) return;
+            phase.initialPhasePositions = phase.assets.map(a => ({
+                id: a.id,
+                x: a.x,
+                y: a.y
+            }));
+        }
+
         function triggerPhaseTransitionAnimation(newIdx) {
             if (transitionState > 0 || isRecordingIntro) return;
             transOldIdx = STATE.phaseIdx;
             transNewIdx = newIdx;
+            
+            // Lock positioning data exactly before running the slide panel sweep
+            capturePhaseSnapshot(transNewIdx);
+            
             transitionState = 1;
             transitionStartTime = null;
             activePathBuilding = null;
@@ -846,6 +860,8 @@
             resizeTacticalSurface();
             window.addEventListener('resize', resizeTacticalSurface);
             attachInterfaceListeners();
+            
+            capturePhaseSnapshot(0);
             recordState();
             pushTerminalLog("Operational baseline synchronized successfully.");
             
@@ -1054,13 +1070,8 @@
                 if(!STATE.animating) { 
                     if(activePathBuilding) commitCurrentPath();
                     
-                    const activePhase = STATE.phases[STATE.phaseIdx];
-                    
-                    // Core Fix: Caching deep references to the initial position right before simulation executes
-                    activePhase.assets.forEach(a => {
-                        a.x = a.spawnX;
-                        a.y = a.spawnY;
-                    });
+                    // Always make sure snapshot state parameters match layout boundaries right before execution
+                    capturePhaseSnapshot(STATE.phaseIdx);
                     
                     bindUnitsToRoutes();
                     STATE.animating = true; 
@@ -1074,16 +1085,31 @@
                 recordState();
                 const activePhase = STATE.phases[STATE.phaseIdx];
                 
-                // Fixed Reset Engine: Pull exclusively from spawn coordinates, safe from empty route structures
-                activePhase.assets.forEach(a => { 
-                    a.x = a.spawnX; 
-                    a.y = a.spawnY;
-                    a.runtimePoints = null; 
-                });
+                // Decisive Fix: Reset positions using the immutable phase tab snap history cache block
+                if (activePhase.initialPhasePositions && activePhase.initialPhasePositions.length > 0) {
+                    activePhase.assets.forEach(a => {
+                        const originalPos = activePhase.initialPhasePositions.find(snap => snap.id === a.id);
+                        if (originalPos) {
+                            a.x = originalPos.x;
+                            a.y = originalPos.y;
+                            a.spawnX = originalPos.x;
+                            a.spawnY = originalPos.y;
+                        }
+                        a.runtimePoints = null;
+                    });
+                } else {
+                    // Fallback to local properties if snapshot mapping hasn't triggered yet
+                    activePhase.assets.forEach(a => { 
+                        a.x = a.spawnX; 
+                        a.y = a.spawnY;
+                        a.runtimePoints = null; 
+                    });
+                }
+                
                 STATE.animating = false;
                 STATE.animProgress = 0;
                 document.getElementById('ctrl-play').classList.remove('active');
-                pushTerminalLog("Simulation coordinates hard-reset to original phase deployment nodes.");
+                pushTerminalLog("Simulation coordinates hard-reset to initial phase entry nodes.");
                 syncInterface();
             });
 
@@ -1104,7 +1130,6 @@
                 recordState();
                 const parent = STATE.phases[STATE.phaseIdx];
                 
-                // Carryover Logic: Inherited units deploy natively at Phase 1 target endpoints
                 const inheritedAssets = parent.assets.map(a => {
                     let targetX = a.x;
                     let targetY = a.y;
@@ -1121,7 +1146,7 @@
                     intel: `${parent.intel} [CLONE]`,
                     assets: inheritedAssets,
                     zones: JSON.parse(JSON.stringify(parent.zones)),
-                    paths: [], // Clean slate: Redundant routes wiped instantly on Phase escalation
+                    paths: [], 
                     terrain: JSON.parse(JSON.stringify(parent.terrain || []))
                 });
                 triggerPhaseTransitionAnimation(STATE.phases.length - 1);
@@ -1147,6 +1172,10 @@
                     let current = STATE.phases[STATE.phaseIdx];
                     current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
                     pushTerminalLog("Target micro-unit removed from operational memory.");
+                    
+                    // Re-calculate local phase tracking history parameters instantly
+                    capturePhaseSnapshot(STATE.phaseIdx);
+                    
                     STATE.selectedId = null;
                     syncInterface();
                 }
@@ -1158,6 +1187,7 @@
                     STATE.phases[STATE.phaseIdx] = { name: `PHASE ${STATE.phaseIdx + 1}`, intel: '', assets: [], zones: [], paths: [], terrain: [] };
                     STATE.selectedId = null;
                     activePathBuilding = null;
+                    capturePhaseSnapshot(STATE.phaseIdx);
                     pushTerminalLog("Wiped active workspace parameters cleanly.", true);
                     syncInterface();
                 });
@@ -1346,6 +1376,10 @@
                         kia: false 
                     };
                     activePhase.assets.push(created);
+                    
+                    // Track position natively into initial snap registries
+                    capturePhaseSnapshot(STATE.phaseIdx);
+                    
                     STATE.selectedId = created.id;
                     dragAnchor = created;
                     pushTerminalLog(`Asset operational: ${STATE.unitType.toUpperCase()} initialized.`);
@@ -1405,6 +1439,12 @@
 
         function pointerUp(e) {
             if (STATE.animating || transitionState > 0) return;
+            
+            if (STATE.mode === 'deploy' && dragAnchor) {
+                // Keep local snapshots clean when finishing drag actions
+                capturePhaseSnapshot(STATE.phaseIdx);
+            }
+            
             const activePhase = STATE.phases[STATE.phaseIdx];
             
             if (STATE.mode === 'path') {
