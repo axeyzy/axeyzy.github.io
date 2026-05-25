@@ -218,10 +218,53 @@
 
         .theater-btn { font-size: 8px; padding-left: 10px; }
 
+        /* --- NEW GLOBAL METT-TC SYSTEM CSS --- */
+        .global-nav-header {
+            display: none; background: #040914; border-bottom: 1px solid #122236;
+            height: 34px; padding: 0 20px; gap: 6px; align-items: center; z-index: 12;
+        }
+        .global-tab-btn {
+            padding: 4px 14px; font-size: 9px; font-weight: 700; font-family: inherit;
+            color: #43586d; border: 1px solid #122236; background: transparent; cursor: pointer;
+        }
+        .global-tab-btn::before { display: none; }
+        .global-tab-btn.active { color: #00f2fe; border-color: #00f2fe; background: rgba(0,242,254,0.05); }
+
+        .mett-workspace {
+            display: none; flex: 1; background: #010306; padding: 20px; flex-direction: column; gap: 15px; overflow-y: auto;
+        }
+        .mett-layout-split { display: flex; gap: 15px; flex: 1; min-height: 0; }
+        .mett-form-panel { flex: 1.2; display: flex; flex-direction: column; gap: 12px; background: rgba(4,9,20,0.7); border: 1px solid #122236; padding: 16px; overflow-y: auto; }
+        .mett-report-panel { flex: 1; display: flex; flex-direction: column; gap: 12px; background: rgba(4,9,20,0.4); border: 1px solid #122236; padding: 16px; overflow-y: auto; }
+        
+        .mett-matrix-tabs { display: flex; gap: 2px; background: #010307; border: 1px solid #122236; padding: 2px; }
+        .mett-sub-tab { flex: 1; text-align: center; font-size: 9px; font-weight: 700; padding: 6px 0; color: #43586d; cursor: pointer; border: 1px solid transparent; }
+        .mett-sub-tab.active { background: rgba(0,242,254,0.08); color: #00f2fe; border-color: #00f2fe; }
+
+        .mett-pane-view { display: none; flex-direction: column; gap: 10px; margin-top: 5px; }
+        .mett-pane-view.active { display: flex; }
+
+        .form-row { display: flex; flex-direction: column; gap: 4px; }
+        .form-row label { font-size: 9px; font-weight: 700; color: #43586d; letter-spacing: 0.05em; }
+        
+        .mett-workspace select, .mett-workspace input[type="text"], .mett-workspace input[type="number"], .mett-workspace textarea {
+            background: #010307; border: 1px solid #1e354d; color: #d1dfec; padding: 8px; font-family: inherit; font-size: 10px; outline: none; width: 100%;
+        }
+        .mett-workspace select:focus, .mett-workspace input:focus, .mett-workspace textarea:focus { border-color: #00f2fe; }
+        .mett-workspace select { color: #00f2fe; cursor: pointer; }
+        
+        .live-output-card { background: #010307; border: 1px solid #122236; padding: 10px; font-size: 10px; line-height: 1.5; color: #7a92a8; white-space: pre-wrap; }
+        .live-output-card.tlp-highlight { border-color: #00ffaa; color: #00ffaa; }
+
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
 <body>
+
+    <div class="global-nav-header" id="global-tabs-row">
+        <button class="global-tab-btn active" id="nav-btn-map">GEOSPATIAL THEATER MAP</button>
+        <button class="global-tab-btn" id="nav-btn-mett">METT-TC STRATEGIC CONSOLE</button>
+    </div>
 
     <div class="password-screen" id="auth-screen">
         <div class="password-box">
@@ -238,7 +281,7 @@
             <div class="op-indicator"></div>
             <span class="op-name" id="op-label">SYS.MAIN // RECON_V4.3 // SECURE</span>
         </div>
-        <div class="controls">
+        <div class="controls" id="mapping-header-controls">
             <div class="control-group">
                 <button id="ctrl-undo">UNDO</button>
                 <button id="ctrl-redo">REDO</button>
@@ -255,7 +298,7 @@
     </div>
 
     <div class="main">
-        <div class="sidebar sidebar-left">
+        <div class="sidebar sidebar-left" id="map-sidebar-left">
             <div class="sidebar-content">
                 <div class="section">
                     <div class="section-title">COMMAND SELECTION</div>
@@ -338,7 +381,7 @@
             </div>
         </div>
 
-        <div style="flex:1; display:flex; flex-direction:column; position:relative;">
+        <div style="flex:1; display:flex; flex-direction:column; position:relative;" id="geospatial-canvas-area">
             <div class="canvas-container" id="canvas-holder">
                 <canvas id="tactical-grid"></canvas>
             </div>
@@ -347,9 +390,140 @@
             </div>
         </div>
 
-        <div class="sidebar sidebar-right">
+        <div class="mett-workspace" id="mett-strategic-workspace">
+            <div class="section-title" style="color: #00f2fe; border-bottom: 1px solid #122236; padding-bottom: 6px;">METT-TC STRATEGIC ANALYSIS ENGINE // COMMAND AND CONTROL CORE</div>
+            
+            <div class="mett-layout-split">
+                <div class="mett-form-panel">
+                    <div class="mett-matrix-tabs">
+                        <div class="mett-sub-tab active" data-mpane="m">MISSION</div>
+                        <div class="mett-sub-tab" data-mpane="e">ENEMY</div>
+                        <div class="mett-sub-tab" data-mpane="t">TERRAIN (OAKOC)</div>
+                        <div class="mett-sub-tab" data-mpane="tr">TROOPS / POOL</div>
+                        <div class="mett-sub-tab" data-mpane="ti">TIME AVAILABLE</div>
+                        <div class="mett-sub-tab" data-mpane="c">CIVILIAN CONSTRAINTS</div>
+                    </div>
+
+                    <div class="mett-pane-view active" id="pane-mett-m">
+                        <div class="form-row">
+                            <label>FRIENDLY TACTICAL TASK ACTION (VERB)</label>
+                            <select id="m-friendly-task">
+                                <option value="Attack by Fire">ATTACK BY FIRE</option>
+                                <option value="Secure">SECURE</option>
+                                <option value="Breach">BREACH</option>
+                                <option value="Seize">SEIZE</option>
+                                <option value="Bypass">BYPASS</option>
+                                <option value="Clear">CLEAR</option>
+                                <option value="Disengagement">DISENGAGEMENT</option>
+                                <option value="Occupy">OCCUPY</option>
+                                <option value="Retain">RETAIN</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>EXPECTED EFFECT ON ENEMY FORCES</label>
+                            <select id="m-enemy-effect">
+                                <option value="Block">BLOCK</option>
+                                <option value="Destroy">DESTROY</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>MISSION COMMAND INTENT PURPOSE</label>
+                            <select id="m-intent-purpose">
+                                <option value="Allow">ALLOW</option>
+                                <option value="Enable">ENABLE</option>
+                                <option value="Cause">CAUSE</option>
+                                <option value="Prevent">PREVENT</option>
+                                <option value="Create">CREATE</option>
+                                <option value="Protect">PROTECT</option>
+                                <option value="Deny">DENY</option>
+                                <option value="Support">SUPPORT</option>
+                            </select>
+                        </div>
+                        <div class="divider" style="margin: 8px 0;"></div>
+                        <div class="section-title">MISSION RESTATEMENT // 5W ARCHITECTURE FORMAT</div>
+                        <div class="form-row"><label>WHO (Designated Unit Element Name)</label><input type="text" id="w-who" value="1st Recon Platoon"></div>
+                        <div class="form-row"><label>WHAT (Doctrinal Tactical Objective Task)</label><input type="text" id="w-what" value="Establish fortified forward observer mesh screen"></div>
+                        <div class="form-row"><label>WHEN (Operation Execution Window DTG Grid)</label><input type="text" id="w-when" value="H-Hour // 0430 Local Sequence"></div>
+                        <div class="form-row"><label>WHERE (Spatial Map Coordinate Zone)</label><input type="text" id="w-where" value="Sector Alpha Choke-Point Corridor"></div>
+                        <div class="form-row"><label>WHY (Commander Intent Purpose Target Context)</label><input type="text" id="w-why" value="Deny entry access pathways to enemy advance reconnaissance armor elements"></div>
+                    </div>
+
+                    <div class="mett-pane-view" id="pane-mett-e">
+                        <div class="form-row">
+                            <label>ENEMY DEFENSIVE DISPOSITION PROFILE</label>
+                            <input type="text" id="e-disposition" value="Entrenched heavy mechanized infantry group holding linear ridgelines">
+                        </div>
+                        <div class="form-row">
+                            <label>PROBABLE COURSE OF ACTION (COA)</label>
+                            <textarea id="e-probable-coa">Conduct early flanking probe attacks using fast armored vehicle clusters across lower plains sectors before settling into deep static baseline grid defenses.</textarea>
+                        </div>
+                    </div>
+
+                    <div class="mett-pane-view" id="pane-mett-t">
+                        <div class="form-row">
+                            <label>KEY TERRAIN ELEVATION OBSERVATIONS (OAKOC)</label>
+                            <input type="text" id="t-key-terrain" value="Central ridge gap provides singular deep mobility avenue; high hills map optimal observer paths.">
+                        </div>
+                        <div class="form-row">
+                            <label>METEOROLOGICAL OBSCURATION & WEATHER CONDITIONS</label>
+                            <input type="text" id="t-weather-impact" value="Low light ambient atmosphere cycle // 15% visibility restriction due to regional airborne dust grids.">
+                        </div>
+                    </div>
+
+                    <div class="mett-pane-view" id="pane-mett-tr">
+                        <div class="form-row">
+                            <label>COMBAT READY ASSETS AVAILABLE</label>
+                            <input type="text" id="tr-friendly-assets" value="Three infantry line squads, one integrated heavy specialist asset team, and two light armored units.">
+                        </div>
+                        <div class="form-row">
+                            <label>LOGISTICAL SUPPORT AVAILABILITY MATRIX</label>
+                            <select id="tr-logistics-status">
+                                <option value="Ample resupply caches secured // Fuel matrix normal status">AMPLE RESERVES SECURED // NORMAL</option>
+                                <option value="Ammunition parameters restricted // Support deployment limited">AMMUNITION RESTRICTED // LIMITED</option>
+                                <option value="Critical supply asset constraints flagged // No immediate line backup">CRITICAL CONSTRAINTS // NO IMMEDIATE BACKUP</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mett-pane-view" id="pane-mett-ti">
+                        <div class="form-row">
+                            <label>TOTAL ALLOCATED TIME REMAINING UNTIL MISSION LAUNCH (HOURS)</label>
+                            <input type="number" id="ti-hours-total" value="9" min="1" max="96" step="0.5">
+                        </div>
+                        <div class="divider" style="margin: 8px 0;"></div>
+                        <div class="section-title" style="color:#00ffaa;">AUTOMATED BACKWARD PLANNING CALCULATOR MATRIX</div>
+                        <div class="stat"><span>COMMANDER PLANNING ALLOCATION WINDOW (1/3):</span><span class="stat-val" id="calc-cmd-time">3.0 Hrs</span></div>
+                        <div class="stat"><span>SUBORDINATE SQUAD PREPARATION MATRIX WINDOW (2/3):</span><span class="stat-val" id="calc-sub-time">6.0 Hrs</span></div>
+                    </div>
+
+                    <div class="mett-pane-view" id="pane-mett-c">
+                        <div class="form-row">
+                            <label>CIVILIAN COLLATERAL RISK INDEX ASSESSMENT</label>
+                            <select id="c-risk-index">
+                                <option value="Negligible civilian footprint expected inside sector grids">NEGLIGIBLE IN-SECTOR POPULATION</option>
+                                <option value="Localized urban clusters adjacent to target vector lanes">LOCALIZED ADJACENT SUB-CLUSTERS</option>
+                                <option value="High density urban habitat zones. Strict non-combatant matrix active.">HIGH DENSITY AREA // CRITICAL CONSTRAINT</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>SPECIFIC DESIGNATED RULES OF ENGAGEMENT (ROE)</label>
+                            <input type="text" id="c-roe-directive" value="Proportional return-fire validation mandatory. Structural demolition restricted without verification.">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mett-report-panel">
+                    <div class="section-title" style="color:#ffcc00">LIVE ANALYSIS SYNOPSIS ASSESSMENT REPORT</div>
+                    <div class="live-output-card" id="mett-live-summary-box">Awaiting operational framework updates...</div>
+
+                    <div class="section-title" style="color:#00ffaa">TROOP LEADING PROCEDURES (TLP) STEP 2 STATUS VECTOR</div>
+                    <div class="live-output-card tlp-highlight" id="mett-live-warno-box">Generating Warning Order metrics...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar sidebar-right" id="map-sidebar-right">
             <div class="sidebar-content">
-                
                 <div class="section">
                     <div class="section-title">THEATER GRID MATRIX</div>
                     <div class="button-grid">
@@ -528,6 +702,12 @@
             const inputCode = authInput.value.trim().toUpperCase();
             if (inputCode === 'AXEYZY' || inputCode === 'ADMIN' || inputCode === '') {
                 authScreen.classList.add('hidden');
+                
+                // Expose Workspace Navigation Tab switcher layout ONLY if authenticated via designated admin tags
+                if(inputCode === 'AXEYZY' || inputCode === 'ADMIN') {
+                    document.getElementById('global-tabs-row').style.display = 'flex';
+                }
+                
                 bootstrapSystem();
             } else {
                 authError.style.display = 'block';
@@ -606,6 +786,9 @@
             pushTerminalLog("Operational baseline synchronized successfully.");
             syncInterface();
             runRenderLoop();
+
+            // Initialize structural updates for the new detached METT-TC computation engine
+            runMettCalculationSync();
         }
 
         function resizeTacticalSurface() {
@@ -813,6 +996,97 @@
                 if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath();
             });
             window.addEventListener('keydown', handleKeydown);
+
+            // --- DECOUPLED TAB INTERACTION LOGIC SUBSCRIPTIONS ---
+            document.getElementById('nav-btn-map').addEventListener('click', () => toggleGlobalWorkspaceMode('map'));
+            document.getElementById('nav-btn-mett').addEventListener('click', () => toggleGlobalWorkspaceMode('mett'));
+
+            document.querySelectorAll('.mett-sub-tab').forEach(t => {
+                t.addEventListener('click', (e) => {
+                    document.querySelectorAll('.mett-sub-tab').forEach(tab => tab.classList.remove('active'));
+                    document.querySelectorAll('.mett-pane-view').forEach(p => p.classList.remove('active'));
+                    e.target.classList.add('active');
+                    document.getElementById(`pane-mett-${e.target.dataset.mpane}`).classList.add('active');
+                });
+            });
+
+            // Bind update telemetry directly to form fields for local tracking compilation
+            document.querySelectorAll('#mett-strategic-workspace input, #mett-strategic-workspace select, #mett-strategic-workspace textarea').forEach(inputNode => {
+                inputNode.addEventListener('input', runMettCalculationSync);
+            });
+        }
+
+        // Handles workspace visibility switching between Map Assets and METT-TC Form System
+        function toggleGlobalWorkspaceMode(mode) {
+            const btnMap = document.getElementById('nav-btn-map');
+            const btnMett = document.getElementById('nav-btn-mett');
+            const mapLeftSidebar = document.getElementById('map-sidebar-left');
+            const mapRightSidebar = document.getElementById('map-sidebar-right');
+            const mapCanvasArea = document.getElementById('geospatial-canvas-area');
+            const mettWorkspace = document.getElementById('mett-strategic-workspace');
+            const headerControls = document.getElementById('mapping-header-controls');
+
+            if(mode === 'map') {
+                btnMap.classList.add('active'); btnMett.classList.remove('active');
+                mapLeftSidebar.style.display = 'flex'; mapRightSidebar.style.display = 'flex';
+                mapCanvasArea.style.display = 'flex'; mettWorkspace.style.display = 'none';
+                headerControls.style.visibility = 'visible';
+            } else {
+                btnMett.classList.add('active'); btnMap.classList.remove('active');
+                mapLeftSidebar.style.display = 'none'; mapRightSidebar.style.display = 'none';
+                mapCanvasArea.style.display = 'none'; mettWorkspace.style.display = 'flex';
+                headerControls.style.visibility = 'hidden';
+                runMettCalculationSync();
+            }
+        }
+
+        // Decoupled computation loop reading selector metrics and outputting live TLP/WARNORD assessments
+        function runMettCalculationSync() {
+            // Read standard 1/3 - 2/3 planning rule parameters
+            const totalHoursInput = parseFloat(document.getElementById('ti-hours-total').value) || 0;
+            const cmdHours = (totalHoursInput * (1/3)).toFixed(1);
+            const squadHours = (totalHoursInput * (2/3)).toFixed(1);
+
+            document.getElementById('calc-cmd-time').innerText = `${cmdHours} Hours`;
+            document.getElementById('calc-sub-time').innerText = `${squadHours} Hours`;
+
+            // Compile dynamic live summary data report
+            const friendlyTask = document.getElementById('m-friendly-task').value;
+            const enemyEffect = document.getElementById('m-enemy-effect').value;
+            const intentPurpose = document.getElementById('m-intent-purpose').value;
+            const who = document.getElementById('w-who').value;
+            const what = document.getElementById('w-what').value;
+            const when = document.getElementById('w-when').value;
+            const where = document.getElementById('w-where').value;
+            const why = document.getElementById('w-why').value;
+            
+            const enemyDisp = document.getElementById('e-disposition').value;
+            const keyTerrain = document.getElementById('t-key-terrain').value;
+            const troopLog = document.getElementById('tr-logistics-status').value;
+            const civRisk = document.getElementById('c-risk-index').value;
+
+            let coreReport = `[MISSION FRAMEWORK RESTATEMENT]:\n`;
+            coreReport += `• DESIGNATION Element: ${who}\n`;
+            coreReport += `• DOCTRINAL Task Line: ${friendlyTask.toUpperCase()} (${what})\n`;
+            coreReport += `• TARGET Enemy Effect: To ${enemyEffect.toUpperCase()}\n`;
+            coreReport += `• EXECUTION Window   : ${when} at [${where}]\n`;
+            coreReport += `• STRATEGIC Purpose  : In order to ${intentPurpose.toUpperCase()} (${why})\n\n`;
+            coreReport += `[TACTICAL SITUATION EVALUATION]:\n`;
+            coreReport += `• ENEMY DISPOSITION : ${enemyDisp}\n`;
+            coreReport += `• TERRAIN CORRIDOR  : ${keyTerrain}\n`;
+            coreReport += `• LOGISTICAL POOL   : ${troopLog}\n`;
+            coreReport += `• CIVILIAN RESTRAINT: ${civRisk}`;
+
+            document.getElementById('mett-live-summary-box').innerText = coreReport;
+
+            // Compile TLP Step 2 Warning Order live text block
+            let warnoTemplate = `WARNORD // FLASH TRANSMISSION DIRECTIVE\n`;
+            warnoTemplate += `DOCUMENT TYPE: PRELIMINARY PLANNING OUTLINE MATRIX\n`;
+            warnoTemplate += `TARGET ACTION ELEMENT: ${who}\n`;
+            warnoTemplate += `INITIAL INSTRUCTIONS: Subordinate units enforce immediate prep alerts. Tactical maneuver assigned is ${friendlyTask.toUpperCase()}.\n`;
+            warnoTemplate += `TIMELINE BOUNDS: H-Hour total limit maps at ${totalHoursInput} Hours. Immediate 1/3 rule enforces Commander planning cessation at H-${cmdHours} Hours. Subordinate units assume full prep control vector for remaining ${squadHours} Hours.`;
+
+            document.getElementById('mett-live-warno-box').innerText = warnoTemplate;
         }
 
         function syncInterface() {
@@ -903,11 +1177,9 @@
             } else if (STATE.mode === 'path') {
                 if (STATE.pStyle === 'straight') {
                     isInteracting = true;
-                    // FIX: Path now strictly inherits the faction drawing it
                     activePathBuilding = { id: Math.random(), type: 'straight', faction: STATE.faction, points: [pt, {x: pt.x, y: pt.y}] };
                 } else if (STATE.pStyle === 'stencil') {
                     if (!activePathBuilding) {
-                        // FIX: Path now strictly inherits the faction drawing it
                         activePathBuilding = { id: Math.random(), type: 'stencil', faction: STATE.faction, points: [pt] };
                         pushTerminalLog(`Began interconnected ${STATE.faction}-locked elbow stencil trace layout.`);
                     } else {
@@ -996,7 +1268,6 @@
             return { dist: Math.hypot(p.x - interceptPoint.x, p.y - interceptPoint.y), point: interceptPoint, t: t };
         }
 
-        // FIX: The proximity engine now strictly isolates and searches only paths matching the unit's faction
         function bindUnitsToRoutes() {
             const activePhase = STATE.phases[STATE.phaseIdx];
             activePhase.assets.forEach(asset => {
@@ -1006,7 +1277,6 @@
                 let bestSegmentIdx = 0;
                 let bestInterceptPoint = null;
 
-                // CRITICAL FILTER: Ignore all paths that do not belong to this unit's faction
                 const factionCompatiblePaths = activePhase.paths.filter(path => path.faction === asset.faction);
 
                 factionCompatiblePaths.forEach(path => {
@@ -1193,20 +1463,11 @@
             ctx.restore();
         }
 
-        function strokePathPoints(pts) {
-            ctx.beginPath();
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for(let i = 1; i < pts.length; i++) {
-                ctx.lineTo(pts[i].x, pts[i].y);
-            }
-            ctx.stroke();
-        }
-
         function createHatchPattern(color) {
             const pCanvas = document.createElement('canvas'); pCanvas.width = 12; pCanvas.height = 12;
-            const pCtx = pCanvas.getContext('2d');
-            pCtx.strokeStyle = color; pCtx.lineWidth = 1.5;
-            pCtx.beginPath(); pCtx.moveTo(0, 0); pCtx.lineTo(12, 12); pCtx.stroke();
+            const pCanvasCtx = pCanvas.getContext('2d');
+            pCanvasCtx.strokeStyle = color; pCanvasCtx.lineWidth = 1.5;
+            pCanvasCtx.beginPath(); pCanvasCtx.moveTo(0, 0); pCanvasCtx.lineTo(12, 12); pCanvasCtx.stroke();
             return ctx.createPattern(pCanvas, 'repeat');
         }
 
@@ -1231,7 +1492,6 @@
                 for(let i = 1; i < path.points.length; i++) ctx.lineTo(path.points[i].x, path.points[i].y);
                 ctx.stroke();
 
-                // FIX: Path color matches its assigned faction instead of defaulting to generic blue
                 ctx.strokeStyle = COLORS[path.faction] || '#00f2fe';
                 ctx.lineWidth = 1.5;
                 ctx.setLineDash([8, 6]);
@@ -1248,7 +1508,6 @@
             if (activePathBuilding) {
                 ctx.save();
                 ctx.lineWidth = 1.5;
-                // FIX: Path preview colored by active drawing faction
                 ctx.strokeStyle = COLORS[activePathBuilding.faction] + '88';
                 ctx.setLineDash([4, 4]);
                 ctx.beginPath();
@@ -1381,17 +1640,17 @@
 
         function createStripedPattern(color) {
             const pCanvas = document.createElement('canvas'); pCanvas.width = 16; pCanvas.height = 16;
-            const pCtx = pCanvas.getContext('2d');
-            pCtx.strokeStyle = color + '22'; pCtx.lineWidth = 1;
-            pCtx.beginPath(); pCtx.moveTo(0, 16); pCtx.lineTo(16, 0); pCtx.stroke();
+            const pCanvasCtx = pCanvas.getContext('2d');
+            pCanvasCtx.strokeStyle = color + '22'; pCanvasCtx.lineWidth = 1;
+            pCanvasCtx.beginPath(); pCanvasCtx.moveTo(0, 16); pCanvasCtx.lineTo(16, 0); pCanvasCtx.stroke();
             return ctx.createPattern(pCanvas, 'repeat');
         }
 
         function createGridPattern(color) {
             const pCanvas = document.createElement('canvas'); pCanvas.width = 14; pCanvas.height = 14;
-            const pCtx = pCanvas.getContext('2d');
-            pCtx.strokeStyle = color + '18'; pCtx.lineWidth = 1;
-            pCtx.strokeRect(0, 0, 14, 14);
+            const pCanvasCtx = pCanvas.getContext('2d');
+            pCanvasCtx.strokeStyle = color + '18'; pCanvasCtx.lineWidth = 1;
+            pCanvasCtx.strokeRect(0, 0, 14, 14);
             return ctx.createPattern(pCanvas, 'repeat');
         }
 
