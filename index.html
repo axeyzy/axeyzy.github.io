@@ -532,6 +532,8 @@
                     <div class="section-title" style="color:#ffcc00">LIVE ANALYSIS SYNOPSIS ASSESSMENT REPORT</div>
                     <div class="live-output-card" id="mett-live-summary-box">Awaiting operational framework updates...</div>
 
+                    <button id="mett-map-generate-btn" style="border-color:#ffcc00; color:#ffcc00; font-size:10px; width:100%; text-align:center; padding:12px; font-weight:bold; background:rgba(255,204,0,0.05);">⚡ AUTO-GENERATE OPTIONAL MAP MATRIX PLAN</button>
+
                     <div class="section-title" style="color:#00ffaa">TROOP LEADING PROCEDURES (TLP) STEP 2 STATUS VECTOR</div>
                     <div class="live-output-card tlp-highlight" id="mett-live-warno-box">Generating Warning Order metrics...</div>
                 </div>
@@ -798,7 +800,6 @@
             systemHistoryIdx++;
         }
 
-        // Dedicated snapshot registry to prevent carryover desynchronizations
         function capturePhaseSnapshot(index) {
             const phase = STATE.phases[index];
             if (!phase) return;
@@ -814,7 +815,6 @@
             transOldIdx = STATE.phaseIdx;
             transNewIdx = newIdx;
             
-            // Lock positioning data exactly before running the slide panel sweep
             capturePhaseSnapshot(transNewIdx);
             
             transitionState = 1;
@@ -994,8 +994,106 @@
             ctx.restore();
         }
 
+        // OPTIONAL: Automated Intelligence Mapper Pipeline Translation Engine
+        function executeMettToMapOptionalGeneration() {
+            recordState();
+            
+            const activePhase = STATE.phases[STATE.phaseIdx];
+            
+            // Safe clean layout sweeps before writing intelligence plan data
+            activePhase.assets = [];
+            activePhase.zones = [];
+            activePhase.paths = [];
+            
+            const taskAction = document.getElementById('m-friendly-task').value;
+            const enemyEffect = document.getElementById('m-enemy-effect').value;
+            const mapSectorKeyword = document.getElementById('w-where').value.toUpperCase();
+            const terrainInputText = document.getElementById('t-key-terrain').value.toLowerCase();
+
+            pushTerminalLog(`INTELLIGENCE INJECTION RUNNING: PARSING METT-TC FIELDS FOR COGNITIVE PLACEMENT...`);
+
+            // 1. Plot Tactical Faction Boundaries
+            let focusX = canvas.width / 2;
+            let focusY = canvas.height / 2;
+
+            if (taskAction === "Attack by Fire" || taskAction === "Seize") {
+                // Generate a highly visible tactical priority objective zone
+                activePhase.zones.push({
+                    type: 'circle',
+                    style: 'noman',
+                    fx: focusX, fy: focusY,
+                    tx: focusX + 75, ty: focusY + 75,
+                    faction: 'TARGET'
+                });
+                
+                // Deploy explicit high-value target assets centered right inside that circle bounds
+                activePhase.assets.push({
+                    id: Math.random(), x: focusX, y: focusY, spawnX: focusX, spawnY: focusY,
+                    faction: 'TARGET', type: 'Tank', kia: false
+                });
+            } else {
+                activePhase.zones.push({
+                    type: 'rect',
+                    style: 'fob',
+                    fx: focusX - 100, fy: focusY - 60,
+                    tx: focusX + 100, ty: focusY + 60,
+                    faction: 'ALLY'
+                });
+            }
+
+            // 2. Deploy Combat Ready Friendly Elements natively from Left boundary entry corridors
+            let spawnBaselineY = 120;
+            activePhase.assets.push({
+                id: Math.random(), x: 80, y: spawnBaselineY, spawnX: 80, spawnY: spawnBaselineY,
+                faction: 'GAR', type: 'Infantry', kia: false
+            });
+            activePhase.assets.push({
+                id: Math.random(), x: 80, y: spawnBaselineY + 80, spawnX: 80, spawnY: spawnBaselineY + 80,
+                faction: 'GAR', type: 'Specialist', kia: false
+            });
+            activePhase.assets.push({
+                id: Math.random(), x: 60, y: spawnBaselineY + 160, spawnX: 60, spawnY: spawnBaselineY + 160,
+                faction: 'GAR', type: 'ATTE', kia: false
+            });
+
+            // 3. Deploy Hostile Entities based on parameters read from text field registries
+            let opforX = canvas.width - 150;
+            activePhase.assets.push({
+                id: Math.random(), x: opforX, y: 160, spawnX: opforX, spawnY: 160,
+                faction: 'OPFOR', type: 'Tank', kia: false
+            });
+            activePhase.assets.push({
+                id: Math.random(), x: opforX, y: 300, spawnX: opforX, spawnY: 300,
+                faction: 'OPFOR', type: 'Armoured', kia: false
+            });
+
+            // 4. Trace Automated Guidelines if text patterns indicate obstacle formations
+            if (terrainInputText.includes("trench") || terrainInputText.includes("ridge")) {
+                let obstacleY = focusY - 40;
+                let obstaclePoints = [{x: focusX - 80, y: obstacleY}, {x: focusX + 80, y: obstacleY + 20}];
+                
+                if (!activePhase.terrain) activePhase.terrain = [];
+                activePhase.terrain.push({
+                    type: terrainInputText.includes("trench") ? 'trench' : 'ridge',
+                    points: obstaclePoints
+                });
+            }
+
+            // Ensure our crucial Reset protection system registers the newly mapped coordinate map data instantly
+            capturePhaseSnapshot(STATE.phaseIdx);
+            
+            pushTerminalLog(`SUCCESS: METT-TC INTELLIGENCE GRAPH OPTIONALLY INJECTED INTO ACTIVE MATRIX VIEW.`);
+            
+            // Switch tabs gracefully back to geospatial layout viewer screen
+            toggleGlobalWorkspaceMode('map');
+            syncInterface();
+        }
+
         function attachInterfaceListeners() {
             document.getElementById('ctrl-record').addEventListener('click', toggleRecording);
+
+            // NEW: Optional Translation Engine click handler assignment
+            document.getElementById('mett-map-generate-btn').addEventListener('click', executeMettToMapOptionalGeneration);
 
             document.getElementById('op-label').addEventListener('click', () => {
                 const newOpName = prompt("ENTER NEW STRATEGIC OPERATION IDENTIFIER:", STATE.opName);
@@ -1070,7 +1168,6 @@
                 if(!STATE.animating) { 
                     if(activePathBuilding) commitCurrentPath();
                     
-                    // Always make sure snapshot state parameters match layout boundaries right before execution
                     capturePhaseSnapshot(STATE.phaseIdx);
                     
                     bindUnitsToRoutes();
@@ -1085,7 +1182,6 @@
                 recordState();
                 const activePhase = STATE.phases[STATE.phaseIdx];
                 
-                // Decisive Fix: Reset positions using the immutable phase tab snap history cache block
                 if (activePhase.initialPhasePositions && activePhase.initialPhasePositions.length > 0) {
                     activePhase.assets.forEach(a => {
                         const originalPos = activePhase.initialPhasePositions.find(snap => snap.id === a.id);
@@ -1098,7 +1194,6 @@
                         a.runtimePoints = null;
                     });
                 } else {
-                    // Fallback to local properties if snapshot mapping hasn't triggered yet
                     activePhase.assets.forEach(a => { 
                         a.x = a.spawnX; 
                         a.y = a.spawnY;
@@ -1173,7 +1268,6 @@
                     current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
                     pushTerminalLog("Target micro-unit removed from operational memory.");
                     
-                    // Re-calculate local phase tracking history parameters instantly
                     capturePhaseSnapshot(STATE.phaseIdx);
                     
                     STATE.selectedId = null;
@@ -1377,7 +1471,6 @@
                     };
                     activePhase.assets.push(created);
                     
-                    // Track position natively into initial snap registries
                     capturePhaseSnapshot(STATE.phaseIdx);
                     
                     STATE.selectedId = created.id;
@@ -1441,7 +1534,6 @@
             if (STATE.animating || transitionState > 0) return;
             
             if (STATE.mode === 'deploy' && dragAnchor) {
-                // Keep local snapshots clean when finishing drag actions
                 capturePhaseSnapshot(STATE.phaseIdx);
             }
             
