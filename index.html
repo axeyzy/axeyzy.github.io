@@ -691,7 +691,7 @@
                     ctx.strokeStyle = "rgba(var(--theme-color-rgb), 0.08)";
                     ctx.lineWidth = 2;
                     ctx.beginPath(); ctx.arc(w/2, h/2, 90, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                    ctx.beginPath(); ctx.arc(w/2, h/2, 45, 0, Math.PI * 2); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(w/2, h/2, 45, 0, Math.PI * 2); stroke();
                 }
             },
             
@@ -994,39 +994,42 @@
             ctx.restore();
         }
 
-        // OPTIONAL: Automated Intelligence Mapper Pipeline Translation Engine
+        // REPAIRED: Automated Intelligence Mapper Dynamic Interpreter Pipeline
         function executeMettToMapOptionalGeneration() {
+            // Push active timeline states cleanly into system history nodes first
             recordState();
             
             const activePhase = STATE.phases[STATE.phaseIdx];
             
-            // Safe clean layout sweeps before writing intelligence plan data
+            // Clean active field grids completely before assigning custom calculations
             activePhase.assets = [];
             activePhase.zones = [];
             activePhase.paths = [];
+            activePhase.terrain = [];
             
+            // Dynamic Selector Parser: Safely grab real-time parameters from inputs
             const taskAction = document.getElementById('m-friendly-task').value;
-            const enemyEffect = document.getElementById('m-enemy-effect').value;
-            const mapSectorKeyword = document.getElementById('w-where').value.toUpperCase();
-            const terrainInputText = document.getElementById('t-key-terrain').value.toLowerCase();
+            const terrainInputText = (document.getElementById('t-key-terrain').value || "").toLowerCase();
+            const rawLocation = (document.getElementById('w-where').value || "").toUpperCase();
 
-            pushTerminalLog(`INTELLIGENCE INJECTION RUNNING: PARSING METT-TC FIELDS FOR COGNITIVE PLACEMENT...`);
+            pushTerminalLog(`INTELLIGENCE INJECTION RUNNING: CALCULATING USER-ADJUSTED PARAMETERS...`);
 
-            // 1. Plot Tactical Faction Boundaries
             let focusX = canvas.width / 2;
             let focusY = canvas.height / 2;
 
-            if (taskAction === "Attack by Fire" || taskAction === "Seize") {
-                // Generate a highly visible tactical priority objective zone
+            if (isNaN(focusX) || focusX <= 0) focusX = 400;
+            if (isNaN(focusY) || focusY <= 0) focusY = 300;
+
+            // 1. Plot Tactical Faction Boundaries using Dynamic Mappings
+            if (taskAction === "Attack by Fire" || taskAction === "Seize" || taskAction === "Secure") {
                 activePhase.zones.push({
                     type: 'circle',
                     style: 'noman',
                     fx: focusX, fy: focusY,
-                    tx: focusX + 75, ty: focusY + 75,
+                    tx: focusX + 80, ty: focusY + 80,
                     faction: 'TARGET'
                 });
                 
-                // Deploy explicit high-value target assets centered right inside that circle bounds
                 activePhase.assets.push({
                     id: Math.random(), x: focusX, y: focusY, spawnX: focusX, spawnY: focusY,
                     faction: 'TARGET', type: 'Tank', kia: false
@@ -1035,64 +1038,70 @@
                 activePhase.zones.push({
                     type: 'rect',
                     style: 'fob',
-                    fx: focusX - 100, fy: focusY - 60,
-                    tx: focusX + 100, ty: focusY + 60,
+                    fx: focusX - 120, fy: focusY - 70,
+                    tx: focusX + 120, ty: focusY + 70,
                     faction: 'ALLY'
                 });
             }
 
-            // 2. Deploy Combat Ready Friendly Elements natively from Left boundary entry corridors
+            // 2. Deploy friendly forces safely structured from left margin corridors
             let spawnBaselineY = 120;
             activePhase.assets.push({
-                id: Math.random(), x: 80, y: spawnBaselineY, spawnX: 80, spawnY: spawnBaselineY,
+                id: Math.random(), x: 90, y: spawnBaselineY, spawnX: 90, spawnY: spawnBaselineY,
                 faction: 'GAR', type: 'Infantry', kia: false
             });
             activePhase.assets.push({
-                id: Math.random(), x: 80, y: spawnBaselineY + 80, spawnX: 80, spawnY: spawnBaselineY + 80,
+                id: Math.random(), x: 90, y: spawnBaselineY + 80, spawnX: 90, spawnY: spawnBaselineY + 80,
                 faction: 'GAR', type: 'Specialist', kia: false
             });
             activePhase.assets.push({
-                id: Math.random(), x: 60, y: spawnBaselineY + 160, spawnX: 60, spawnY: spawnBaselineY + 160,
+                id: Math.random(), x: 70, y: spawnBaselineY + 160, spawnX: 70, spawnY: spawnBaselineY + 160,
                 faction: 'GAR', type: 'ATTE', kia: false
             });
 
-            // 3. Deploy Hostile Entities based on parameters read from text field registries
-            let opforX = canvas.width - 150;
+            // 3. Spawning opposing team assets mapped into east zone sectors
+            let opforX = canvas.width > 200 ? canvas.width - 160 : 640;
             activePhase.assets.push({
-                id: Math.random(), x: opforX, y: 160, spawnX: opforX, spawnY: 160,
+                id: Math.random(), x: opforX, y: 180, spawnX: opforX, spawnY: 180,
                 faction: 'OPFOR', type: 'Tank', kia: false
             });
             activePhase.assets.push({
-                id: Math.random(), x: opforX, y: 300, spawnX: opforX, spawnY: 300,
+                id: Math.random(), x: opforX, y: 320, spawnX: opforX, spawnY: 320,
                 faction: 'OPFOR', type: 'Armoured', kia: false
             });
 
-            // 4. Trace Automated Guidelines if text patterns indicate obstacle formations
-            if (terrainInputText.includes("trench") || terrainInputText.includes("ridge")) {
-                let obstacleY = focusY - 40;
-                let obstaclePoints = [{x: focusX - 80, y: obstacleY}, {x: focusX + 80, y: obstacleY + 20}];
-                
-                if (!activePhase.terrain) activePhase.terrain = [];
+            // 4. Custom Keyword Obstacle Parser Matrix (OAKOC Layer Mapping)
+            if (terrainInputText.includes("trench") || terrainInputText.includes("fortified")) {
                 activePhase.terrain.push({
-                    type: terrainInputText.includes("trench") ? 'trench' : 'ridge',
-                    points: obstaclePoints
+                    type: 'trench',
+                    points: [{x: focusX - 100, y: focusY - 110}, {x: focusX + 100, y: focusY - 110}]
+                });
+            } 
+            if (terrainInputText.includes("ridge") || terrainInputText.includes("canyon") || terrainInputText.includes("hills")) {
+                activePhase.terrain.push({
+                    type: 'ridge',
+                    points: [{x: focusX - 150, y: focusY + 120}, {x: focusX + 150, y: focusY + 100}]
+                });
+            }
+            if (terrainInputText.includes("hazard") || terrainInputText.includes("plasma")) {
+                activePhase.terrain.push({
+                    type: 'hazard',
+                    points: [{x: focusX - 200, y: 80}, {x: focusX + 200, y: 80}]
                 });
             }
 
-            // Ensure our crucial Reset protection system registers the newly mapped coordinate map data instantly
+            // CRITICAL RESET FIX: Immediately map newly calculated positions into cache array snapshot loops
             capturePhaseSnapshot(STATE.phaseIdx);
             
-            pushTerminalLog(`SUCCESS: METT-TC INTELLIGENCE GRAPH OPTIONALLY INJECTED INTO ACTIVE MATRIX VIEW.`);
+            pushTerminalLog(`SUCCESS: METT-TC CALCULATIONS SYNCHRONIZED AND RENDERED TO THEATER GRID.`);
             
-            // Switch tabs gracefully back to geospatial layout viewer screen
+            // Re-route UI tabs cleanly back onto spatial viewport layout screens
             toggleGlobalWorkspaceMode('map');
             syncInterface();
         }
 
         function attachInterfaceListeners() {
             document.getElementById('ctrl-record').addEventListener('click', toggleRecording);
-
-            // NEW: Optional Translation Engine click handler assignment
             document.getElementById('mett-map-generate-btn').addEventListener('click', executeMettToMapOptionalGeneration);
 
             document.getElementById('op-label').addEventListener('click', () => {
