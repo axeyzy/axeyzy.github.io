@@ -183,6 +183,10 @@
             padding: 12px; font-size: 10px; color: var(--theme-color); overflow-y: auto;
             position: relative; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
         }
+        .log-terminal::-webkit-scrollbar { width: 6px; }
+        .log-terminal::-webkit-scrollbar-thumb { background: #122236; border-radius: 3px; }
+        .log-terminal::-webkit-scrollbar-thumb:hover { background: var(--theme-color); }
+        
         .log-line { margin-bottom: 4px; display: flex; gap: 12px; line-height: 1.2; font-weight: 500;}
         .log-time { color: #43586d; font-weight: normal; }
         .log-alert { color: #ff3366; text-shadow: 0 0 4px #ff3366; }
@@ -662,7 +666,7 @@
                     const roots = [{x:100, y:400}, {x:350, y:300}, {x:650, y:450}];
                     roots.forEach(r => {
                         for(let rad = 30; rad < 140; rad += 25) {
-                            ctx.beginPath(); ctx.arc(r.x, r.y, rad, 0, Math.PI*2); ctx.stroke();
+                            ctx.beginPath(); ctx.arc(r.x, r.y, rad, 0, Math.PI * 2); ctx.stroke();
                         }
                     });
                 }
@@ -684,8 +688,8 @@
                     ctx.fillStyle = "rgba(4, 9, 20, 0.8)";
                     ctx.strokeStyle = "rgba(var(--theme-color-rgb), 0.08)";
                     ctx.lineWidth = 2;
-                    ctx.beginPath(); ctx.arc(w/2, h/2, 90, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-                    ctx.beginPath(); ctx.arc(w/2, h/2, 45, 0, Math.PI*2); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(w/2, h/2, 90, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(w/2, h/2, 45, 0, Math.PI * 2); ctx.stroke();
                 }
             },
             
@@ -1051,6 +1055,8 @@
                     if(activePathBuilding) commitCurrentPath();
                     
                     const activePhase = STATE.phases[STATE.phaseIdx];
+                    
+                    // Core Fix: Caching deep references to the initial position right before simulation executes
                     activePhase.assets.forEach(a => {
                         a.x = a.spawnX;
                         a.y = a.spawnY;
@@ -1066,7 +1072,10 @@
 
             document.getElementById('ctrl-reset').addEventListener('click', () => {
                 recordState();
-                STATE.phases[STATE.phaseIdx].assets.forEach(a => { 
+                const activePhase = STATE.phases[STATE.phaseIdx];
+                
+                // Fixed Reset Engine: Pull exclusively from spawn coordinates, safe from empty route structures
+                activePhase.assets.forEach(a => { 
                     a.x = a.spawnX; 
                     a.y = a.spawnY;
                     a.runtimePoints = null; 
@@ -1074,7 +1083,7 @@
                 STATE.animating = false;
                 STATE.animProgress = 0;
                 document.getElementById('ctrl-play').classList.remove('active');
-                pushTerminalLog("Simulation coordinates hard-reset to original deployment nodes.");
+                pushTerminalLog("Simulation coordinates hard-reset to original phase deployment nodes.");
                 syncInterface();
             });
 
@@ -1454,12 +1463,11 @@
                     const startNode = path.points[0];
                     const endNode = path.points[path.points.length - 1];
                     
-                    // Proximity-Locked Gate Check: Unit must sit exactly at the Start or End tip of the vector route
                     const distanceToStartTip = Math.hypot(asset.x - startNode.x, asset.y - startNode.y);
                     const distanceToEndTip = Math.hypot(asset.x - endNode.x, asset.y - endNode.y);
                     
                     if (distanceToStartTip > 35 && distanceToEndTip > 35) {
-                        return; // Ignore units dropped into the middle entirely
+                        return; 
                     }
 
                     for(let i = 0; i < path.points.length - 1; i++) {
@@ -1528,8 +1536,8 @@
                 ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(size + 8, 0); ctx.lineWidth = 3; ctx.stroke();
             } else if (type === 'ATTE') {
                 ctx.beginPath();
-                ctx.arc(-size, -size + 4, 3, 0, Math.PI*2); ctx.arc(0, -size + 2, 3, 0, Math.PI*2); ctx.arc(size, -size + 4, 3, 0, Math.PI*2);
-                ctx.arc(-size, size - 4, 3, 0, Math.PI*2); ctx.arc(0, size - 2, 3, 0, Math.PI*2); ctx.arc(size, size - 4, 3, 0, Math.PI*2);
+                ctx.arc(-size, -size + 4, 3, 0, Math.PI * 2); ctx.arc(0, -size + 2, 3, 0, Math.PI * 2); ctx.arc(size, -size + 4, 3, 0, Math.PI * 2);
+                ctx.arc(-size, size - 4, 3, 0, Math.PI * 2); ctx.arc(0, size - 2, 3, 0, Math.PI * 2); ctx.arc(size, size - 4, 3, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.beginPath();
                 ctx.moveTo(-size, -size + 4); ctx.lineTo(size, -size + 4); ctx.lineTo(size + 6, 0); ctx.lineTo(size, size - 4); ctx.lineTo(-size, size - 4); ctx.closePath();
@@ -1813,7 +1821,6 @@
                     if (isRecording && STATE.phaseIdx < STATE.phases.length - 1) {
                         const nextIndex = STATE.phaseIdx + 1;
                         
-                        // Pass Kinetic Positioning Coordinates straight into the next phase deployment map layer
                         STATE.phases[nextIndex].assets.forEach(nextAsset => {
                             const matchingCurrentAsset = activePhase.assets.find(currAsset => currAsset.type === nextAsset.type && currAsset.faction === nextAsset.faction);
                             if (matchingCurrentAsset) {
