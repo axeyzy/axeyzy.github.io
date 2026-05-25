@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical Commander // Operational Core v3.8</title>
+    <title>Tactical Commander // Operational Core v4.0</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
@@ -249,7 +249,7 @@
     <div class="header">
         <div class="op-title">
             <div class="op-indicator"></div>
-            <span class="op-name" id="op-label">SYS.MAIN // RECON_V3.8 // SECURE</span>
+            <span class="op-name" id="op-label">SYS.MAIN // RECON_V4.0 // SECURE</span>
         </div>
         <div class="controls">
             <div class="control-group">
@@ -308,10 +308,11 @@
                 </div>
 
                 <div class="section">
-                    <div class="section-title">TERRAIN STRUCTURE</div>
+                    <div class="section-title">ENVIRONMENT OBJECT TYPE</div>
                     <div class="button-grid">
-                        <button class="terrain-btn" data-tstyle="trench">TRENCH LINE</button>
-                        <button class="terrain-btn" data-tstyle="ridge">ELEVATED RIDGE</button>
+                        <button class="terrain-btn" data-tstyle="trench" style="color: #00f2fe;">FORTIFIED TRENCH</button>
+                        <button class="terrain-btn" data-tstyle="ridge" style="color: #ff9f1c;">CANYON CHOKE</button>
+                        <button class="terrain-btn" data-tstyle="hazard" style="color: #ff3366;">PLASMA HAZARD</button>
                     </div>
                 </div>
 
@@ -358,7 +359,7 @@
             </div>
             <!-- REAL-TIME CONSOLE FEED -->
             <div class="log-terminal" id="system-log">
-                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // BASILINE STRUCTURAL MATRIX ONLINE v3.8</div>
+                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // ENVIRONMENTAL MATRIX UPDATE v4.0 ENGAGED</div>
             </div>
         </div>
 
@@ -422,24 +423,22 @@
     <script>
         const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TARGET: '#ffcc00' };
 
-        // PLANETARY PRESET PROFILES DATA MATRIX WITH PROURAL SATELLITE CONTOUR RENDERING CONTEXTS
+        // PLANETARY PRESET PROFILES DATA MATRIX WITH PROCEDURAL SATELLITE CONTOUR RENDERING CONTEXTS
         const THEATERS = {
             default: { name: "CORE BASILINE MATRIX", bg: "#010306", gridColor: "rgba(0, 242, 254, 0.012)", drawSatelliteMap: null, terrain: [] },
             
             christophsis: { 
                 name: "THEATER: CHRISTOPHSIS // URBAN CRYSTAL MESH", bg: "#020712", gridColor: "rgba(0, 242, 254, 0.03)",
                 terrain: [
-                    { type: 'ridge', points: [{x:100, y:80}, {x:220, y:80}, {x:220, y:240}, {x:100, y:240}, {x:100, y:80}] },
-                    { type: 'ridge', points: [{x:450, y:250}, {x:570, y:250}, {x:570, y:410}, {x:450, y:410}, {x:450, y:250}] }
+                    { type: 'trench', points: [{x:100, y:80}, {x:220, y:80}, {x:220, y:240}, {x:100, y:240}] },
+                    { type: 'ridge', points: [{x:450, y:250}, {x:570, y:250}, {x:570, y:410}, {x:450, y:410}] }
                 ],
                 drawSatelliteMap: (ctx, w, h) => {
-                    // Angular geometric building blocks & crystal layout scans
                     ctx.fillStyle = "rgba(0, 242, 254, 0.015)";
                     for(let i = 0; i < w; i += 80) {
                         ctx.fillRect(i, 0, 30, h);
                         ctx.fillRect(0, i, w, 30);
                     }
-                    // Crystalline structures and central plaza hex contours
                     ctx.strokeStyle = "rgba(0, 242, 254, 0.05)";
                     ctx.lineWidth = 1;
                     for (let r = 100; r < 500; r += 120) {
@@ -457,10 +456,9 @@
                 name: "THEATER: RYLOTH // TRENCH OUTPOST MESH", bg: "#120b05", gridColor: "rgba(255, 159, 28, 0.02)",
                 terrain: [
                     { type: 'trench', points: [{x:50, y:200}, {x:250, y:230}, {x:400, y:120}] },
-                    { type: 'trench', points: [{x:300, y:380}, {x:550, y:350}, {x:650, y:450}] }
+                    { type: 'ridge', points: [{x:300, y:380}, {x:550, y:350}, {x:650, y:450}] }
                 ],
                 drawSatelliteMap: (ctx, w, h) => {
-                    // Wavy topo map ridge curves and canyons
                     ctx.strokeStyle = "rgba(255, 159, 28, 0.03)";
                     ctx.lineWidth = 1.5;
                     for(let i = -200; i < h; i += 60) {
@@ -469,7 +467,6 @@
                         ctx.bezierCurveTo(w * 0.25, i + 120, w * 0.75, i - 120, w, i + 50);
                         ctx.stroke();
                     }
-                    // Rocky mesa heat spots
                     ctx.fillStyle = "rgba(255, 159, 28, 0.01)";
                     ctx.beginPath(); ctx.arc(w*0.2, h*0.3, 140, 0, Math.PI*2); ctx.fill();
                     ctx.beginPath(); ctx.arc(w*0.8, h*0.7, 180, 0, Math.PI*2); ctx.fill();
@@ -479,19 +476,16 @@
             kashyyyk: { 
                 name: "THEATER: KASHYYYK // KACHIRO BEACHHEAD", bg: "#031206", gridColor: "rgba(0, 255, 170, 0.02)",
                 terrain: [
-                    { type: 'ridge', points: [{x:0, y:150}, {x:180, y:180}, {x:350, y:130}, {x:550, y:200}, {x:800, y:160}] }
+                    { type: 'hazard', points: [{x:0, y:150}, {x:220, y:180}, {x:450, y:130}, {x:800, y:160}] }
                 ],
                 drawSatelliteMap: (ctx, w, h) => {
-                    // Tree canopy concentric topography circles and shoreline contours
                     ctx.strokeStyle = "rgba(0, 255, 170, 0.025)";
                     ctx.lineWidth = 1;
-                    // Shoreline depth vectors
                     for (let d = 0; d < 80; d += 20) {
                         ctx.beginPath();
                         ctx.moveTo(0, 150 + d); ctx.bezierCurveTo(200, 190 + d, 400, 110 + d, w, 170 + d);
                         ctx.stroke();
                     }
-                    // Massive Wroshyr tree trunk clusters (Topographic mounds)
                     const roots = [{x:100, y:400}, {x:350, y:300}, {x:650, y:450}];
                     roots.forEach(r => {
                         for(let rad = 30; rad < 140; rad += 25) {
@@ -508,15 +502,12 @@
                     { type: 'trench', points: [{x:500, y:0}, {x:500, y:500}] }
                 ],
                 drawSatelliteMap: (ctx, w, h) => {
-                    // Megacity grid-lines, structural blocks and sky-car lanes
                     ctx.strokeStyle = "rgba(209, 223, 236, 0.04)";
                     ctx.lineWidth = 0.5;
-                    // Densely nested infrastructure footprints
                     for (let i = 0; i < w; i += 40) {
                         ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
                         ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke();
                     }
-                    // Giant circular ventilation or turbo-lift shaft layout vectors
                     ctx.fillStyle = "rgba(4, 9, 20, 0.8)";
                     ctx.strokeStyle = "rgba(0, 242, 254, 0.08)";
                     ctx.lineWidth = 2;
@@ -532,13 +523,10 @@
                     { type: 'ridge', points: [{x:200, y:360}, {x:450, y:360}] }
                 ],
                 drawSatelliteMap: (ctx, w, h) => {
-                    // Capital ship assembly dock lines and frame gantries
                     ctx.strokeStyle = "rgba(230, 57, 70, 0.03)";
                     ctx.lineWidth = 1.5;
-                    // Gantries sweeping down the sides
                     ctx.strokeRect(100, -50, 150, h + 100);
                     ctx.strokeRect(w - 250, -50, 150, h + 100);
-                    // Internal machinery diagonal strut layout patterns
                     ctx.lineWidth = 0.5;
                     ctx.beginPath();
                     for(let i = -h; i < w; i += 50) {
@@ -685,7 +673,6 @@
                 });
             });
 
-            // THEATER SELECTION ENGINE SWITCH
             document.querySelectorAll('.theater-btn').forEach(b => {
                 b.addEventListener('click', (e) => {
                     recordState();
@@ -924,7 +911,7 @@
                 dragAnchor = { type: STATE.tStyle, points: [pt] };
                 if(!activePhase.terrain) activePhase.terrain = [];
                 activePhase.terrain.push(dragAnchor);
-                pushTerminalLog(`Constructing strategic topography line: ${STATE.tStyle.toUpperCase()}`);
+                pushTerminalLog(`Mapping tactical environment object: ${STATE.tStyle.toUpperCase()}`);
             }
         }
 
@@ -945,7 +932,7 @@
                 activeZonePreview.ty = pt.y;
             } else if (STATE.mode === 'terrain' && isInteracting && dragAnchor) {
                 const lastPt = dragAnchor.points[dragAnchor.points.length - 1];
-                if (Math.hypot(pt.x - lastPt.x, pt.y - lastPt.y) > 15) {
+                if (Math.hypot(pt.x - lastPt.x, pt.y - lastPt.y) > 12) {
                     dragAnchor.points.push(pt);
                 }
             }
@@ -1066,12 +1053,10 @@
             ctx.fillStyle = theaterProfile.bg; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // SATELLITE TOPO RENDERING
             if(theaterProfile.drawSatelliteMap) {
                 theaterProfile.drawSatelliteMap(ctx, canvas.width, canvas.height);
             }
 
-            // GRID MATRIX OVERLAY
             if (STATE.gridOn) {
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = theaterProfile.gridColor;
@@ -1084,29 +1069,104 @@
             }
         }
 
+        // PROCEDURAL RADAR TERRAIN RENDERING HARNESS v4.0
+        function renderTacticalTerrain(t) {
+            if (!t.points || t.points.length < 2) return;
+            
+            ctx.save();
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+
+            if (t.type === 'trench') {
+                // Fortified Trench System: Heavy, dual-reinforced bunker channel walls
+                ctx.lineWidth = 26;
+                ctx.strokeStyle = "rgba(0, 242, 254, 0.05)";
+                strokePathPoints(t.points);
+
+                ctx.lineWidth = 16;
+                ctx.strokeStyle = "#08111e";
+                strokePathPoints(t.points);
+
+                // Structural structural reinforcement hatches
+                ctx.lineWidth = 14;
+                ctx.strokeStyle = createHatchPattern('#122b47');
+                strokePathPoints(t.points);
+
+                // Inner parapet path outline limits
+                ctx.lineWidth = 12;
+                ctx.strokeStyle = "rgba(0, 242, 254, 0.3)";
+                ctx.setLineDash([4, 12]);
+                strokePathPoints(t.points);
+                
+            } else if (t.type === 'ridge') {
+                // Canyon Chokepoint Cliffs: Nested structural topographic slope brackets
+                for (let w = 45; w >= 15; w -= 10) {
+                    ctx.lineWidth = w;
+                    ctx.strokeStyle = `rgba(255, 159, 28, ${0.03 + (45 - w) * 0.003})`;
+                    strokePathPoints(t.points);
+                }
+                // High ground edge alert parameters
+                ctx.lineWidth = 15;
+                ctx.strokeStyle = "rgba(255, 159, 28, 0.15)";
+                ctx.setLineDash([2, 8]);
+                strokePathPoints(t.points);
+
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "rgba(255, 159, 28, 0.4)";
+                ctx.setLineDash([]);
+                strokePathPoints(t.points);
+
+            } else if (t.type === 'hazard') {
+                // Unstable Energy Hazard/Deep Channels: Shifting neon threat zones
+                ctx.lineWidth = 35;
+                ctx.strokeStyle = "rgba(255, 51, 102, 0.04)";
+                strokePathPoints(t.points);
+
+                ctx.lineWidth = 20;
+                ctx.strokeStyle = "rgba(255, 51, 102, 0.12)";
+                strokePathPoints(t.points);
+
+                ctx.lineWidth = 8;
+                ctx.strokeStyle = "#1a050b";
+                strokePathPoints(t.points);
+
+                // Volatile core line core trace
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#ff3366";
+                ctx.setLineDash([30, 15]);
+                ctx.lineDashOffset = dynamicDashOffset * 2;
+                strokePathPoints(t.points);
+            }
+
+            ctx.restore();
+        }
+
+        function strokePathPoints(pts) {
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for(let i = 1; i < pts.length; i++) {
+                ctx.lineTo(pts[i].x, pts[i].y);
+            }
+            ctx.stroke();
+        }
+
+        function createHatchPattern(color) {
+            const pCanvas = document.createElement('canvas'); pCanvas.width = 12; pCanvas.height = 12;
+            const pCtx = pCanvas.getContext('2d');
+            pCtx.strokeStyle = color; pCtx.lineWidth = 1.5;
+            pCtx.beginPath(); pCtx.moveTo(0, 0); pCtx.lineTo(12, 12); pCtx.stroke();
+            return ctx.createPattern(pCanvas, 'repeat');
+        }
+
         function runRenderLoop() {
             dynamicDashOffset = (dynamicDashOffset - 0.5) % 24;
             renderCanvasGrid();
 
             const current = STATE.phases[STATE.phaseIdx];
 
-            // TERRAIN RENDERING DEPTH
+            // RENDER REWORKED TERRAIN ENVIRONMENT ELEMENTS
             if(current.terrain) {
-                current.terrain.forEach(t => {
-                    if (t.points.length < 2) return;
-                    ctx.save();
-                    ctx.lineWidth = t.type === 'trench' ? 7 : 12;
-                    ctx.strokeStyle = t.type === 'trench' ? '#0f1724' : '#211811';
-                    ctx.beginPath(); ctx.moveTo(t.points[0].x, t.points[0].y);
-                    for(let i=1; i<t.points.length; i++) ctx.lineTo(t.points[i].x, t.points[i].y);
-                    ctx.stroke();
-
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = t.type === 'trench' ? 'rgba(0, 242, 254, 0.15)' : 'rgba(255, 159, 28, 0.15)';
-                    ctx.setLineDash([3, 6]);
-                    ctx.stroke();
-                    ctx.restore();
-                });
+                current.terrain.forEach(t => renderTacticalTerrain(t));
             }
 
             // ZONE RENDERING LAYER
