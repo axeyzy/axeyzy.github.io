@@ -346,7 +346,7 @@
                 <div class="section">
                     <div class="section-title">ENVIRONMENT OBJECT TYPE</div>
                     <div class="button-grid">
-                        <button class="terrain-btn" data-tstyle="trench" style="color: #00f2fe;">FORTIFIED TRENCH</button>
+                        <button class="terrain-btn active" data-tstyle="trench" style="color: #00f2fe;">FORTIFIED TRENCH</button>
                         <button class="terrain-btn" data-tstyle="ridge" style="color: #ff9f1c;">CANYON CHOKE</button>
                         <button class="terrain-btn" data-tstyle="hazard" style="color: #ff3366;">PLASMA HAZARD</button>
                     </div>
@@ -584,7 +584,7 @@
     <script>
         const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TARGET: '#ffcc00' };
 
-        // Configuration map registry matching designated passwords to color strings
+        // Configuration registry matching keys to color specs and labels
         const LEGION_THEMES = {
             'BARC':  { color: '#ff3366', rgb: '255, 51, 102',  border: '#4a121f', label: "BARC COMMAND // STAGE RED" },
             '104TH': { color: '#8a9da8', rgb: '138, 157, 168', border: '#2b353c', label: "104TH WOLF PACK // STAGE GREY" },
@@ -717,16 +717,15 @@
         function verifyPasskey() {
             const inputCode = authInput.value.trim().toUpperCase();
             
-            // Intercept and load dynamic Legion profiles
+            // Validate and inject specific custom Legion Theme models
             if (LEGION_THEMES[inputCode]) {
                 const themeData = LEGION_THEMES[inputCode];
                 
-                // Set native root variables
                 document.documentElement.style.setProperty('--theme-color', themeData.color);
                 document.documentElement.style.setProperty('--theme-color-rgb', themeData.rgb);
                 document.documentElement.style.setProperty('--theme-border', themeData.border);
                 
-                // Expose strategic task console explicitly for legion authorization routes
+                // Expose operational planning interface explicitly
                 document.getElementById('global-tabs-row').style.display = 'flex';
                 
                 authScreen.classList.add('hidden');
@@ -737,7 +736,7 @@
                 return;
             }
 
-            // Standard baseline security entry gates
+            // Normal authorization fallbacks
             if (inputCode === 'AXEYZY' || inputCode === 'ADMIN' || inputCode === '') {
                 authScreen.classList.add('hidden');
                 
@@ -875,7 +874,7 @@
                     STATE.activeTheater = targetT;
                     
                     const profile = THEATERS[targetT];
-                    STATE.phases[STATE.phaseIdx].terrain = JSON.parse(JSON.stringify(profile.terrain));
+                    STATE.phases[STATE.phaseIdx].terrain = JSON.parse(JSON.stringify(profile.terrain || []));
                     
                     document.getElementById('op-label').innerText = `SYS.MAIN // ${profile.name} // SECURE`;
                     pushTerminalLog(`CONNECTED INTEL FEED: DOWNLINKING SATELLITE TOPO FOR ${targetT.toUpperCase()}`);
@@ -957,7 +956,7 @@
                 STATE.phases.push({ 
                     intel: `PHASE ${STATE.phases.length + 1} DIRECTIVES`, 
                     assets: [], zones: [], paths: [], 
-                    terrain: JSON.parse(JSON.stringify(profile.terrain)) 
+                    terrain: JSON.parse(JSON.stringify(profile.terrain || [])) 
                 });
                 STATE.phaseIdx = STATE.phases.length - 1;
                 pushTerminalLog(`New phase window mapped: Phase ${STATE.phaseIdx + 1}`);
@@ -1002,7 +1001,7 @@
                     recordState();
                     let current = STATE.phases[STATE.phaseIdx];
                     current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
-                    pushTerminalLog(`Target micro-unit removed from operational memory.`);
+                    pushTerminalLog("Target micro-unit removed from operational memory.");
                     STATE.selectedId = null;
                     syncInterface();
                 }
@@ -1121,7 +1120,7 @@
         function syncInterface() {
             legaliseControlState();
             const activePhase = STATE.phases[STATE.phaseIdx];
-            intelField.value = activePhase.intel;
+            intelField.value = activePhase.intel || '';
 
             phaseContainer.innerHTML = '';
             STATE.phases.forEach((p, idx) => {
@@ -1224,7 +1223,7 @@
                 recordState();
                 isInteracting = true;
                 dragAnchor = { type: STATE.tStyle, points: [pt] };
-                if(!activePhase.terrain) activePhase.terrain = [];
+                if (!activePhase.terrain) activePhase.terrain = [];
                 activePhase.terrain.push(dragAnchor);
                 pushTerminalLog(`Mapping tactical environment object: ${STATE.tStyle.toUpperCase()}`);
             }
@@ -1418,7 +1417,6 @@
 
             if (STATE.gridOn) {
                 ctx.lineWidth = 1;
-                // Read root layout parameters globally to adapt dynamically
                 ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() + '14';
                 for (let x = 0; x < canvas.width; x += 25) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
                 for (let y = 0; y < canvas.height; y += 25) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
@@ -1430,7 +1428,7 @@
         }
 
         function renderTacticalTerrain(t) {
-            if (!t.points || t.points.length < 2) return;
+            if (!t.points || t.points.length < 1) return;
             
             ctx.save();
             ctx.lineCap = "round";
@@ -1493,6 +1491,16 @@
             }
 
             ctx.restore();
+        }
+
+        function strokePathPoints(pts) {
+            if(pts.length === 0) return;
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for(let i = 1; i < pts.length; i++) {
+                ctx.lineTo(pts[i].x, pts[i].y);
+            }
+            ctx.stroke();
         }
 
         function createHatchPattern(color) {
