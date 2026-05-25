@@ -3,1149 +3,647 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical Commander // Operational Core v3.7</title>
+    <title>GAR Tactical Sandbox</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-        }
-
-        body {
-            font-family: 'JetBrains Mono', monospace;
-            background: #02050a;
-            color: #7a92a8;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* CRT HUD SCANLINE OVERLAY EFFECT */
-        body::before {
-            content: " ";
-            display: block;
-            position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 99999;
-            background-size: 100% 4px, 6px 100%;
-            pointer-events: none;
-            opacity: 0.4;
-        }
-
-        /* SECURITY AUTHENTICATION SHIELD */
-        .password-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #02050a;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 9999;
-        }
-        .password-screen.hidden { display: none !important; }
-
-        .password-box {
-            background: #040914;
-            border: 2px solid #00f2fe;
-            padding: 40px; width: 400px;
-            box-shadow: 0 0 30px rgba(0, 242, 254, 0.15);
-            position: relative;
-        }
-        .password-box::before {
-            content: '[ COMS SECURE ]'; position: absolute; top: -10px; left: 20px; 
-            background: #02050a; padding: 0 5px; font-size: 10px; color: #00f2fe;
-        }
-
-        .password-title { font-size: 14px; font-weight: 700; color: #00f2fe; letter-spacing: 0.25em; margin-bottom: 6px; }
-        .password-subtitle { font-size: 9px; color: #43586d; margin-bottom: 24px; letter-spacing: 0.15em; }
-        .password-input {
-            background: #010307; border: 1px solid #1e354d; color: #00f2fe;
-            padding: 14px; font-family: inherit; font-size: 16px; width: 100%;
-            outline: none; text-align: center; letter-spacing: 0.5em; margin-bottom: 16px;
-        }
-        .password-input:focus { border-color: #00f2fe; box-shadow: 0 0 10px rgba(0,242,254,0.2); }
-        .password-button {
-            background: rgba(0, 242, 254, 0.08); color: #00f2fe; border: 1px solid #00f2fe;
-            padding: 12px; font-family: inherit; font-size: 11px; font-weight: 700;
-            width: 100%; cursor: pointer; letter-spacing: 0.15em;
-        }
-        .password-button:hover { background: #00f2fe; color: #02050a; }
-        .password-error { color: #ff3366; font-size: 10px; margin-top: 12px; display: none; font-weight: bold; }
-
-        /* HEADER FRAME */
-        .header {
-            background: #040914;
-            border-bottom: 2px solid #122236;
-            padding: 0 20px;
-            display: flex; align-items: center; justify-content: space-between;
-            height: 54px; z-index: 10;
-            position: relative;
-        }
-        .header::after {
-            content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 1px; background: #00f2fe; opacity: 0.2;
-        }
-
-        .op-title { display: flex; align-items: center; gap: 12px; }
-        .op-indicator { width: 8px; height: 8px; background: #00f2fe; box-shadow: 0 0 10px #00f2fe; animation: blink 2s infinite ease-in-out; }
-        .op-name { font-size: 13px; font-weight: 700; letter-spacing: 0.15em; color: #d1dfec; }
-
-        .controls { display: flex; gap: 16px; align-items: center; }
-        .control-group { display: flex; gap: 6px; align-items: center; border-right: 1px solid #122236; padding-right: 16px; }
-        .control-group:last-child { border: none; padding-right: 0; }
-        .control-label { font-size: 9px; color: #43586d; font-weight: 700; letter-spacing: 0.1em; }
-
-        /* CORE VIEWPORTS */
-        .main { flex: 1; display: flex; overflow: hidden; position: relative; }
-        
-        .sidebar { 
-            width: 260px; background: #040914; display: flex; flex-direction: column; z-index: 5;
-            position: relative;
-        }
-        .sidebar-left { border-right: 2px solid #122236; }
-        .sidebar-right { border-left: 2px solid #122236; }
-
-        .sidebar-content {
-            flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 18px;
-        }
-
-        /* TACTICAL CONTAINER BLOCKS */
-        .section { 
-            display: flex; flex-direction: column; gap: 8px; 
-            background: rgba(1, 3, 7, 0.4); border: 1px solid #122236; padding: 10px;
-            position: relative;
-        }
-        .section::before {
-            content: ''; position: absolute; top: -1px; left: -1px; width: 4px; height: 4px; background: #43586d;
-        }
-        .section::after {
-            content: ''; position: absolute; bottom: -1px; right: -1px; width: 4px; height: 4px; background: #43586d;
-        }
-        .section-title { 
-            font-size: 9px; letter-spacing: 0.15em; color: #43586d; font-weight: 700;
-            border-bottom: 1px solid #122236; padding-bottom: 4px; margin-bottom: 2px;
-        }
-
-        .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-        .button-grid.triple { grid-template-columns: repeat(3, 1fr); }
-
-        /* MILITARY SWITCH BUTTONS */
-        button {
-            background: #010307;
-            border: 1px solid #1e354d;
-            color: #7a92a8;
-            padding: 8px;
-            font-family: inherit; font-size: 9px; font-weight: 700;
-            letter-spacing: 0.08em; text-transform: uppercase;
-            cursor: pointer; position: relative; transition: all 0.15s ease;
-            text-align: left; padding-left: 12px;
-        }
-        button::before {
-            content: '▫'; position: absolute; left: 4px; color: #1e354d; font-size: 7px; top: 9px;
-        }
-        button:hover:not(:disabled) { 
-            border-color: #43586d; color: #d1dfec; background: rgba(30, 53, 77, 0.2); 
-        }
-        button.active { 
-            border-color: #00f2fe; color: #00f2fe; background: rgba(0, 242, 254, 0.05);
-            box-shadow: inset 0 0 8px rgba(0, 242, 254, 0.1);
-        }
-        button.active::before { content: '▪'; color: #00f2fe; }
-        button:disabled { opacity: 0.15; cursor: not-allowed; }
-
-        /* CONTROL SYSTEM STYLING EXCEPS */
-        #ctrl-play { border-color: #00ffaa; color: #00ffaa; }
-        #ctrl-play.active { background: rgba(0,255,170,0.1); box-shadow: 0 0 10px rgba(0,255,170,0.2); }
-        #ctrl-play::before { display: none; }
-        #ctrl-undo, #ctrl-redo, #ctrl-reset, #phase-add, #phase-clone, #ctrl-grid { padding-left: 8px; text-align: center; }
-        #ctrl-undo::before, #ctrl-redo::before, #ctrl-reset::before, #phase-add::before, #phase-clone::before, #ctrl-grid::before { display: none; }
-
-        .canvas-container { flex: 1; background: #010306; position: relative; }
-        canvas { display: block; width: 100%; height: 100%; }
-
-        /* CORNER CORNER BRACKETS FOR CANVAS WORKSPACE */
-        .canvas-container::before {
-            content: ''; position: absolute; top: 15px; left: 15px; width: 20px; height: 20px;
-            border-top: 2px solid rgba(0, 242, 254, 0.2); border-left: 2px solid rgba(0, 242, 254, 0.2); pointer-events: none;
-        }
-        .canvas-container::after {
-            content: ''; position: absolute; bottom: 15px; right: 15px; width: 20px; height: 20px;
-            border-bottom: 2px solid rgba(0, 242, 254, 0.2); border-right: 2px solid rgba(0, 242, 254, 0.2); pointer-events: none;
-        }
-
-        /* CONSOLE OUTPUT MONITOR */
-        .log-terminal {
-            height: 120px; background: #010307; border-top: 2px solid #122236;
-            padding: 12px; font-size: 10px; color: #00f2fe; overflow-y: auto;
-            position: relative; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
-        }
-        .log-line { margin-bottom: 4px; display: flex; gap: 12px; line-height: 1.2; font-weight: 500;}
-        .log-time { color: #43586d; font-weight: normal; }
-        .log-alert { color: #ff3366; text-shadow: 0 0 4px #ff3366; }
-
-        textarea {
-            background: #010307; border: 1px solid #1e354d;
-            color: #d1dfec; padding: 10px; font-family: inherit; font-size: 10px;
-            resize: none; flex: 1; outline: none; line-height: 1.5; min-height: 70px;
-        }
-        textarea:focus { border-color: #00f2fe; }
-
-        .divider { height: 2px; background: #122236; margin: 4px 0; }
-
-        .tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
-        .tab { 
-            padding: 6px 10px; font-size: 9px; border: 1px solid #1e354d; color: #7a92a8; 
-            text-align: center; padding-left: 10px;
-        }
-        .tab::before { display: none; }
-        .tab.active { color: #00f2fe; border-color: #00f2fe; background: rgba(0,242,254,0.05); font-weight: bold; }
-
-        .stat { display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; border-bottom: 1px dashed rgba(18,34,54,0.5); }
-        .stat:last-child { border: none; }
-        .stat-val { color: #00f2fe; font-weight: 700; text-shadow: 0 0 4px rgba(0,242,254,0.3); }
-
-        .unit-info-box {
-            background: #010307; border: 1px solid #1e354d;
-            padding: 12px; font-size: 10px; min-height: 90px; line-height: 1.6;
-            display: flex; flex-direction: column; justify-content: center;
-        }
-
-        /* TACTICAL BOX DIALOG OVERLAYS */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2,5,10,0.85); z-index: 5000; display: none; backdrop-filter: blur(4px); }
-        .modal { 
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            background: #040914; border: 2px solid #ff3366; padding: 24px; width: 340px; z-index: 5001; display: none;
-            box-shadow: 0 0 30px rgba(255, 51, 102, 0.2);
-        }
-        .modal.active, .modal-overlay.active { display: block; }
-        .modal-title { font-size: 12px; font-weight: 700; color: #ff3366; margin-bottom: 8px; letter-spacing: 0.1em; }
-        .modal-msg { font-size: 10px; color: #7a92a8; margin-bottom: 20px; line-height: 1.4; }
-        .modal-buttons { display: flex; gap: 8px; }
-        .modal-buttons button { flex: 1; text-align: center; padding-left: 8px; }
-        .modal-buttons button::before { display: none; }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        .hud-font { font-family: 'Share Tech Mono', monospace; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b131e; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
     </style>
 </head>
-<body>
+<body class="bg-[#04080f] text-slate-200 min-h-screen flex flex-col hud-font selection:bg-cyan-500/30 overflow-hidden">
 
-    <!-- SECURITY AUTHORIZATION -->
-    <div class="password-screen" id="auth-screen">
-        <div class="password-box">
-            <div class="password-title">TACTICAL COMMAND SURFACE</div>
-            <div class="password-subtitle">ENTER INTERFACE ENCRYPTION CODE (OR LEAVE BLANK)</div>
-            <input type="password" class="password-input" id="auth-input" placeholder="••••" autocomplete="off"/>
-            <button class="password-button" id="auth-submit">DECRYPT & RUN</button>
-            <div class="password-error" id="auth-error">DECRYPTION FAILURE</div>
+    <!-- TOP HEADER HUD -->
+    <header class="border-b border-cyan-900/40 bg-[#08101c]/80 backdrop-blur-md px-6 py-3 flex items-center justify-between shrink-0 shadow-lg shadow-black/20">
+        <div class="flex items-center gap-3">
+            <div class="h-3 w-3 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.7)]"></div>
+            <h1 class="text-xl tracking-wider text-cyan-400 font-bold uppercase">GAR Tactical Command Network</h1>
         </div>
+        <div class="flex items-center gap-6 text-xs text-cyan-600">
+            <div>SECTOR: <span id="current-sector-hud" class="text-cyan-400 font-bold">GRID-DEFAULT</span></div>
+            <div class="hidden md:block">STATUS: <span class="text-emerald-400">LINK ESTABLISHED</span></div>
+        </div>
+    </header>
+
+    <!-- MAIN APP INTERFACE CONTAINER -->
+    <div class="flex flex-1 overflow-hidden w-full">
+        
+        <!-- LEFT CONTROL PANEL (Factions & Timeline) -->
+        <aside class="w-80 border-r border-cyan-900/30 bg-[#060c14]/90 flex flex-col shrink-0">
+            <!-- Asset Ingress -->
+            <div class="p-4 border-b border-cyan-900/20">
+                <h2 class="text-xs font-bold text-cyan-500 tracking-widest uppercase mb-3">Asset Ingress Matrix</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-[10px] uppercase text-slate-500 mb-1">Affiliation Alignment</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="faction-ally-btn" onclick="setFaction('ALLY')" class="py-1.5 px-3 rounded text-xs border border-emerald-500/30 bg-emerald-950/20 text-emerald-400 font-bold transition-all hover:bg-emerald-500/10 shadow-inner">
+                            GAR (ALLY)
+                        </button>
+                        <button id="faction-opfor-btn" onclick="setFaction('OPFOR')" class="py-1.5 px-3 rounded text-xs border border-slate-800 bg-slate-900 text-slate-400 transition-all hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20">
+                            CIS (OPFOR)
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] uppercase text-slate-500 mb-1">Asset Template Selection</label>
+                    <div class="space-y-1 max-h-40 overflow-y-auto pr-1" id="asset-templates-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operational Timeline Manager -->
+            <div class="flex-1 flex flex-col min-h-0">
+                <div class="p-4 border-b border-cyan-900/20 flex justify-between items-center bg-[#08111c]/40">
+                    <h2 class="text-xs font-bold text-cyan-500 tracking-widest uppercase">Operational Timeline</h2>
+                    <button onclick="addTimelinePhase()" class="text-[10px] bg-cyan-950 text-cyan-400 border border-cyan-800/50 hover:bg-cyan-900/50 px-2 py-0.5 rounded transition-all">
+                        + NEW PHASE
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 space-y-2" id="timeline-phases-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER TACTICAL CANVAS FIELD -->
+        <main class="flex-1 bg-[#03060a] relative flex items-center justify-center p-4">
+            <!-- Canvas HUD overlay hints -->
+            <div class="absolute top-6 left-6 z-10 bg-[#060c14]/80 border border-cyan-900/30 px-3 py-1.5 rounded pointer-events-none text-[11px] text-slate-400 backdrop-blur-sm">
+                <span class="text-cyan-400 font-bold">Left Click:</span> Deploy Selected Asset | <span class="text-cyan-400 font-bold">Right Click:</span> Purge Asset
+            </div>
+            
+            <div class="relative w-full h-full flex items-center justify-center">
+                <canvas id="tactical-canvas" class="border border-cyan-950 shadow-2xl shadow-cyan-950/10 cursor-crosshair max-w-full max-h-full bg-slate-950 transition-colors duration-500"></canvas>
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR (Theater Presets & Telemetry Telecommunications) -->
+        <aside class="w-80 border-left border-l border-cyan-900/30 bg-[#060c14]/90 flex flex-col shrink-0">
+            <!-- Theater Sector Selection Grid -->
+            <div class="p-4 border-b border-cyan-900/20">
+                <h2 class="text-xs font-bold text-cyan-400 tracking-widest uppercase mb-2">Theater Sector Presets</h2>
+                <p class="text-[10px] text-slate-500 mb-3 leading-relaxed">Swapping sectors reconfigures environmental variables, tactical terrain, and structural grids matrix.</p>
+                
+                <div class="grid grid-cols-2 gap-2" id="theater-presets-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Active Object Telemetry Matrix -->
+            <div class="flex-1 flex flex-col min-h-0">
+                <div class="p-4 border-b border-cyan-900/20 bg-[#08111c]/40">
+                    <h2 class="text-xs font-bold text-cyan-500 tracking-widest uppercase">Tactical Telemetry Matrix</h2>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4">
+                    <div id="telemetry-empty-state" class="h-full flex flex-col items-center justify-center text-center text-slate-600 p-4">
+                        <svg class="w-8 h-8 mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+                        <p class="text-[11px] uppercase tracking-wider">No active deployment parameters selected</p>
+                    </div>
+                    <div id="telemetry-data-display" class="hidden space-y-4 text-xs">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </aside>
+
     </div>
 
-    <!-- MAIN INTERFACE HEADER -->
-    <div class="header">
-        <div class="op-title">
-            <div class="op-indicator"></div>
-            <span class="op-name" id="op-label">SYS.MAIN // RECON_V3.7 // SECURE</span>
-        </div>
-        <div class="controls">
-            <div class="control-group">
-                <button id="ctrl-undo">UNDO</button>
-                <button id="ctrl-redo">REDO</button>
-            </div>
-            <div class="control-group">
-                <span class="control-label">GRID MATRIX</span>
-                <button id="ctrl-grid" class="active">ON</button>
-            </div>
-            <div class="control-group">
-                <button id="ctrl-play">EXECUTE SIM</button>
-                <button id="ctrl-reset">RESET</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="main">
-        <!-- CONTROLS SIDEBAR (LEFT) -->
-        <div class="sidebar sidebar-left">
-            <div class="sidebar-content">
-                <div class="section">
-                    <div class="section-title">COMMAND SELECTION</div>
-                    <div class="button-grid">
-                        <button class="mode-btn active" data-mode="deploy">DEPLOY UNITS</button>
-                        <button class="mode-btn" data-mode="path">ROUTING ZONES</button>
-                        <button class="mode-btn" data-mode="zone">ZONE BUILDER</button>
-                        <button class="mode-btn" data-mode="terrain" style="color: #ff9f1c;">TERRAIN LAYER</button>
-                    </div>
-                    <div style="font-size: 8px; color: #43586d; margin-top: 5px; text-align: center; letter-spacing: 0.05em; font-weight: bold; border-top: 1px dashed #122236; padding-top: 4px;"> HOLD SHIFT + CLICK TO PING</div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">VECTOR ROUTE STYLE</div>
-                    <div class="button-grid">
-                        <button class="path-style-btn active" data-pstyle="straight">STRAIGHT LINE</button>
-                        <button class="path-style-btn" data-pstyle="stencil">ELBOW STENCIL</button>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">ZONE SHAPE ARCHITECTURE</div>
-                    <div class="button-grid">
-                        <button class="zone-type-btn" data-ztype="rect">RECTANGLE BOUNDS</button>
-                        <button class="zone-type-btn" data-ztype="circle">CIRCULAR RADIUS</button>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">ZONE STYLE PRESET</div>
-                    <div class="button-grid">
-                        <button class="zone-style-btn" data-zstyle="faction">MATCH FACTION</button>
-                        <button class="zone-style-btn" data-zstyle="fob" style="color:#00f2fe;">FOB MATRIX</button>
-                        <button class="zone-style-btn" data-zstyle="noman" style="color:#e63946;">NO MAN'S SLATS</button>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">TERRAIN STRUCTURE</div>
-                    <div class="button-grid">
-                        <button class="terrain-btn" data-tstyle="trench">TRENCH LINE</button>
-                        <button class="terrain-btn" data-tstyle="ridge">ELEVATED RIDGE</button>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">FACTION SELECTION // PING COLOR</div>
-                    <div class="button-grid">
-                        <button class="faction-btn active" data-faction="GAR">GAR (CYAN)</button>
-                        <button class="faction-btn" data-faction="OPFOR" style="color:#ff3366;">OPFOR (RED)</button>
-                        <button class="faction-btn" data-faction="ALLY" style="color:#00ffaa;">ALLY (GREEN)</button>
-                        <button class="faction-btn" data-faction="TARGET" style="color:#ffcc00;">TARGET (GOLD)</button>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">MICRO ASSET CLASS</div>
-                    <div class="button-grid triple">
-                        <button class="unit-btn active" data-unit="Infantry">INF</button>
-                        <button class="unit-btn" data-unit="Specialist">SPC</button>
-                        <button class="unit-btn" data-unit="Armoured">ARM</button>
-                        <button class="unit-btn" data-unit="Tank">TNK</button>
-                        <button class="unit-btn" data-unit="ATTE">ATTE</button>
-                        <button class="unit-btn" data-unit="Air">AIR</button>
-                    </div>
-                </div>
-
-                <div class="divider"></div>
-
-                <div class="section">
-                    <div class="section-title">OPERATIONAL TIMELINE</div>
-                    <div class="tabs" id="phase-container"></div>
-                    <div class="button-grid">
-                        <button id="phase-add">+ NEW</button>
-                        <button id="phase-clone">CLONE</button>
-                    </div>
-                    <button id="phase-delete" style="color:#ff3366; border-color:rgba(255,51,102,0.25); text-align:center; padding-left:8px;">PURGE CURRENT PHASE</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- CENTER MATRIX WORKSPACE -->
-        <div style="flex:1; display:flex; flex-direction:column; position:relative;">
-            <div class="canvas-container" id="canvas-holder">
-                <canvas id="tactical-grid"></canvas>
-            </div>
-            <!-- REAL-TIME CONSOLE FEED -->
-            <div class="log-terminal" id="system-log">
-                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // BASILINE STRUCTURAL MATRIX ONLINE v3.7</div>
-            </div>
-        </div>
-
-        <!-- MONITORING REGISTRY (RIGHT) -->
-        <div class="sidebar sidebar-right">
-            <div class="sidebar-content">
-                <div class="section">
-                    <div class="section-title">TACTICAL TELEMETRY</div>
-                    <div class="stat"><span>THEATER ASSETS:</span><span class="stat-val" id="tele-units">0</span></div>
-                    <div class="stat"><span>DEPLOYED ZONES:</span><span class="stat-val" id="tele-zones">0</span></div>
-                    <div class="stat"><span>ROUTE VECTORS:</span><span class="stat-val" id="tele-paths">0</span></div>
-                </div>
-
-                <div class="divider"></div>
-
-                <div class="section" style="flex: 1;">
-                    <div class="section-title">SELECTED OBJECT MONITOR</div>
-                    <div class="unit-info-box" id="info-display">
-                        <span style="color: #43586d; text-align:center;">AWAITING SELECTION TARGET</span>
-                    </div>
-                    <button id="asset-purge" style="color:#ff3366; border-color:rgba(255,51,102,0.25); width:100%; margin-top:6px; text-align:center; padding-left:8px;">PURGE SELECTED</button>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">INTEL MISSION LOG</div>
-                    <textarea id="intel-field" placeholder="Input specific field engagement directives..."></textarea>
-                </div>
-
-                <div class="divider"></div>
-                <button id="board-wipe" style="color:#ff3366; border-color:rgba(255,51,102,0.35); text-align:center; padding-left:8px;">WIPE ACTIVE MATRIX</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- NOTIFICATION DIALOG SYSTEM -->
-    <div class="modal-overlay" id="overlay-shield"></div>
-    <div class="modal" id="modal-box">
-        <div class="modal-title" id="m-title">ALERT // REQUIRE CRITICAL CONFIRMATION</div>
-        <div class="modal-msg" id="m-msg">Commit permanent operational change?</div>
-        <div class="modal-buttons">
-            <button id="m-confirm" style="border-color:#00ffaa; color:#00ffaa;">CONFIRM</button>
-            <button id="m-cancel">ABORT</button>
-        </div>
-    </div>
-
-    <!-- CORE SIM ENGINE SCRIPT -->
+    <!-- MAIN CORE APPLICATION SCRIPT ENGINE -->
     <script>
-        const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TARGET: '#ffcc00' };
-
-        // AUTHORIZATION CORE
-        const authScreen = document.getElementById('auth-screen');
-        const authInput = document.getElementById('auth-input');
-        const authSubmit = document.getElementById('auth-submit');
-        const authError = document.getElementById('auth-error');
-
-        authSubmit.addEventListener('click', verifyPasskey);
-        authInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') verifyPasskey(); });
-
-        function verifyPasskey() {
-            const inputCode = authInput.value.trim().toUpperCase();
-            if (inputCode === 'AXEYZY' || inputCode === 'ADMIN' || inputCode === '') {
-                authScreen.classList.add('hidden');
-                bootstrapSystem();
-            } else {
-                authError.style.display = 'block';
-                authInput.value = '';
-                setTimeout(() => { authError.style.display = 'none'; }, 2000);
-            }
-        }
-
-        // STATE ENGINE
-        const STATE = {
-            opName: 'OPERATION AXE-RECON',
-            mode: 'deploy',      
-            pStyle: 'straight',  
-            zType: 'rect',       
-            zStyle: 'faction',   
-            tStyle: 'trench',    
-            faction: 'GAR',
-            unitType: 'Infantry',
-            gridOn: true,
-            phaseIdx: 0,
-            animating: false,
-            animProgress: 0,
-            selectedId: null,
-            phases: [{ intel: 'SECURE RECON COORD LAYERS // ASSIGN STRUCTURAL LANES', assets: [], zones: [], paths: [], terrain: [] }]
+        // CONFIGURATION STATE & DATABASE STRUCTURES
+        const ASSET_TEMPLATES = {
+            ALLY: [
+                { id: 'gar_inf', name: 'Phase II Trooper Infantry', signifier: 'INF', size: 12, color: '#10b981' },
+                { id: 'gar_arc', name: 'ARC Striker Commander', signifier: 'ARC', size: 14, color: '#06b6d4' },
+                { id: 'gar_atrt', name: 'AT-RT Scout Recon Platform', signifier: 'ATRT', size: 18, color: '#34d399' },
+                { id: 'gar_atte', name: 'AT-TE Heavy Tactical Walker', signifier: 'ATTE', size: 28, color: '#059669' }
+            ],
+            OPFOR: [
+                { id: 'cis_b1', name: 'B1 Battle Droid Cohort', signifier: 'B1', size: 11, color: '#f43f5e' },
+                { id: 'cis_b2', name: 'B2 Super Battle Droid Squad', signifier: 'B2', size: 14, color: '#e11d48' },
+                { id: 'cis_droideka', name: 'Droideka Destructor Unit', signifier: 'DDK', size: 16, color: '#fb7185' },
+                { id: 'cis_aat', name: 'AAT Armored Assault Platform', signifier: 'AAT', size: 24, color: '#be123c' }
+            ]
         };
 
-        let systemHistory = [];
-        let systemHistoryIdx = -1;
-        let activePings = []; // Visual overlay ping records tracking animations
-
-        function recordState() {
-            if (systemHistoryIdx < systemHistory.length - 1) {
-                systemHistory = systemHistory.slice(0, systemHistoryIdx + 1);
+        const THEATER_PRESETS = {
+            DEFAULT: {
+                name: "Grid Default",
+                bgColor: "#090f19",
+                gridColor: "rgba(6, 182, 212, 0.08)",
+                textColor: "#22d3ee",
+                obstacles: []
+            },
+            CHRISTOPHSIS: {
+                name: "Christophsis",
+                bgColor: "#060f1e",
+                gridColor: "rgba(34, 211, 238, 0.15)",
+                textColor: "#22d3ee",
+                obstacles: [
+                    { type: 'crystal', x: 200, y: 150, w: 90, h: 180, label: "Crystal Spire Alpha" },
+                    { type: 'crystal', x: 550, y: 300, w: 120, h: 220, label: "Plaza Core Structure" },
+                    { type: 'crystal', x: 150, y: 450, w: 100, h: 120, label: "Crystalline Defilade" }
+                ]
+            },
+            RYLOTH: {
+                name: "Ryloth",
+                bgColor: "#24140e",
+                gridColor: "rgba(249, 115, 22, 0.12)",
+                textColor: "#f97316",
+                obstacles: [
+                    { type: 'mesa', x: 350, y: 80, w: 220, h: 140, label: "Nabat Mesa Spine" },
+                    { type: 'chasm', x: 0, y: 380, w: 500, h: 45, label: "Lessu Gorge Fissure" },
+                    { type: 'mesa', x: 600, y: 480, w: 140, h: 160, label: "High Ground Bluffs" }
+                ]
+            },
+            KASHYYYK: {
+                name: "Kashyyyk",
+                bgColor: "#0b1610",
+                gridColor: "rgba(34, 197, 94, 0.12)",
+                textColor: "#22c55e",
+                obstacles: [
+                    { type: 'wroshyr', x: 100, y: 100, radius: 65, label: "Wroshyr Root Node 01" },
+                    { type: 'wroshyr', x: 680, y: 180, radius: 80, label: "Wroshyr Root Node 02" },
+                    { type: 'water', x: 250, y: 480, w: 350, h: 180, label: "Kachirho Lagoon Beach" }
+                ]
+            },
+            CORUSCANT: {
+                name: "Coruscant",
+                bgColor: "#111318",
+                gridColor: "rgba(234, 179, 8, 0.15)",
+                textColor: "#eab308",
+                obstacles: [
+                    { type: 'structure', x: 0, y: 0, w: 800, h: 60, label: "Senate District High-Line Trench" },
+                    { type: 'structure', x: 80, y: 200, w: 180, h: 240, label: "Jedi Temple Auxiliary Spire Base" },
+                    { type: 'structure', x: 500, y: 220, w: 220, h: 260, label: "Corporate Sector Blockhouse" }
+                ]
+            },
+            CORELLIA: {
+                name: "Corellia",
+                bgColor: "#13161c",
+                gridColor: "rgba(148, 163, 184, 0.15)",
+                textColor: "#94a3b8",
+                obstacles: [
+                    { type: 'industrial', x: 300, y: 0, w: 160, h: 250, label: "Coronet City Shipyard Gantry" },
+                    { type: 'industrial', x: 40, y: 420, w: 240, h: 150, label: "Cooling Liquid Vats Cluster" },
+                    { type: 'industrial', x: 520, y: 450, w: 260, h: 120, label: "Assembly Block Vector Seven" }
+                ]
             }
-            systemHistory.push(JSON.stringify(STATE.phases));
-            systemHistoryIdx++;
-        }
+        };
 
-        function triggerUndo() {
-            if (systemHistoryIdx > 0) {
-                systemHistoryIdx--;
-                STATE.phases = JSON.parse(systemHistory[systemHistoryIdx]);
-                if (STATE.phaseIdx >= STATE.phases.length) STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog("System recovery: UNDO executed.");
-                syncInterface();
-            }
-        }
+        // APPLICATION CORE STATE MACHINE
+        let state = {
+            currentTheater: 'DEFAULT',
+            currentFaction: 'ALLY',
+            selectedTemplateId: 'gar_inf',
+            activePhaseIndex: 0,
+            phases: [
+                {
+                    id: 1,
+                    name: "Initial Approach Deployment Vectors",
+                    timestamp: "00:00:00 Z",
+                    assets: [
+                        { x: 120, y: 320, type: 'gar_inf', faction: 'ALLY', id: 'a1' },
+                        { x: 160, y: 280, type: 'gar_arc', faction: 'ALLY', id: 'a2' },
+                        { x: 640, y: 240, type: 'cis_b1', faction: 'OPFOR', id: 'm1' },
+                        { x: 680, y: 380, type: 'cis_aat', faction: 'OPFOR', id: 'm2' }
+                    ]
+                }
+            ]
+        };
 
-        function triggerRedo() {
-            if (systemHistoryIdx < systemHistory.length - 1) {
-                systemHistoryIdx++;
-                STATE.phases = JSON.parse(systemHistory[systemHistoryIdx]);
-                pushTerminalLog("System state advancement: REDO executed.");
-                syncInterface();
-            }
-        }
-
-        const canvas = document.getElementById('tactical-grid');
+        // DOM ELEMENTS REFERENCE MATRIX
+        const canvas = document.getElementById('tactical-canvas');
         const ctx = canvas.getContext('2d');
-        const intelField = document.getElementById('intel-field');
-        const phaseContainer = document.getElementById('phase-container');
-        const terminalLog = document.getElementById('system-log');
 
-        let isInteracting = false;
-        let dragAnchor = null;
-        let activeZonePreview = null;
-        let dynamicDashOffset = 0;
-        let activePathBuilding = null;
-        let mouseCurrentPos = { x: 0, y: 0 };
+        // APPLICATION INITIALIZATION INTERFACE ENTRYPOINT
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeCanvasDimensions();
+            renderFactionTemplates();
+            renderTheaterSystemGrid();
+            renderTimelineEngine();
+            synchronizeTelemetryDisplay();
+            
+            // Register canvas interactive event listeners
+            canvas.addEventListener('click', handleCanvasLeftClick);
+            canvas.addEventListener('contextmenu', handleCanvasRightClick);
+            
+            // Run global drawing loop execution sequence
+            requestAnimationFrame(drawCoreTacticalEngine);
+        });
 
-        function bootstrapSystem() {
-            resizeTacticalSurface();
-            window.addEventListener('resize', resizeTacticalSurface);
-            attachInterfaceListeners();
-            recordState();
-            pushTerminalLog("Operational baseline synchronized successfully.");
-            syncInterface();
-            runRenderLoop();
+        function initializeCanvasDimensions() {
+            canvas.width = 800;
+            canvas.height = 600;
         }
 
-        function resizeTacticalSurface() {
-            const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-        }
-
-        function pushTerminalLog(message, isAlert = false) {
-            const now = new Date();
-            const timeStr = `[${now.toTimeString().split(' ')[0]}]`;
-            const logLine = document.createElement('div');
-            logLine.className = 'log-line';
-            logLine.innerHTML = `<span class="log-time">${timeStr}</span> <span class="${isAlert ? 'log-alert' : ''}">${message.toUpperCase()}</span>`;
-            terminalLog.appendChild(logLine);
-            terminalLog.scrollTop = terminalLog.scrollHeight;
-        }
-
-        function legaliseControlState() {
-            document.querySelectorAll('.unit-btn').forEach(b => b.disabled = (STATE.mode !== 'deploy'));
-            document.querySelectorAll('.path-style-btn').forEach(b => b.disabled = (STATE.mode !== 'path'));
-            document.querySelectorAll('.zone-type-btn, .zone-style-btn').forEach(b => b.disabled = (STATE.mode !== 'zone'));
-            document.querySelectorAll('.terrain-btn').forEach(b => b.disabled = (STATE.mode !== 'terrain'));
-
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === STATE.mode));
-            document.querySelectorAll('.path-style-btn').forEach(b => b.classList.toggle('active', b.dataset.pstyle === STATE.pStyle));
-            document.querySelectorAll('.faction-btn').forEach(b => b.classList.toggle('active', b.dataset.faction === STATE.faction));
-            document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('active', b.dataset.unit === STATE.unitType));
-            document.querySelectorAll('.zone-type-btn').forEach(b => b.classList.toggle('active', b.dataset.ztype === STATE.zType));
-            document.querySelectorAll('.zone-style-btn').forEach(b => b.classList.toggle('active', b.dataset.zstyle === STATE.zStyle));
-            document.querySelectorAll('.terrain-btn').forEach(b => b.classList.toggle('active', b.dataset.tstyle === STATE.tStyle));
-        }
-
-        function attachInterfaceListeners() {
-            document.querySelectorAll('.mode-btn').forEach(b => {
-                b.addEventListener('click', (e) => {
-                    STATE.mode = e.target.dataset.mode;
-                    pushTerminalLog(`Switched frame matrix to ${STATE.mode.toUpperCase()}`);
-                    if(STATE.mode !== 'path' && activePathBuilding) commitCurrentPath();
-                    legaliseControlState();
-                });
-            });
-
-            document.querySelectorAll('.path-style-btn').forEach(b => {
-                b.addEventListener('click', (e) => { 
-                    if(activePathBuilding) commitCurrentPath();
-                    STATE.pStyle = e.target.dataset.pstyle; 
-                    legaliseControlState(); 
-                });
-            });
-
-            document.querySelectorAll('.faction-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.faction = e.target.dataset.faction; legaliseControlState(); });
-            });
-
-            document.querySelectorAll('.unit-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.unitType = e.target.dataset.unit; legaliseControlState(); });
-            });
-
-            document.querySelectorAll('.zone-type-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.zType = e.target.dataset.ztype; legaliseControlState(); });
-            });
-
-            document.querySelectorAll('.zone-style-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.zStyle = e.target.dataset.zstyle; legaliseControlState(); });
-            });
-
-            document.querySelectorAll('.terrain-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.tStyle = e.target.dataset.tstyle; legaliseControlState(); });
-            });
-
-            document.getElementById('ctrl-grid').addEventListener('click', (e) => {
-                STATE.gridOn = !STATE.gridOn;
-                e.target.classList.toggle('active', STATE.gridOn);
-            });
-
-            document.getElementById('ctrl-undo').addEventListener('click', triggerUndo);
-            document.getElementById('ctrl-redo').addEventListener('click', triggerRedo);
-
-            document.getElementById('ctrl-play').addEventListener('click', () => {
-                if(!STATE.animating) { 
-                    if(activePathBuilding) commitCurrentPath();
-                    bindUnitsToRoutes();
-                    STATE.animating = true; 
-                    STATE.animProgress = 0;
-                    document.getElementById('ctrl-play').classList.add('active');
-                    pushTerminalLog("COMMENCING COORDINATED DISPLACEMENT SIMULATION.");
-                }
-            });
-
-            document.getElementById('ctrl-reset').addEventListener('click', () => {
-                recordState();
-                STATE.phases[STATE.phaseIdx].assets.forEach(a => { a.runtimePoints = null; });
-                STATE.animating = false;
-                STATE.animProgress = 0;
-                document.getElementById('ctrl-play').classList.remove('active');
-                pushTerminalLog("Simulation coordinates reset to timeline origins.");
-                syncInterface();
-            });
-
-            document.getElementById('phase-add').addEventListener('click', () => {
-                recordState();
-                STATE.phases.push({ intel: `PHASE ${STATE.phases.length + 1} DIRECTIVES`, assets: [], zones: [], paths: [], terrain: [] });
-                STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog(`New phase window mapped: Phase ${STATE.phaseIdx + 1}`);
-                syncInterface();
-            });
-
-            document.getElementById('phase-clone').addEventListener('click', () => {
-                recordState();
-                const parent = STATE.phases[STATE.phaseIdx];
-                const cleanAssets = parent.assets.map(a => ({ id: Math.random(), x: a.x, y: a.y, faction: a.faction, type: a.type }));
-                STATE.phases.push({
-                    intel: `${parent.intel} [CLONE]`,
-                    assets: cleanAssets,
-                    zones: JSON.parse(JSON.stringify(parent.zones)),
-                    paths: JSON.parse(JSON.stringify(parent.paths)),
-                    terrain: JSON.parse(JSON.stringify(parent.terrain || []))
-                });
-                STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog(`Cloned timeline layers into position ${STATE.phaseIdx + 1}`);
-                syncInterface();
-            });
-
-            document.getElementById('phase-delete').addEventListener('click', () => {
-                if(STATE.phases.length > 1) {
-                    showWarningBox('PURGE ACTIVE STRATEGIC PHASE ARRAY?', () => {
-                        recordState();
-                        STATE.phases.splice(STATE.phaseIdx, 1);
-                        STATE.phaseIdx = Math.max(0, STATE.phaseIdx - 1);
-                        pushTerminalLog("Timeline coordinate array cleanly excised.");
-                        syncInterface();
-                    });
-                }
-            });
-
-            document.getElementById('asset-purge').addEventListener('click', () => {
-                if(STATE.selectedId) {
-                    recordState();
-                    let current = STATE.phases[STATE.phaseIdx];
-                    current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
-                    pushTerminalLog(`Target micro-unit removed from operational memory.`);
-                    STATE.selectedId = null;
-                    syncInterface();
-                }
-            });
-
-            document.getElementById('board-wipe').addEventListener('click', () => {
-                showWarningBox('CLEAR CURRENT WORKSPACE MAP MATRICES?', () => {
-                    recordState();
-                    STATE.phases[STATE.phaseIdx] = { intel: '', assets: [], zones: [], paths: [], terrain: [] };
-                    STATE.selectedId = null;
-                    activePathBuilding = null;
-                    pushTerminalLog("Wiped active workspace parameters cleanly.", true);
-                    syncInterface();
-                });
-            });
-
-            intelField.addEventListener('input', (e) => {
-                STATE.phases[STATE.phaseIdx].intel = e.target.value;
-            });
-
-            canvas.addEventListener('mousedown', pointerDown);
-            canvas.addEventListener('mousemove', pointerMove);
-            canvas.addEventListener('mouseup', pointerUp);
-            canvas.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath();
-            });
-            window.addEventListener('keydown', handleKeydown);
-        }
-
-        function syncInterface() {
-            legaliseControlState();
-            const activePhase = STATE.phases[STATE.phaseIdx];
-            intelField.value = activePhase.intel;
-
-            phaseContainer.innerHTML = '';
-            STATE.phases.forEach((p, idx) => {
-                const node = document.createElement('button');
-                node.className = `tab ${idx === STATE.phaseIdx ? 'active' : ''}`;
-                node.innerText = `PH-${idx + 1}`;
-                node.addEventListener('click', () => { STATE.phaseIdx = idx; STATE.selectedId = null; activePathBuilding = null; syncInterface(); });
-                phaseContainer.appendChild(node);
-            });
-
-            document.getElementById('tele-units').innerText = activePhase.assets.length;
-            document.getElementById('tele-zones').innerText = activePhase.zones.length;
-            document.getElementById('tele-paths').innerText = activePhase.paths.length;
-
-            const selectedAsset = activePhase.assets.find(a => a.id === STATE.selectedId);
-            const infoBox = document.getElementById('info-display');
-            if(selectedAsset) {
-                infoBox.innerHTML = `<div>SYS_ID // OBJ-${selectedAsset.id.toString().substring(2,7)}</div>
-                                     <div>CLASS  // ${selectedAsset.type.toUpperCase()}</div>
-                                     <div>TEAM   // <span style="color:${COLORS[selectedAsset.faction]}">${selectedAsset.faction}</span></div>
-                                     <div>LOC    // X:${Math.round(selectedAsset.x)} Y:${Math.round(selectedAsset.y)}</div>`;
+        // FACTION MATRIX AND TEMPLATE MANAGEMENT
+        function setFaction(faction) {
+            state.currentFaction = faction;
+            state.selectedTemplateId = ASSET_TEMPLATES[faction][0].id;
+            
+            // Sync control graphic states
+            const allyBtn = document.getElementById('faction-ally-btn');
+            const opforBtn = document.getElementById('faction-opfor-btn');
+            
+            if (faction === 'ALLY') {
+                allyBtn.className = "py-1.5 px-3 rounded text-xs border border-emerald-500/30 bg-emerald-950/20 text-emerald-400 font-bold transition-all hover:bg-emerald-500/10 shadow-inner";
+                opforBtn.className = "py-1.5 px-3 rounded text-xs border border-slate-800 bg-slate-900 text-slate-400 transition-all hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20";
             } else {
-                infoBox.innerHTML = `<span style="color: #43586d; text-align:center;">AWAITING SELECTION TARGET</span>`;
+                opforBtn.className = "py-1.5 px-3 rounded text-xs border border-rose-500/30 bg-rose-950/20 text-rose-400 font-bold transition-all hover:bg-rose-500/10 shadow-inner";
+                allyBtn.className = "py-1.5 px-3 rounded text-xs border border-slate-800 bg-slate-900 text-slate-400 transition-all hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/20";
             }
+            renderFactionTemplates();
         }
 
-        function readPointer(e) {
+        function renderFactionTemplates() {
+            const container = document.getElementById('asset-templates-container');
+            container.innerHTML = '';
+            
+            ASSET_TEMPLATES[state.currentFaction].forEach(template => {
+                const isSelected = template.id === state.selectedTemplateId;
+                const button = document.createElement('button');
+                button.className = `w-full text-left p-2 rounded text-xs border transition-all flex items-center justify-between ${
+                    isSelected 
+                        ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-200 font-bold shadow-sm shadow-cyan-950' 
+                        : 'bg-[#0a111a] border-slate-800/60 text-slate-400 hover:border-slate-700 hover:bg-[#0f1a26]'
+                }`;
+                button.onclick = () => {
+                    state.selectedTemplateId = template.id;
+                    renderFactionTemplates();
+                };
+                
+                button.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full" style="background-color: ${template.color}"></span>
+                        <span class="truncate max-w-[160px]">${template.name}</span>
+                    </div>
+                    <span class="text-[9px] font-mono border px-1 rounded opacity-60 ${
+                        isSelected ? 'border-cyan-500/30 text-cyan-400' : 'border-slate-800'
+                    }">${template.signifier}</span>
+                `;
+                container.appendChild(button);
+            });
+        }
+
+        // THEATER PRESETS ENGINE 
+        function renderTheaterSystemGrid() {
+            const grid = document.getElementById('theater-presets-grid');
+            grid.innerHTML = '';
+            
+            Object.keys(THEATER_PRESETS).forEach(key => {
+                const preset = THEATER_PRESETS[key];
+                const isActive = state.currentTheater === key;
+                const button = document.createElement('button');
+                
+                button.className = `p-2 rounded text-xs border text-left flex flex-col justify-between h-14 uppercase tracking-wider transition-all ${
+                    isActive 
+                        ? 'bg-cyan-950/40 border-cyan-500/60 text-cyan-400 font-bold shadow-md' 
+                        : 'bg-[#0a111a] border-slate-800/80 text-slate-400 hover:bg-[#0e1724] hover:text-slate-200'
+                }`;
+                
+                button.onclick = () => {
+                    state.currentTheater = key;
+                    document.getElementById('current-sector-hud').innerText = `GRID-${key}`;
+                    renderTheaterSystemGrid();
+                    synchronizeTelemetryDisplay();
+                };
+                
+                button.innerHTML = `
+                    <span class="text-[10px] font-bold block truncate">${preset.name}</span>
+                    <span class="text-[8px] text-slate-500 block truncate">Objs: ${preset.obstacles.length}</span>
+                `;
+                grid.appendChild(button);
+            });
+        }
+
+        // OPERATIONAL TIMELINE AND RECONSTRUCTIVE DATA
+        function renderTimelineEngine() {
+            const container = document.getElementById('timeline-phases-list');
+            container.innerHTML = '';
+            
+            state.phases.forEach((phase, idx) => {
+                const isActive = state.activePhaseIndex === idx;
+                const div = document.createElement('div');
+                div.className = `p-3 rounded border cursor-pointer transition-all ${
+                    isActive 
+                        ? 'bg-[#091524] border-cyan-600/40 text-cyan-300 shadow-md' 
+                        : 'bg-[#080e14] border-slate-900 text-slate-400 hover:bg-[#0c1621] hover:border-slate-800'
+                }`;
+                div.onclick = () => {
+                    state.activePhaseIndex = idx;
+                    renderTimelineEngine();
+                    synchronizeTelemetryDisplay();
+                };
+                
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-[10px] uppercase font-bold tracking-wider truncate max-w-[170px]">Phase ${idx + 1}: ${phase.name}</span>
+                        ${state.phases.length > 1 ? `
+                            <button onclick="event.stopPropagation(); removeTimelinePhase(${idx});" class="text-slate-600 hover:text-rose-400 text-[10px] font-bold px-1">×</button>
+                        ` : ''}
+                    </div>
+                    <div class="flex justify-between text-[9px] text-slate-500 font-mono">
+                        <span>ASSETS: ${phase.assets.length} Elements</span>
+                        <span>TIMESTAMP: ${phase.timestamp}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addTimelinePhase() {
+            const lastPhase = state.phases[state.phases.length - 1];
+            // Clone existing vector arrays to build cumulative planning phases
+            const clonedAssets = JSON.parse(JSON.stringify(lastPhase.assets));
+            
+            // Format dynamic sequential timestamps
+            const secondsOffset = state.phases.length * 30;
+            const minStr = String(Math.floor(secondsOffset / 60)).padStart(2, '0');
+            const secStr = String(secondsOffset % 60).padStart(2, '0');
+            
+            state.phases.push({
+                id: Date.now(),
+                name: `Tactical Deployment Progression Vector`,
+                timestamp: `00:${minStr}:${secStr} Z`,
+                assets: clonedAssets
+            });
+            
+            state.activePhaseIndex = state.phases.length - 1;
+            renderTimelineEngine();
+            synchronizeTelemetryDisplay();
+        }
+
+        function removeTimelinePhase(idx) {
+            state.phases.splice(idx, 1);
+            if (state.activePhaseIndex >= state.phases.length) {
+                state.activePhaseIndex = state.phases.length - 1;
+            }
+            renderTimelineEngine();
+            synchronizeTelemetryDisplay();
+        }
+
+        // CORE CANVAS COORDINATION AND RENDERING LOOP Engine
+        function handleCanvasLeftClick(e) {
             const rect = canvas.getBoundingClientRect();
-            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-        }
-
-        function pointerDown(e) {
-            const pt = readPointer(e);
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
             
-            // SCREENSHARE PING TRACE INTERCEPT LOOP
-            if (e.shiftKey) {
-                activePings.push({
-                    x: pt.x,
-                    y: pt.y,
-                    color: COLORS[STATE.faction],
-                    radius: 2,
-                    maxRadius: 65,
-                    alpha: 1.0,
-                    expansionRate: 2.2
-                });
-                pushTerminalLog(`COMS BRIEF PING: BROADCAST APPLIED AT FIELD SECTOR X:${Math.round(pt.x)} Y:${Math.round(pt.y)}`);
-                return; // Cease execution immediately to prevent changing canvas items
-            }
-
-            if (STATE.animating) return;
-            const activePhase = STATE.phases[STATE.phaseIdx];
-
-            if (STATE.mode === 'deploy') {
-                const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 18);
-                if (found) {
-                    STATE.selectedId = found.id;
-                    dragAnchor = found;
-                    pushTerminalLog(`Linked command matrix to asset: OBJ-${found.id.toString().substring(2,7)}`);
-                } else {
-                    recordState();
-                    const created = { id: Math.random(), x: pt.x, y: pt.y, faction: STATE.faction, type: STATE.unitType };
-                    activePhase.assets.push(created);
-                    STATE.selectedId = created.id;
-                    dragAnchor = created;
-                    pushTerminalLog(`Asset operational: ${STATE.unitType.toUpperCase()} initialized.`);
-                }
-                syncInterface();
-            } else if (STATE.mode === 'path') {
-                if (STATE.pStyle === 'straight') {
-                    isInteracting = true;
-                    activePathBuilding = { id: Math.random(), type: 'straight', points: [pt, {x: pt.x, y: pt.y}] };
-                } else if (STATE.pStyle === 'stencil') {
-                    if (!activePathBuilding) {
-                        activePathBuilding = { id: Math.random(), type: 'stencil', points: [pt] };
-                        pushTerminalLog("Began interconnected elbow stencil trace layout.");
-                    } else {
-                        activePathBuilding.points.push(pt);
-                        pushTerminalLog("Added stencil trajectory node.");
-                    }
-                }
-            } else if (STATE.mode === 'zone') {
-                isInteracting = true;
-                dragAnchor = pt;
-                activeZonePreview = { type: STATE.zType, style: STATE.zStyle, fx: pt.x, fy: pt.y, tx: pt.x, ty: pt.y, faction: STATE.faction };
-            } else if (STATE.mode === 'terrain') {
-                recordState();
-                isInteracting = true;
-                dragAnchor = { type: STATE.tStyle, points: [pt] };
-                if(!activePhase.terrain) activePhase.terrain = [];
-                activePhase.terrain.push(dragAnchor);
-                pushTerminalLog(`Constructing strategic topography line: ${STATE.tStyle.toUpperCase()}`);
-            }
-        }
-
-        function pointerMove(e) {
-            const pt = readPointer(e);
-            mouseCurrentPos = pt;
-            if (STATE.animating) return;
-
-            if (STATE.mode === 'deploy' && dragAnchor) {
-                dragAnchor.x = pt.x;
-                dragAnchor.y = pt.y;
-            } else if (STATE.mode === 'path' && activePathBuilding) {
-                if (STATE.pStyle === 'straight' && isInteracting) {
-                    activePathBuilding.points[1] = pt;
-                }
-            } else if (STATE.mode === 'zone' && isInteracting && activeZonePreview) {
-                activeZonePreview.tx = pt.x;
-                activeZonePreview.ty = pt.y;
-            } else if (STATE.mode === 'terrain' && isInteracting && dragAnchor) {
-                const lastPt = dragAnchor.points[dragAnchor.points.length - 1];
-                if (Math.hypot(pt.x - lastPt.x, pt.y - lastPt.y) > 15) {
-                    dragAnchor.points.push(pt);
-                }
-            }
-        }
-
-        function pointerUp(e) {
-            if (STATE.animating) return;
-            const activePhase = STATE.phases[STATE.phaseIdx];
+            // Find template data
+            const template = ASSET_TEMPLATES[state.currentFaction].find(t => t.id === state.selectedTemplateId);
+            if (!template) return;
             
-            if (STATE.mode === 'path') {
-                if (STATE.pStyle === 'straight' && isInteracting && activePathBuilding) {
-                    recordState();
-                    activePhase.paths.push(activePathBuilding);
-                    pushTerminalLog("Committed straight line routing vector.");
-                    activePathBuilding = null;
-                }
-            } else if (STATE.mode === 'zone' && isInteracting && activeZonePreview) {
-                recordState();
-                activePhase.zones.push(activeZonePreview);
-                pushTerminalLog(`Strategic map zone registered: ${activeZonePreview.type.toUpperCase()}`);
-                activeZonePreview = null;
-            }
-            isInteracting = false;
-            if(STATE.mode !== 'path') dragAnchor = null;
-            syncInterface();
+            // Generate unit token entity instances
+            const newAsset = {
+                id: 'asset_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                x: Math.round(x),
+                y: Math.round(y),
+                type: template.id,
+                faction: state.currentFaction
+            };
+            
+            state.phases[state.activePhaseIndex].assets.push(newAsset);
+            synchronizeTelemetryDisplay();
+            renderTimelineEngine();
         }
 
-        function commitCurrentPath() {
-            if(!activePathBuilding) return;
-            if(activePathBuilding.type === 'stencil' && activePathBuilding.points.length >= 2) {
-                recordState();
-                STATE.phases[STATE.phaseIdx].paths.push(activePathBuilding);
-                pushTerminalLog("Elbow stencil network committed cleanly.");
-            }
-            activePathBuilding = null;
-            syncInterface();
-        }
-
-        function findDistanceToSegment(p, v, w) {
-            const l2 = Math.hypot(v.x - w.x, v.y - w.y) ** 2;
-            if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
-            let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
-            t = Math.max(0, Math.min(1, t));
-            return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
-        }
-
-        function bindUnitsToRoutes() {
-            const activePhase = STATE.phases[STATE.phaseIdx];
-            activePhase.assets.forEach(asset => {
-                let bestRoute = null;
-                let minimumDistance = 35; 
-
-                activePhase.paths.forEach(path => {
-                    for(let i = 0; i < path.points.length - 1; i++) {
-                        let dist = findDistanceToSegment(asset, path.points[i], path.points[i+1]);
-                        if(dist < minimumDistance) {
-                            minimumDistance = dist;
-                            bestRoute = path;
-                        }
-                    }
-                });
-
-                if (bestRoute) {
-                    asset.runtimePoints = [...bestRoute.points];
-                    pushTerminalLog(`Routing sync: Asset locked to path line vector.`);
-                } else {
-                    asset.runtimePoints = null;
-                }
-            });
-        }
-
-        function drawMilitarySymbol(ctx, x, y, type, color) {
-            ctx.save();
-            ctx.strokeStyle = color;
-            ctx.fillStyle = '#010306';
-            ctx.lineWidth = 2;
-
-            const size = 11; 
-            ctx.translate(x, y);
-
-            if (type === 'Infantry') {
-                ctx.beginPath(); ctx.arc(0, 0, size, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(-size, 0); ctx.lineTo(size, 0); ctx.moveTo(0, -size); ctx.lineTo(0, size); ctx.stroke();
-            } else if (type === 'Specialist') {
-                ctx.beginPath(); ctx.moveTo(0, -size - 2); ctx.lineTo(size + 2, 0); ctx.lineTo(0, size + 2); ctx.lineTo(-size - 2, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI * 2); ctx.stroke();
-            } else if (type === 'Armoured') {
-                ctx.beginPath();
-                for (let i = 0; i < 4; i++) {
-                    let angle = (i * Math.PI / 2) + (Math.PI / 4);
-                    ctx.lineTo(Math.cos(angle) * (size + 2), Math.sin(angle) * (size + 2));
-                }
-                ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(-size, -size); ctx.lineTo(size, size); ctx.stroke();
-            } else if (type === 'Tank') {
-                ctx.fillRect(-size - 2, -size + 3, (size * 2) + 4, (size * 2) - 6);
-                ctx.strokeRect(-size - 2, -size + 3, (size * 2) + 4, (size * 2) - 6);
-                ctx.fillRect(-size + 2, -size + 1, (size * 2) - 4, (size * 2) - 2);
-                ctx.strokeRect(-size + 2, -size + 1, (size * 2) - 4, (size * 2) - 2);
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(size + 8, 0); ctx.lineWidth = 3; ctx.stroke();
-            } else if (type === 'ATTE') {
-                ctx.beginPath();
-                ctx.arc(-size, -size + 4, 3, 0, Math.PI*2); ctx.arc(0, -size + 2, 3, 0, Math.PI*2); ctx.arc(size, -size + 4, 3, 0, Math.PI*2);
-                ctx.arc(-size, size - 4, 3, 0, Math.PI*2); ctx.arc(0, size - 2, 3, 0, Math.PI*2); ctx.arc(size, size - 4, 3, 0, Math.PI*2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(-size, -size + 4); ctx.lineTo(size, -size + 4); ctx.lineTo(size + 6, 0); ctx.lineTo(size, size - 4); ctx.lineTo(-size, size - 4); ctx.closePath();
-                ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(size, 0); ctx.lineTo(size + 9, -2); ctx.moveTo(size, 0); ctx.lineTo(size + 9, 2); ctx.stroke();
-            } else if (type === 'Air') {
-                ctx.beginPath(); ctx.moveTo(size + 4, 0); ctx.lineTo(-size, -size - 2); ctx.lineTo(-size + 4, 0); ctx.lineTo(-size, size + 2); ctx.closePath(); ctx.fill(); ctx.stroke();
-            }
-            ctx.restore();
-        }
-
-        function renderCanvasGrid() {
-            ctx.fillStyle = '#010306'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            if (STATE.gridOn) {
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = 'rgba(0, 242, 254, 0.012)';
-                for (let x = 0; x < canvas.width; x += 25) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
-                for (let y = 0; y < canvas.height; y += 25) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
-
-                ctx.strokeStyle = 'rgba(0, 242, 254, 0.03)';
-                for (let x = 0; x < canvas.width; x += 100) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
-                for (let y = 0; y < canvas.height; y += 100) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
-            }
-        }
-
-        function runRenderLoop() {
-            dynamicDashOffset = (dynamicDashOffset - 0.5) % 24;
-            renderCanvasGrid();
-
-            const current = STATE.phases[STATE.phaseIdx];
-
-            // TERRAIN RENDERING DEPTH
-            if(current.terrain) {
-                current.terrain.forEach(t => {
-                    if (t.points.length < 2) return;
-                    ctx.save();
-                    ctx.lineWidth = t.type === 'trench' ? 7 : 12;
-                    ctx.strokeStyle = t.type === 'trench' ? '#0f1724' : '#211811';
-                    ctx.beginPath(); ctx.moveTo(t.points[0].x, t.points[0].y);
-                    for(let i=1; i<t.points.length; i++) ctx.lineTo(t.points[i].x, t.points[i].y);
-                    ctx.stroke();
-
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = t.type === 'trench' ? 'rgba(0, 242, 254, 0.15)' : 'rgba(255, 159, 28, 0.15)';
-                    ctx.setLineDash([3, 6]);
-                    ctx.stroke();
-                    ctx.restore();
-                });
-            }
-
-            // ZONE RENDERING LAYER
-            current.zones.forEach(z => renderZoneBounds(z));
-            if (activeZonePreview) renderZoneBounds(activeZonePreview);
-
-            // COMPLETED ROUTES VECTOR LAYER
-            current.paths.forEach(path => {
-                ctx.save();
-                ctx.lineWidth = 4;
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-                ctx.beginPath(); ctx.moveTo(path.points[0].x, path.points[0].y);
-                for(let i = 1; i < path.points.length; i++) ctx.lineTo(path.points[i].x, path.points[i].y);
-                ctx.stroke();
-
-                ctx.strokeStyle = '#00f2fe';
-                ctx.lineWidth = 1.5;
-                ctx.setLineDash([8, 6]);
-                ctx.lineDashOffset = dynamicDashOffset;
-                ctx.stroke();
-                ctx.restore();
-
-                path.points.forEach((pt, idx) => {
-                    ctx.fillStyle = idx === 0 ? '#00ffaa' : '#00f2fe';
-                    ctx.beginPath(); ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2); ctx.fill();
-                });
-            });
-
-            // ACTIVE VECTOR PATH-BUILDING LIVE PREVIEW
-            if (activePathBuilding) {
-                ctx.save();
-                ctx.lineWidth = 1.5;
-                ctx.strokeStyle = 'rgba(0, 242, 254, 0.5)';
-                ctx.setLineDash([4, 4]);
-                ctx.beginPath();
-                ctx.moveTo(activePathBuilding.points[0].x, activePathBuilding.points[0].y);
-                for(let i = 1; i < activePathBuilding.points.length; i++) {
-                    ctx.lineTo(activePathBuilding.points[i].x, activePathBuilding.points[i].y);
-                }
-                if (STATE.pStyle === 'stencil') {
-                    ctx.lineTo(mouseCurrentPos.x, mouseCurrentPos.y);
-                }
-                ctx.stroke();
-                ctx.restore();
-
-                activePathBuilding.points.forEach(pt => {
-                    ctx.fillStyle = '#ffcc00';
-                    ctx.beginPath(); ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2); ctx.fill();
-                });
-            }
-
-            // PROXIMITY ENGAGEMENT SECTOR DETECTIONS
-            current.assets.forEach(a1 => {
-                if(a1.faction !== 'GAR') return;
-                current.assets.forEach(a2 => {
-                    if(a2.faction !== 'OPFOR') return;
-                    let dist = Math.hypot(a1.x - a2.x, a1.y - a2.y);
-                    if(dist < 110) {
-                        ctx.save(); ctx.strokeStyle = 'rgba(255, 51, 102, 0.25)'; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
-                        ctx.beginPath(); ctx.moveTo(a1.x, a1.y); ctx.lineTo(a2.x, a2.y); ctx.stroke();
-                        let mx = (a1.x + a2.x)/2; let my = (a1.y + a2.y)/2;
-                        ctx.strokeStyle = '#ff3366'; ctx.setLineDash([]); ctx.strokeRect(mx - 3, my - 3, 6, 6);
-                        ctx.restore();
-                    }
-                });
-            });
-
-            // RUN TIME ANIMATION COEFFICIENTS
-            if (STATE.animating) {
-                STATE.animProgress += 0.003;
-                if(STATE.animProgress >= 1) {
-                    STATE.animating = false;
-                    recordState();
-                    current.assets.forEach(a => {
-                        if (a.runtimePoints && a.runtimePoints.length > 0) {
-                            const dest = a.runtimePoints[a.runtimePoints.length - 1];
-                            a.x = dest.x; a.y = dest.y; a.runtimePoints = null;
-                        }
-                    });
-                    STATE.animProgress = 0;
-                    document.getElementById('ctrl-play').classList.remove('active');
-                    pushTerminalLog("Sim flight positioning iterations completed.");
-                    syncInterface();
-                }
-            }
-
-            // FRAME RENDERING DISPLACEMENT FOR TOTAL ASSETS
-            current.assets.forEach(asset => {
-                let rx = asset.x; let ry = asset.y;
-
-                if (STATE.animating && asset.runtimePoints && asset.runtimePoints.length > 0) {
-                    let absoluteProgress = STATE.animProgress * (asset.runtimePoints.length - 1);
-                    let baseIdx = Math.floor(absoluteProgress);
-                    let fractional = absoluteProgress - baseIdx;
-
-                    if (baseIdx < asset.runtimePoints.length - 1) {
-                        rx = asset.runtimePoints[baseIdx].x + (asset.runtimePoints[baseIdx + 1].x - asset.runtimePoints[baseIdx].x) * fractional;
-                        ry = asset.runtimePoints[baseIdx].y + (asset.runtimePoints[baseIdx + 1].y - asset.runtimePoints[baseIdx].y) * fractional;
-                    } else {
-                        rx = asset.runtimePoints[asset.runtimePoints.length - 1].x;
-                        ry = asset.runtimePoints[asset.runtimePoints.length - 1].y;
-                    }
-                }
-
-                if (asset.id === STATE.selectedId) {
-                    ctx.save();
-                    ctx.strokeStyle = 'rgba(0, 242, 254, 0.5)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
-                    ctx.beginPath(); ctx.arc(rx, ry, 18, 0, Math.PI * 2); ctx.stroke(); 
-                    ctx.restore();
-                }
-
-                drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction]);
-            });
-
-            // SCREENSHARE COMS PING RENDERING LOGIC LOOP
-            for (let i = activePings.length - 1; i >= 0; i--) {
-                let p = activePings[i];
-                p.radius += p.expansionRate;
-                p.alpha = 1.0 - (p.radius / p.maxRadius);
-
-                if (p.alpha <= 0) {
-                    activePings.splice(i, 1);
-                    continue;
-                }
-
-                ctx.save();
-                ctx.globalAlpha = p.alpha;
-                ctx.strokeStyle = p.color;
-                ctx.lineWidth = 2.5;
+        function handleCanvasRightClick(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const currentAssets = state.phases[state.activePhaseIndex].assets;
+            
+            // Perform collision target scanning
+            for (let i = currentAssets.length - 1; i >= 0; i--) {
+                const asset = currentAssets[i];
+                const tInfo = findTemplateInformation(asset.type);
+                const radius = tInfo ? tInfo.size : 12;
                 
-                // Ring ripple
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.stroke();
-
-                // Static crosshair center dot
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.restore();
+                const dist = Math.hypot(asset.x - x, asset.y - y);
+                if (dist <= radius + 4) {
+                    currentAssets.splice(i, 1);
+                    synchronizeTelemetryDisplay();
+                    renderTimelineEngine();
+                    break;
+                }
             }
-
-            requestAnimationFrame(runRenderLoop);
         }
 
-        function renderZoneBounds(z) {
-            ctx.save();
-            let zoneColor = COLORS[z.faction] || '#7a92a8';
-            
-            if (z.style === 'fob') {
-                ctx.strokeStyle = '#00f2fe';
-                ctx.fillStyle = createGridPattern('#00f2fe');
-            } else if (z.style === 'noman') {
-                ctx.strokeStyle = '#e63946';
-                ctx.fillStyle = createStripedPattern('#e63946');
-            } else {
-                ctx.strokeStyle = zoneColor;
-                ctx.fillStyle = zoneColor + '08';
-            }
+        function findTemplateInformation(typeId) {
+            return ASSET_TEMPLATES.ALLY.find(t => t.id === typeId) || 
+                   ASSET_TEMPLATES.OPFOR.find(t => t.id === typeId);
+        }
 
+        function synchronizeTelemetryDisplay() {
+            const emptyState = document.getElementById('telemetry-empty-state');
+            const dataDisplay = document.getElementById('telemetry-data-display');
+            const currentAssets = state.phases[state.activePhaseIndex].assets;
+            
+            if (currentAssets.length === 0) {
+                emptyState.classList.remove('hidden');
+                dataDisplay.classList.add('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            dataDisplay.classList.remove('hidden');
+            
+            dataDisplay.innerHTML = '';
+            
+            // Metrics Header Panel
+            const alliesCount = currentAssets.filter(a => a.faction === 'ALLY').length;
+            const opforCount = currentAssets.filter(a => a.faction === 'OPFOR').length;
+            
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = "grid grid-cols-2 gap-2 bg-[#0a111a] p-2 rounded border border-slate-900 text-center uppercase text-[10px]";
+            summaryDiv.innerHTML = `
+                <div><span class="text-emerald-500 font-bold">GAR Force:</span> ${alliesCount}</div>
+                <div><span class="text-rose-500 font-bold">CIS Force:</span> ${opforCount}</div>
+            `;
+            dataDisplay.appendChild(summaryDiv);
+
+            // Asset Vector Feed List
+            const listDiv = document.createElement('div');
+            listDiv.className = "space-y-1.5 max-h-64 overflow-y-auto pr-1";
+            
+            currentAssets.forEach(asset => {
+                const info = findTemplateInformation(asset.type);
+                if (!info) return;
+                
+                const item = document.createElement('div');
+                item.className = "p-2 bg-[#080d14] rounded border border-slate-950 flex justify-between items-center text-[11px]";
+                item.innerHTML = `
+                    <div class="flex items-center gap-2 truncate max-w-[150px]">
+                        <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${info.color}"></span>
+                        <span class="truncate text-slate-300 font-medium">${info.name}</span>
+                    </div>
+                    <span class="font-mono text-cyan-600 text-[10px]">X:${asset.x} Y:${asset.y}</span>
+                `;
+                listDiv.appendChild(item);
+            });
+            
+            dataDisplay.appendChild(listDiv);
+        }
+
+        // TACTICAL VISUAL ENGINE DRAW LOOP
+        function drawCoreTacticalEngine() {
+            const preset = THEATER_PRESETS[state.currentTheater];
+            
+            // 1. Clear Frame & Structural Ambient Colors
+            ctx.fillStyle = preset.bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 2. Draw Background Vector Grid Matrix
+            ctx.strokeStyle = preset.gridColor;
             ctx.lineWidth = 1;
-
-            if (z.type === 'circle') {
-                const r = Math.hypot(z.tx - z.fx, z.ty - z.fy);
-                ctx.beginPath(); ctx.arc(z.fx, z.fy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-            } else {
-                const w = z.tx - z.fx; const h = z.ty - z.fy;
-                ctx.fillRect(z.fx, z.fy, w, h); ctx.strokeRect(z.fx, z.fy, w, h);
+            const gridSize = 40;
+            
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
             }
-            ctx.restore();
-        }
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // 3. Render Procedural Obstacles Based on Planet Preset Variables
+            preset.obstacles.forEach(obs => {
+                ctx.save();
+                if (obs.type === 'crystal') {
+                    // Christophsis Crystalline Structures
+                    let grad = ctx.createLinearGradient(obs.x, obs.y, obs.x + obs.w, obs.y + obs.h);
+                    grad.addColorStop(0, 'rgba(6, 182, 212, 0.25)');
+                    grad.addColorStop(1, 'rgba(8, 47, 73, 0.6)');
+                    ctx.fillStyle = grad;
+                    ctx.strokeStyle = 'rgba(34, 211, 238, 0.4)';
+                    ctx.lineWidth = 1.5;
+                    ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+                    ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+                    
+                    // Internal crystalline geode facet accents
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(34, 211, 238, 0.2)';
+                    ctx.moveTo(obs.x, obs.y);
+                    ctx.lineTo(obs.x + obs.w, obs.y + obs.h);
+                    ctx.moveTo(obs.x + obs.w, obs.y);
+                    ctx.lineTo(obs.x, obs.y + obs.h);
+                    ctx.stroke();
 
-        function createStripedPattern(color) {
-            const pCanvas = document.createElement('canvas'); pCanvas.width = 16; pCanvas.height = 16;
-            const pCtx = pCanvas.getContext('2d');
-            pCtx.strokeStyle = color + '22'; pCtx.lineWidth = 1;
-            pCtx.beginPath(); pCtx.moveTo(0, 16); pCtx.lineTo(16, 0); pCtx.stroke();
-            return ctx.createPattern(pCanvas, 'repeat');
-        }
+                } else if (obs.type === 'mesa' || obs.type === 'chasm') {
+                    // Ryloth Earthen Badlands Formations
+                    ctx.fillStyle = obs.type === 'mesa' ? 'rgba(120, 53, 4, 0.35)' : 'rgba(12, 10, 9, 0.85)';
+                    ctx.strokeStyle = obs.type === 'mesa' ? 'rgba(249, 115, 22, 0.3)' : 'rgba(120, 53, 4, 0.4)';
+                    ctx.lineWidth = 2;
+                    ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+                    ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
 
-        function createGridPattern(color) {
-            const pCanvas = document.createElement('canvas'); pCanvas.width = 14; pCanvas.height = 14;
-            const pCtx = pCanvas.getContext('2d');
-            pCtx.strokeStyle = color + '18'; pCtx.lineWidth = 1;
-            pCtx.strokeRect(0, 0, 14, 14);
-            return ctx.createPattern(pCanvas, 'repeat');
-        }
+                } else if (obs.type === 'wroshyr') {
+                    // Kashyyyk Wroshyr Forest Nodes
+                    let grad = ctx.createRadialGradient(obs.x, obs.y, 10, obs.x, obs.y, obs.radius);
+                    grad.addColorStop(0, 'rgba(22, 101, 52, 0.5)');
+                    grad.addColorStop(1, 'rgba(2, 44, 18, 0.2)');
+                    ctx.fillStyle = grad;
+                    ctx.strokeStyle = 'rgba(34, 197, 94, 0.3)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(obs.x, obs.y, obs.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
 
-        const mOverlay = document.getElementById('overlay-shield');
-        const mBox = document.getElementById('modal-box');
-        let confirmationCallback = null;
+                } else if (obs.type === 'water') {
+                    // Kashyyyk Shallows/Water Bodies
+                    ctx.fillStyle = 'rgba(14, 116, 144, 0.15)';
+                    ctx.strokeStyle = 'rgba(6, 182, 212, 0.2)';
+                    ctx.lineWidth = 1;
+                    ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+                    ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
 
-        function showWarningBox(msg, callback) {
-            document.getElementById('m-msg').innerText = msg; confirmationCallback = callback;
-            mOverlay.classList.add('active'); mBox.classList.add('active');
-        }
-
-        function hideWarningBox() { mOverlay.classList.remove('active'); mBox.classList.remove('active'); confirmationCallback = null; }
-
-        document.getElementById('m-confirm').addEventListener('click', () => { if(confirmationCallback) confirmationCallback(); hideWarningBox(); });
-        document.getElementById('m-cancel').addEventListener('click', hideWarningBox);
-
-        function handleKeydown(e) {
-            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-            if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); triggerUndo(); }
-            if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); triggerRedo(); }
-            if (e.key === 'Escape') { if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath(); }
+                } else if (obs.type === 'structure' || obs.type === 'industrial') {
+                    // Coruscant & Corellia Urban/Industrial Infrastructure Blocks
+                    ctx.fillStyle = 'rgba(30, 41, 59, 0.5)';
+                    ctx.strokeStyle = preset.textColor + '40'; // Use preset identity theme color with opacity alpha
+                    ctx.lineWidth = 1.5;
+                    ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+                    ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+                    
+                    // Crosshatch danger warning striping vector
+                    ctx.strokeStyle = preset.textColor + '15';
+                    ctx.lineWidth = 1;
+                    for(let i = 0; i < obs.w; i += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(obs.x + i, obs.y);
+                        ctx.lineTo(obs.x + i + 10, obs.y + obs.h);
+                        ctx.stroke();
+                    }
+                }
+                
+                // Obstacle Text Signature HUD Overlay labels
+                ctx.fillStyle = preset.textColor;
+                ctx.globalAlpha = 0.5;
+                ctx.font = '9px "Share Tech Mono", monospace';
+                ctx.fillText(obs.label.toUpperCase(), obs.x + 6, obs.y + 14);
+                ctx.restore();
+            });
+            
+            // 4. Render Active Tactical Deployment Assets
+            const activePhase = state.phases[state.activePhaseIndex];
+            if (activePhase && activePhase.assets) {
+                activePhase.assets.forEach(asset => {
+                    const info = findTemplateInformation(asset.type);
+                    if (!info) return;
+                    
+                    ctx.save();
+                    
+                    // Draw outer identity grouping brackets or rings
+                    ctx.beginPath();
+                    ctx.arc(asset.x, asset.y, info.size, 0, Math.PI * 2);
+                    ctx.fillStyle = asset.faction === 'ALLY' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)';
+                    ctx.fill();
+                    ctx.strokeStyle = info.color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Dynamic Faction Orientation reticle design markers
+                    if (asset.faction === 'ALLY') {
+                        ctx.strokeStyle = info.color;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(asset.x, asset.y - info.size - 4);
+                        ctx.lineTo(asset.x, asset.y - info.size + 1);
+                        ctx.stroke();
+                    } else {
+                        // Diamond vector target indicator for hostiles
+                        ctx.strokeStyle = info.color;
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(asset.x - info.size/2, asset.y - info.size/2, info.size, info.size);
+                    }
+                    
+                    // Core Signifier Text
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 9px "Share Tech Mono", monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(info.signifier, asset.x, asset.y);
+                    
+                    ctx.restore();
+                });
+            }
+            
+            // Infinite Execution Loop Lifecycle Handshake
+            requestAnimationFrame(drawCoreTacticalEngine);
         }
     </script>
 </body>
