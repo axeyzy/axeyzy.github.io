@@ -94,7 +94,8 @@
 
         .op-title { display: flex; align-items: center; gap: 12px; }
         .op-indicator { width: 8px; height: 8px; background: var(--theme-color); box-shadow: 0 0 10px var(--theme-color); animation: blink 2s infinite ease-in-out; }
-        .op-name { font-size: 13px; font-weight: 700; letter-spacing: 0.15em; color: #d1dfec; }
+        .op-name { font-size: 12px; font-weight: 700; letter-spacing: 0.15em; color: #d1dfec; cursor: pointer; padding: 4px 8px; border: 1px solid transparent; transition: all 0.2s ease; }
+        .op-name:hover { border-color: var(--theme-border); background: rgba(var(--theme-color-rgb), 0.04); color: var(--theme-color); }
 
         .controls { display: flex; gap: 16px; align-items: center; }
         .control-group { display: flex; gap: 6px; align-items: center; border-right: 1px solid #122236; padding-right: 16px; }
@@ -286,7 +287,7 @@
     <div class="header">
         <div class="op-title">
             <div class="op-indicator"></div>
-            <span class="op-name" id="op-label">SYS.MAIN // RECON_V4.3 // SECURE</span>
+            <span class="op-name" id="op-label" title="Click to modify active Operation Identifier">SYS.MAIN // INITIALIZING COORDINATES...</span>
         </div>
         <div class="controls" id="mapping-header-controls">
             <div class="control-group">
@@ -594,10 +595,10 @@
         };
 
         const THEATERS = {
-            default: { name: "CORE BASELINE MATRIX", bg: "#010306", gridColor: "rgba(var(--theme-color-rgb), 0.012)", drawSatelliteMap: null, terrain: [] },
+            default: { name: "CORE BASELINE MATRIX // SECURE", bg: "#010306", gridColor: "rgba(var(--theme-color-rgb), 0.012)", drawSatelliteMap: null, terrain: [] },
             
             christophsis: { 
-                name: "THEATER: CHRISTOPHSIS // URBAN CRYSTAL MESH", bg: "#020712", gridColor: "rgba(var(--theme-color-rgb), 0.03)",
+                name: "THEATER: CHRISTOPHSIS // URBAN CRYSTAL MESH // SECURE", bg: "#020712", gridColor: "rgba(var(--theme-color-rgb), 0.03)",
                 terrain: [
                     { type: 'trench', points: [{x:100, y:80}, {x:220, y:80}, {x:220, y:240}, {x:100, y:240}] },
                     { type: 'ridge', points: [{x:450, y:250}, {x:570, y:250}, {x:570, y:410}, {x:450, y:410}] }
@@ -622,7 +623,7 @@
             },
             
             ryloth: { 
-                name: "THEATER: RYLOTH // TRENCH OUTPOST MESH", bg: "#120b05", gridColor: "rgba(255, 159, 28, 0.02)",
+                name: "THEATER: RYLOTH // TRENCH OUTPOST MESH // SECURE", bg: "#120b05", gridColor: "rgba(255, 159, 28, 0.02)",
                 terrain: [
                     { type: 'trench', points: [{x:50, y:200}, {x:250, y:230}, {x:400, y:120}] },
                     { type: 'ridge', points: [{x:300, y:380}, {x:550, y:350}, {x:650, y:450}] }
@@ -643,7 +644,7 @@
             },
             
             kashyyyk: { 
-                name: "THEATER: KASHYYYK // KACHIRO BEACHHEAD", bg: "#031206", gridColor: "rgba(0, 255, 170, 0.02)",
+                name: "THEATER: KASHYYYK // KACHIRO BEACHHEAD // SECURE", bg: "#031206", gridColor: "rgba(0, 255, 170, 0.02)",
                 terrain: [
                     { type: 'hazard', points: [{x:0, y:150}, {x:220, y:180}, {x:450, y:130}, {x:800, y:160}] }
                 ],
@@ -665,7 +666,7 @@
             },
             
             coruscant: { 
-                name: "THEATER: CORUSCANT // SECURITY QUADRANT", bg: "#060810", gridColor: "rgba(209, 223, 236, 0.025)",
+                name: "THEATER: CORUSCANT // SECURITY QUADRANT // SECURE", bg: "#060810", gridColor: "rgba(209, 223, 236, 0.025)",
                 terrain: [
                     { type: 'trench', points: [{x:150, y:0}, {x:150, y:500}] },
                     { type: 'trench', points: [{x:500, y:0}, {x:500, y:500}] }
@@ -686,7 +687,7 @@
             },
             
             corellia: { 
-                name: "THEATER: CORELLIA // SHIPYARD INDUSTRIAL SLATS", bg: "#0d0404", gridColor: "rgba(230, 57, 70, 0.02)",
+                name: "THEATER: CORELLIA // SHIPYARD INDUSTRIAL SLATS // SECURE", bg: "#0d0404", gridColor: "rgba(230, 57, 70, 0.02)",
                 terrain: [
                     { type: 'ridge', points: [{x:200, y:100}, {x:450, y:100}] },
                     { type: 'ridge', points: [{x:200, y:360}, {x:450, y:360}] }
@@ -731,7 +732,7 @@
                 authScreen.classList.add('hidden');
                 bootstrapSystem();
                 
-                document.getElementById('op-label').innerText = `SYS.MAIN // ${themeData.label} // SECURE`;
+                updateMasterTitle(themeData.label);
                 pushTerminalLog(`LEGION REGISTRY RECOGNIZED: SYSTEM ACCENTS MODIFIED TO ${inputCode} CORE PROFILE.`);
                 return;
             }
@@ -753,7 +754,7 @@
         }
 
         const STATE = {
-            opName: 'OPERATION AXE-RECON',
+            opName: 'RECON_V4.3',
             mode: 'deploy',      
             pStyle: 'straight',  
             zType: 'rect',       
@@ -820,9 +821,19 @@
             attachInterfaceListeners();
             recordState();
             pushTerminalLog("Operational baseline synchronized successfully.");
+            
+            // Initial title generation pass
+            updateMasterTitle();
+            
             syncInterface();
             runRenderLoop();
             runMettCalculationSync();
+        }
+
+        // Standardized master formatting generator hook
+        function updateMasterTitle(optionalTheaterOverride) {
+            const theaterString = optionalTheaterOverride || THEATERS[STATE.activeTheater].name;
+            document.getElementById('op-label').innerText = `SYS.MAIN // ${theaterString} // ${STATE.opName.toUpperCase()}`;
         }
 
         function resizeTacticalSurface() {
@@ -858,6 +869,16 @@
         }
 
         function attachInterfaceListeners() {
+            // Interactive status bar configuration hook setup
+            document.getElementById('op-label').addEventListener('click', () => {
+                const newOpName = prompt("ENTER NEW STRATEGIC OPERATION IDENTIFIER:", STATE.opName);
+                if (newOpName !== null && newOpName.trim() !== "") {
+                    STATE.opName = newOpName.trim().toUpperCase();
+                    updateMasterTitle();
+                    pushTerminalLog(`Operational identifier modified to: ${STATE.opName}`);
+                }
+            });
+
             document.querySelectorAll('.mode-btn').forEach(b => {
                 b.addEventListener('click', (e) => {
                     STATE.mode = e.target.dataset.mode;
@@ -876,7 +897,7 @@
                     const profile = THEATERS[targetT];
                     STATE.phases[STATE.phaseIdx].terrain = JSON.parse(JSON.stringify(profile.terrain || []));
                     
-                    document.getElementById('op-label').innerText = `SYS.MAIN // ${profile.name} // SECURE`;
+                    updateMasterTitle();
                     pushTerminalLog(`CONNECTED INTEL FEED: DOWNLINKING SATELLITE TOPO FOR ${targetT.toUpperCase()}`);
                     syncInterface();
                 });
