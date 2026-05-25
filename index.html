@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAR Operations Command Planner</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-pure: #05070b;
+            --glass-bg: rgba(13, 17, 23, 0.75);
+            --border-clean: rgba(255, 255, 255, 0.08);
+            --border-focus: rgba(255, 255, 255, 0.25);
+            --text-muted: #6e7681;
+            --text-bright: #f0f6fc;
+            
+            /* High-Vis Tactical Neon Colors */
+            --color-gar: #00bfff;
+            --color-opfor: #ff3b30;
+            --color-ally: #34c759;
+            --color-target: #ffcc00;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-pure);
+            color: var(--text-bright);
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Full Screen Map Surface */
+        #canvas-wrapper {
+            position: relative;
+            flex-grow: 1;
+            height: 100%;
+            background-color: var(--bg-pure);
+        }
+        
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
+
+        /* Floating Minimal Interface HUD */
+        .hud-panel {
+            position: absolute;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-clean);
+            border-radius: 4px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        /* Left Command Console */
+        #console-left {
+            top: 20px;
+            left: 20px;
+            width: 280px;
+            bottom: 20px;
+        }
+
+        /* Top Control Bar */
+        #console-top {
+            top: 20px;
+            left: 320px;
+            right: 20px;
+            height: 54px;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-header {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        /* Slick Grid Selectors */
+        .selector-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+        }
+
+        /* Sleek Border-Based Buttons */
+        button {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-clean);
+            border-radius: 3px;
+            padding: 8px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: left;
+        }
+
+        button:hover {
+            border-color: var(--border-focus);
+            color: var(--text-bright);
+        }
+
+        button.active {
+            border-color: var(--text-bright);
+            color: var(--text-bright);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Color Coding for Factions when Selected */
+        button.f-active[data-faction="GAR"] { border-color: var(--color-gar); color: var(--color-gar); }
+        button.f-active[data-faction="OPFOR"] { border-color: var(--color-opfor); color: var(--color-opfor); }
+        button.f-active[data-faction="ALLIES"] { border-color: var(--color-ally); color: var(--color-ally); }
+        button.f-active[data-faction="TARGETS"] { border-color: var(--color-target); color: var(--color-target); }
+
+        /* Navigation Matrix for Phases */
+        #phase-timeline {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+        }
+        
+        .phase-node {
+            padding: 6px 0;
+            text-align: center;
+            flex-grow: 1;
+            font-size: 10px;
+        }
+
+        /* Input / Intel Feed Box */
+        textarea {
+            width: 100%;
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-clean);
+            border-radius: 3px;
+            padding: 10px;
+            color: var(--text-bright);
+            font-family: inherit;
+            font-size: 12px;
+            line-height: 1.5;
+            resize: none;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--border-focus);
+        }
+
+        /* HUD Readout Texts */
+        .hud-readout {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .horizontal-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        /* Custom scrollbar to keep it sleek */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--border-clean); border-radius: 2px; }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-wrapper">
+        <!-- GLOBAL TOP HUD BAR -->
+        <div id="console-top" class="hud-panel">
+            <div class="hud-readout" id="hud-phase-display" style="color: var(--color-gar);">TACTICAL MATRIX // PHASE 1</div>
+            <div class="horizontal-row">
+                <button id="btn-play-animation" style="border-color: var(--color-ally); color: var(--color-ally); padding: 6px 14px;">EXECUTE PATHS</button>
+                <button id="btn-clear-board" style="border-color: var(--color-opfor); color: var(--color-opfor); padding: 6px 14px;">WIPE DATA</button>
+            </div>
+        </div>
+
+        <!-- LEFT CONTROL INTERFACE -->
+        <div id="console-left" class="hud-panel">
+            <div>
+                <div class="section-header">Faction Vector</div>
+                <div class="selector-grid">
+                    <button class="faction-btn f-active" data-faction="GAR">GAR</button>
+                    <button class="faction-btn" data-faction="OPFOR">OPFOR</button>
+                    <button class="faction-btn" data-faction="ALLIES">ALLIES</button>
+                    <button class="faction-btn" data-faction="TARGETS">TARGETS</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-header">Asset Profile</div>
+                <div class="selector-grid">
+                    <button class="unit-btn active" data-unit="Infantry">Infantry</button>
+                    <button class="unit-btn" data-unit="Specialist">Specialist</button>
+                    <button class="unit-btn" data-unit="Armoured">Armoured</button>
+                    <button class="unit-btn" data-unit="Tank">Heavy Tank</button>
+                    <button class="unit-btn" data-unit="AT-TE">AT-TE Walker</button>
+                    <button class="unit-btn" data-unit="Air Support">Air Support</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-header">Action Module</div>
+                <div class="selector-grid">
+                    <button id="btn-mode-deploy" class="active">Deploy</button>
+                    <button id="btn-mode-path">Route Path</button>
+                </div>
+                <button id="btn-delete-unit" style="width: 100%; margin-top: 6px; text-align: center; font-size: 10px;">Purge Selected Asset</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <div class="section-header">Operational Timeline</div>
+                <div id="phase-timeline"></div>
+                <div class="selector-grid">
+                    <button id="btn-add-phase" style="text-align: center;">+ New</button>
+                    <button id="btn-clone-phase" style="text-align: center;">Clone Next</button>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; flex-grow: 1; gap: 6px;">
+                <div class="section-header">Tactical Intelligence Briefing</div>
+                <textarea id="briefing-notes" placeholder="Await objective feed parameters..."></textarea>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE STRATEGIC SURFACE -->
+        <canvas id="tacticalCanvas"></canvas>
+    </div>
+
+    <script>
+        const STATE = {
+            currentFaction: 'GAR',
+            currentUnitType: 'Infantry',
+            interactionMode: 'deploy',
+            selectedUnitId: null,
+            currentPhaseIndex: 0,
+            isAnimating: false,
+            animationProgress: 0,
+            phases: [
+                {
+                    notes: "PHASE 1:\n- Establish forward base vectors.\n- Coordinate initial scouting arrays.",
+                    units: []
+                }
+            ]
+        };
+
+        const FactionColors = {
+            GAR: '#00bfff',
+            OPFOR: '#ff3b30',
+            ALLIES: '#34c759',
+            TARGETS: '#ffcc00'
+        };
+
+        const canvas = document.getElementById('tacticalCanvas');
+        const ctx = canvas.getContext('2d');
+        const briefingNotes = document.getElementById('briefing-notes');
+        const phaseTimeline = document.getElementById('phase-timeline');
+        const hudPhaseDisplay = document.getElementById('hud-phase-display');
+
+        let isDrawingPath = false;
+        let activeMovingUnit = null;
+
+        function init() {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            setupEventListeners();
+            renderPhaseTabs();
+            loadPhase(0);
+            animateLoop();
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function setupEventListeners() {
+            // Faction System Selection
+            document.querySelectorAll('.faction-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.faction-btn').forEach(b => b.classList.remove('f-active'));
+                    e.target.classList.add('f-active');
+                    STATE.currentFaction = e.target.dataset.faction;
+                });
+            });
+
+            // Unit Designation Selection
+            document.querySelectorAll('.unit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    STATE.currentUnitType = e.target.dataset.unit;
+                });
+            });
+
+            const modeDeployBtn = document.getElementById('btn-mode-deploy');
+            const modePathBtn = document.getElementById('btn-mode-path');
+
+            modeDeployBtn.addEventListener('click', () => {
+                STATE.interactionMode = 'deploy';
+                modeDeployBtn.classList.add('active');
+                modePathBtn.classList.remove('active');
+            });
+            modePathBtn.addEventListener('click', () => {
+                STATE.interactionMode = 'path';
+                modePathBtn.classList.add('active');
+                modeDeployBtn.classList.remove('active');
+            });
+
+            document.getElementById('btn-delete-unit').addEventListener('click', () => {
+                if (STATE.selectedUnitId !== null) {
+                    let currentUnits = STATE.phases[STATE.currentPhaseIndex].units;
+                    STATE.phases[STATE.currentPhaseIndex].units = currentUnits.filter(u => u.id !== STATE.selectedUnitId);
+                    STATE.selectedUnitId = null;
+                }
+            });
+
+            briefingNotes.addEventListener('input', (e) => {
+                STATE.phases[STATE.currentPhaseIndex].notes = e.target.value;
+            });
+
+            document.getElementById('btn-add-phase').addEventListener('click', () => {
+                STATE.phases.push({
+                    notes: `PHASE ${STATE.phases.length + 1}:\n- Detail movement plans and dynamic targets.`,
+                    units: []
+                });
+                renderPhaseTabs();
+                loadPhase(STATE.phases.length - 1);
+            });
+
+            document.getElementById('btn-clone-phase').addEventListener('click', () => {
+                const currentPhase = STATE.phases[STATE.currentPhaseIndex];
+                const clonedUnits = currentPhase.units.map(u => ({
+                    ...u,
+                    path: [] 
+                }));
+
+                STATE.phases.push({
+                    notes: `PHASE ${STATE.phases.length + 1} (CLONED):\n- Adjust previous tactical metrics smoothly.`,
+                    units: clonedUnits
+                });
+                renderPhaseTabs();
+                loadPhase(STATE.phases.length - 1);
+            });
+
+            document.getElementById('btn-clear-board').addEventListener('click', () => {
+                if(confirm("Confirm system wipe? All operational phases will be deleted.")) {
+                    STATE.phases = [{ notes: "PHASE 1:\n- Reset executed.", units: [] }];
+                    renderPhaseTabs();
+                    loadPhase(0);
+                }
+            });
+
+            document.getElementById('btn-play-animation').addEventListener('click', () => {
+                if(STATE.isAnimating) return;
+                STATE.isAnimating = true;
+                STATE.animationProgress = 0;
+            });
+
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+        }
+
+        function renderPhaseTabs() {
+            phaseTimeline.innerHTML = '';
+            STATE.phases.forEach((phase, index) => {
+                const btn = document.createElement('button');
+                btn.className = `phase-node ${index === STATE.currentPhaseIndex ? 'active' : ''}`;
+                btn.innerText = `PH ${index + 1}`;
+                btn.addEventListener('click', () => loadPhase(index));
+                phaseTimeline.appendChild(btn);
+            });
+        }
+
+        function loadPhase(index) {
+            STATE.currentPhaseIndex = index;
+            STATE.selectedUnitId = null;
+            briefingNotes.value = STATE.phases[index].notes;
+            hudPhaseDisplay.innerText = `TACTICAL MATRIX // PHASE ${index + 1}`;
+            
+            document.querySelectorAll('.phase-node').forEach((btn, idx) => {
+                if(idx === index) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        }
+
+        function handleMouseDown(e) {
+            if(STATE.isAnimating) return;
+            const pos = getMousePos(e);
+            const units = STATE.phases[STATE.currentPhaseIndex].units;
+            
+            let clickedUnit = null;
+            for (let i = units.length - 1; i >= 0; i--) {
+                let dist = Math.hypot(units[i].x - pos.x, units[i].y - pos.y);
+                if (dist < 16) { 
+                    clickedUnit = units[i];
+                    break;
+                }
+            }
+
+            if (clickedUnit) {
+                STATE.selectedUnitId = clickedUnit.id;
+                activeMovingUnit = clickedUnit;
+                if (STATE.interactionMode === 'path') {
+                    isDrawingPath = true;
+                    activeMovingUnit.path = [{x: clickedUnit.x, y: clickedUnit.y}];
+                }
+            } else {
+                STATE.selectedUnitId = null;
+                if (STATE.interactionMode === 'deploy') {
+                    const newUnit = {
+                        id: Date.now() + Math.random(),
+                        x: pos.x,
+                        y: pos.y,
+                        faction: STATE.currentFaction,
+                        type: STATE.currentUnitType,
+                        path: []
+                    };
+                    units.push(newUnit);
+                    STATE.selectedUnitId = newUnit.id;
+                }
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (!activeMovingUnit || STATE.isAnimating) return;
+            const pos = getMousePos(e);
+
+            if (STATE.interactionMode === 'path' && isDrawingPath) {
+                const currentPath = activeMovingUnit.path;
+                const lastPoint = currentPath[currentPath.length - 1];
+                if (!lastPoint || Math.hypot(lastPoint.x - pos.x, lastPoint.y - pos.y) > 6) {
+                    currentPath.push({x: pos.x, y: pos.y});
+                }
+            } else if (STATE.interactionMode === 'deploy' && activeMovingUnit) {
+                activeMovingUnit.x = pos.x;
+                activeMovingUnit.y = pos.y;
+            }
+        }
+
+        function handleMouseUp() {
+            isDrawingPath = false;
+            activeMovingUnit = null;
+        }
+
+        function animateLoop() {
+            renderCanvas();
+            requestAnimationFrame(animateLoop);
+        }
+
+        function renderCanvas() {
+            // Dark Minimalist Command Center Map Background
+            ctx.fillStyle = '#06080c';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Thin Grid Array Lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+            ctx.lineWidth = 1;
+            const gridSize = 50;
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+
+            const currentPhase = STATE.phases[STATE.currentPhaseIndex];
+            
+            // Handle Movement Calculations
+            if (STATE.isAnimating) {
+                STATE.animationProgress += 0.008; 
+                if (STATE.animationProgress >= 1) {
+                    STATE.isAnimating = false;
+                    STATE.animationProgress = 0;
+                    currentPhase.units.forEach(u => {
+                        if(u.path && u.path.length > 0) {
+                            const finalPoint = u.path[u.path.length - 1];
+                            u.x = finalPoint.x;
+                            u.y = finalPoint.y;
+                            u.path = []; 
+                        }
+                    });
+                }
+            }
+
+            // Draw Vector Paths (Clean Tech Vectors)
+            currentPhase.units.forEach(unit => {
+                if (unit.path && unit.path.length > 1) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = FactionColors[unit.faction];
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([4, 4]);
+                    ctx.moveTo(unit.path[0].x, unit.path[0].y);
+                    for (let i = 1; i < unit.path.length; i++) {
+                        ctx.lineTo(unit.path[i].x, unit.path[i].y);
+                    }
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            });
+
+            // Draw Clean Military Style Unit Icons
+            currentPhase.units.forEach(unit => {
+                let renderX = unit.x;
+                let renderY = unit.y;
+
+                if (STATE.isAnimating && unit.path && unit.path.length > 0) {
+                    const targetIndex = Math.floor(STATE.animationProgress * (unit.path.length - 1));
+                    if (unit.path[targetIndex]) {
+                        renderX = unit.path[targetIndex].x;
+                        renderY = unit.path[targetIndex].y;
+                    }
+                }
+
+                const color = FactionColors[unit.faction];
+                const size = 24; // Precision Icon dimensions
+                
+                // Highlight Selector (Target Reticle Lines)
+                if (unit.id === STATE.selectedUnitId) {
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    // Render precise bounding crosshairs around unit
+                    ctx.arc(renderX, renderY, size - 4, 0, Math.PI*2);
+                    ctx.stroke();
+                }
+
+                // Main Square NATO Asset Wrapper
+                ctx.fillStyle = 'rgba(5, 7, 11, 0.9)';
+                ctx.fillRect(renderX - size/2, renderY - size/2, size, size);
+                
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(renderX - size/2, renderY - size/2, size, size);
+
+                // Internal text designator markers
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "600 8px 'Inter', sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                
+                let code = unit.type.substring(0, 3).toUpperCase();
+                if(unit.type === 'Air Support') code = "AIR";
+                if(unit.type === 'Specialist') code = "SPC";
+                if(unit.type === 'AT-TE') code = "WALK";
+                
+                ctx.fillText(code, renderX, renderY);
+
+                // Small Clean Sub-Label Text under icon bounds
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+                ctx.font = "400 8px 'Inter', sans-serif";
+                ctx.fillText(unit.type.toUpperCase(), renderX, renderY + size - 2);
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
