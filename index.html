@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical Commander // Operational Core v3.7</title>
+    <title>Tactical Commander // Operational Core v3.6</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
@@ -231,6 +231,7 @@
 </head>
 <body>
 
+    <!-- SECURITY AUTHORIZATION -->
     <div class="password-screen" id="auth-screen">
         <div class="password-box">
             <div class="password-title">TACTICAL COMMAND SURFACE</div>
@@ -241,10 +242,11 @@
         </div>
     </div>
 
+    <!-- MAIN INTERFACE HEADER -->
     <div class="header">
         <div class="op-title">
             <div class="op-indicator"></div>
-            <span class="op-name" id="op-label">SYS.MAIN // RECON_V3.7 // SECURE</span>
+            <span class="op-name" id="op-label">SYS.MAIN // RECON_V3.6 // SECURE</span>
         </div>
         <div class="controls">
             <div class="control-group">
@@ -263,17 +265,17 @@
     </div>
 
     <div class="main">
+        <!-- CONTROLS SIDEBAR (LEFT) -->
         <div class="sidebar sidebar-left">
             <div class="sidebar-content">
                 <div class="section">
                     <div class="section-title">COMMAND SELECTION</div>
                     <div class="button-grid">
                         <button class="mode-btn active" data-mode="deploy">DEPLOY UNITS</button>
-                        <button class="mode-btn" data-mode="path">ROUTING ZONES</button>
+                        <button class="mode-btn" data-mode="path">ROUTING VECTORS</button>
                         <button class="mode-btn" data-mode="zone">ZONE BUILDER</button>
                         <button class="mode-btn" data-mode="terrain" style="color: #ff9f1c;">TERRAIN LAYER</button>
                     </div>
-                    <div style="font-size: 8px; color: #43586d; margin-top: 2px; text-align: center; letter-spacing: 0.05em;">TIP: SHIFT+CLICK TO EMIT COMS PING</div>
                 </div>
 
                 <div class="section">
@@ -310,7 +312,7 @@
                 </div>
 
                 <div class="section">
-                    <div class="section-title">FACTION SELECTION // PING COLOR</div>
+                    <div class="section-title">FACTION SELECTION</div>
                     <div class="button-grid">
                         <button class="faction-btn active" data-faction="GAR">GAR (CYAN)</button>
                         <button class="faction-btn" data-faction="OPFOR" style="color:#ff3366;">OPFOR (RED)</button>
@@ -345,15 +347,18 @@
             </div>
         </div>
 
+        <!-- CENTER MATRIX WORKSPACE -->
         <div style="flex:1; display:flex; flex-direction:column; position:relative;">
             <div class="canvas-container" id="canvas-holder">
                 <canvas id="tactical-grid"></canvas>
             </div>
+            <!-- REAL-TIME CONSOLE FEED -->
             <div class="log-terminal" id="system-log">
-                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // BASILINE STRUCTURAL MATRIX ONLINE v3.7</div>
+                <div class="log-line"><span class="log-time">[00:00:00]</span> CORE // BASILINE STRUCTURAL MATRIX ONLINE v3.6</div>
             </div>
         </div>
 
+        <!-- MONITORING REGISTRY (RIGHT) -->
         <div class="sidebar sidebar-right">
             <div class="sidebar-content">
                 <div class="section">
@@ -384,6 +389,7 @@
         </div>
     </div>
 
+    <!-- NOTIFICATION DIALOG SYSTEM -->
     <div class="modal-overlay" id="overlay-shield"></div>
     <div class="modal" id="modal-box">
         <div class="modal-title" id="m-title">ALERT // REQUIRE CRITICAL CONFIRMATION</div>
@@ -394,6 +400,7 @@
         </div>
     </div>
 
+    <!-- CORE SIM ENGINE SCRIPT -->
     <script>
         const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TARGET: '#ffcc00' };
 
@@ -438,7 +445,6 @@
 
         let systemHistory = [];
         let systemHistoryIdx = -1;
-        let activePings = []; // Visual brief overlay array
 
         function recordState() {
             if (systemHistoryIdx < systemHistory.length - 1) {
@@ -696,24 +702,8 @@
         }
 
         function pointerDown(e) {
-            const pt = readPointer(e);
-            
-            // SCREENSHARE PING INTERCEPT LAYER (SHIFT + CLICK)
-            if (e.shiftKey) {
-                activePings.push({
-                    x: pt.x,
-                    y: pt.y,
-                    color: COLORS[STATE.faction],
-                    radius: 0,
-                    maxRadius: 50,
-                    alpha: 1.0,
-                    speed: 1.8
-                });
-                pushTerminalLog(`Transmission alert: Broadcast ping dropped at sector X:${Math.round(pt.x)} Y:${Math.round(pt.y)}`);
-                return; // Do not execute base manipulation layer commands
-            }
-
             if (STATE.animating) return;
+            const pt = readPointer(e);
             const activePhase = STATE.phases[STATE.phaseIdx];
 
             if (STATE.mode === 'deploy') {
@@ -1042,36 +1032,6 @@
 
                 drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction]);
             });
-
-            // SCREENSHARE COMS PING RENDERING LOOP ENGINE
-            for (let i = activePings.length - 1; i >= 0; i--) {
-                let ping = activePings[i];
-                ping.radius += ping.speed;
-                ping.alpha = 1.0 - (ping.radius / ping.maxRadius);
-
-                if (ping.alpha <= 0) {
-                    activePings.splice(i, 1);
-                    continue;
-                }
-
-                ctx.save();
-                ctx.globalAlpha = ping.alpha;
-                ctx.strokeStyle = ping.color;
-                ctx.lineWidth = 2;
-                
-                // Outer Ripple Ring
-                ctx.beginPath();
-                ctx.arc(ping.x, ping.y, ping.radius, 0, Math.PI * 2);
-                ctx.stroke();
-
-                // Inner Crosshair Reticle Anchor Point
-                ctx.fillStyle = ping.color;
-                ctx.beginPath();
-                ctx.arc(ping.x, ping.y, 2, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.restore();
-            }
 
             requestAnimationFrame(runRenderLoop);
         }
