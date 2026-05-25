@@ -53,7 +53,7 @@
             position: relative;
         }
         .password-box::before {
-            content: '[ COMS SECURE ]'; position: absolute; top: -10px; left: 20px; 
+            content: '[ COMS SECURE ]'; position: absolute; top: -10px; left: 20px;
             background: #02050a; padding: 0 5px; font-size: 10px; color: #00f2fe;
         }
 
@@ -95,8 +95,8 @@
         .control-label { font-size: 9px; color: #43586d; font-weight: 700; letter-spacing: 0.1em; }
 
         .main { flex: 1; display: flex; overflow: hidden; position: relative; }
-        
-        .sidebar { 
+
+        .sidebar {
             width: 260px; background: #040914; display: flex; flex-direction: column; z-index: 5;
             position: relative;
         }
@@ -107,8 +107,8 @@
             flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 18px;
         }
 
-        .section { 
-            display: flex; flex-direction: column; gap: 8px; 
+        .section {
+            display: flex; flex-direction: column; gap: 8px;
             background: rgba(1, 3, 7, 0.4); border: 1px solid #122236; padding: 10px;
             position: relative;
         }
@@ -118,7 +118,7 @@
         .section::after {
             content: ''; position: absolute; bottom: -1px; right: -1px; width: 4px; height: 4px; background: #43586d;
         }
-        .section-title { 
+        .section-title {
             font-size: 9px; letter-spacing: 0.15em; color: #43586d; font-weight: 700;
             border-bottom: 1px solid #122236; padding-bottom: 4px; margin-bottom: 2px;
         }
@@ -139,10 +139,10 @@
         button::before {
             content: '▫'; position: absolute; left: 4px; color: #1e354d; font-size: 7px; top: 9px;
         }
-        button:hover:not(:disabled) { 
-            border-color: #43586d; color: #d1dfec; background: rgba(30, 53, 77, 0.2); 
+        button:hover:not(:disabled) {
+            border-color: #43586d; color: #d1dfec; background: rgba(30, 53, 77, 0.2);
         }
-        button.active { 
+        button.active {
             border-color: #00f2fe; color: #00f2fe; background: rgba(0, 242, 254, 0.05);
             box-shadow: inset 0 0 8px rgba(0, 242, 254, 0.1);
         }
@@ -188,8 +188,8 @@
         .divider { height: 2px; background: #122236; margin: 4px 0; }
 
         .tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
-        .tab { 
-            padding: 6px 10px; font-size: 9px; border: 1px solid #1e354d; color: #7a92a8; 
+        .tab {
+            padding: 6px 10px; font-size: 9px; border: 1px solid #1e354d; color: #7a92a8;
             text-align: center; padding-left: 10px;
         }
         .tab::before { display: none; }
@@ -206,8 +206,8 @@
         }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2,5,10,0.85); z-index: 5000; display: none; backdrop-filter: blur(4px); }
-        .modal { 
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+        .modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #040914; border: 2px solid #ff3366; padding: 24px; width: 340px; z-index: 5001; display: none;
             box-shadow: 0 0 30px rgba(255, 51, 102, 0.2);
         }
@@ -268,7 +268,6 @@
 
     <div class="main">
         <div class="sidebar sidebar-left">
-            <!-- Normal Mapping Suite Tab Content Container -->
             <div class="sidebar-content" id="panel-mapping">
                 <div class="section">
                     <div class="section-title">COMMAND SELECTION</div>
@@ -350,10 +349,12 @@
                 </div>
             </div>
 
-            <!-- METT-TC Core Command Subsystem Tab (Hidden by default until Admin key check clears) -->
             <div class="sidebar-content" id="panel-mett-core" style="display: none;">
                 <div class="section">
-                    <div class="section-title" style="color:#00f2fe">METT-TC ANALYSIS CONSOLE</div>
+                    <div class="section-title" style="color:#00f2fe; display: flex; justify-content: space-between; align-items: center;">
+                        <span>METT-TC CONSOLE</span>
+                        <button id="btn-mett-escape" style="font-size: 8px; color: #ff3366; border-color: rgba(255,51,102,0.3); padding: 2px 6px;">← BACK</button>
+                    </div>
                     <div class="mett-header-tabs">
                         <div class="mett-tab active" data-mpane="m_pane">M</div>
                         <div class="mett-tab" data-mpane="e_pane">E</div>
@@ -363,7 +364,6 @@
                         <div class="mett-tab" data-mpane="c_pane">C</div>
                     </div>
 
-                    <!-- M: Mission Pane -->
                     <div class="mett-pane active" id="mett-m_pane">
                         <div>
                             <span class="control-label">FRIENDLY ACTION TASK</span>
@@ -408,7 +408,6 @@
                         <input type="text" id="mett-5w-why" placeholder="WHY (Commander Intent purpose)...">
                     </div>
 
-                    <!-- E: Enemy Pane -->
                     <div class="mett-pane" id="mett-e_pane">
                         <div>
                             <span class="control-label">DISPOSITION</span>
@@ -424,13 +423,12 @@
                             <select id="mett-e-coa">
                                 <option value="Hold High Ground">HOLD HIGH GROUND</option>
                                 <option value="Flank Assembly Zones">FLANK ASSEMBLY ZONES</option>
-                                <option value="Envelop Defending Front">ENVELOP DEFENDING FRONT</option>
+                                <option value="Envelop Defending Front">ENTRENCHED DEFENSE</option>
                                 <option value="Conduct Breakout Attempt">CONDUCT BREAKOUT ATTEMPT</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- T: Terrain Pane -->
                     <div class="mett-pane" id="mett-t_pane">
                         <div>
                             <span class="control-label">KEY TERRAIN FOCUS (OAKOC)</span>
@@ -452,7 +450,6 @@
                         </div>
                     </div>
 
-                    <!-- TR: Troops Pane -->
                     <div class="mett-pane" id="mett-tr_pane">
                         <div>
                             <span class="control-label">COMBAT EFFECTIVENESS CAPACITY</span>
@@ -473,7 +470,6 @@
                         </div>
                     </div>
 
-                    <!-- TI: Time Pane -->
                     <div class="mett-pane" id="mett-ti_pane">
                         <div>
                             <span class="control-label">TOTAL HOURS ALLOCATED UNTIL H-HOUR</span>
@@ -488,7 +484,6 @@
                         <div style="font-size:8px; color:#d1dfec; background:#010307; border:1px solid #122236; padding:6px; max-height:80px; overflow-y:auto; white-space:pre-wrap;" id="mett-warno-box">WARNORD // IMMEDIATE PREPARATION ENFORCED...</div>
                     </div>
 
-                    <!-- C: Civilian Pane -->
                     <div class="mett-pane" id="mett-c_pane">
                         <div>
                             <span class="control-label">CIVIL RISK INDEX</span>
@@ -508,7 +503,6 @@
                         </div>
                     </div>
 
-                    <!-- Custom Addon Injection Interface -->
                     <div class="divider" style="margin-top:12px;"></div>
                     <span class="control-label" style="color:#ff9f1c;">INJECT CUSTOM LOCAL MATRIX VARIABLE</span>
                     <div class="mett-subrow">
@@ -518,7 +512,6 @@
                     <div id="mett-custom-list" style="max-height:100px; overflow-y:auto; margin-top:4px;"></div>
                 </div>
 
-                <!-- Live Assembled Summary Report View -->
                 <div class="section" style="flex:1; min-height:140px; overflow-y:auto;">
                     <div class="section-title" style="color:#ffcc00">LIVE FIELD ASSESSMENT SYNOPSIS</div>
                     <div style="font-size:9px; color:#7a92a8; white-space:pre-wrap; line-height:1.4;" id="mett-live-synopsis">Awaiting input updates...</div>
@@ -527,12 +520,11 @@
         </div>
 
         <div style="flex:1; display:flex; flex-direction:column; position:relative;">
-            <!-- Admin Matrix View Mode Toggle Switcher Header -->
             <div id="mett-tab-header" style="display:none; background:#040914; border-bottom:1px solid #122236; height:32px; align-items:center; padding:0 12px; gap:4px; z-index:4;">
                 <button class="tab active" id="mett-toggle-map" style="padding:4px 12px;">GEOSPATIAL THEATER MAP</button>
                 <button class="tab" id="mett-toggle-mett" style="padding:4px 12px; color:#00f2fe;">METT-TC STRATEGIC CONSOLE</button>
             </div>
-            
+
             <div class="canvas-container" id="canvas-holder">
                 <canvas id="tactical-grid"></canvas>
             </div>
@@ -543,7 +535,7 @@
 
         <div class="sidebar sidebar-right">
             <div class="sidebar-content">
-                
+
                 <div class="section">
                     <div class="section-title">THEATER GRID MATRIX</div>
                     <div class="button-grid">
@@ -599,8 +591,8 @@
 
         const THEATERS = {
             default: { name: "CORE BASELINE MATRIX", bg: "#010306", gridColor: "rgba(0, 242, 254, 0.012)", drawSatelliteMap: null, terrain: [] },
-            
-            christophsis: { 
+
+            christophsis: {
                 name: "THEATER: CHRISTOPHSIS // URBAN CRYSTAL MESH", bg: "#020712", gridColor: "rgba(0, 242, 254, 0.03)",
                 terrain: [
                     { type: 'trench', points: [{x:100, y:80}, {x:220, y:80}, {x:220, y:240}, {x:100, y:240}] },
@@ -624,8 +616,8 @@
                     }
                 }
             },
-            
-            ryloth: { 
+
+            ryloth: {
                 name: "THEATER: RYLOTH // TRENCH OUTPOST MESH", bg: "#120b05", gridColor: "rgba(255, 159, 28, 0.02)",
                 terrain: [
                     { type: 'trench', points: [{x:50, y:200}, {x:250, y:230}, {x:400, y:120}] },
@@ -645,8 +637,8 @@
                     ctx.beginPath(); ctx.arc(w*0.8, h*0.7, 180, 0, Math.PI*2); ctx.fill();
                 }
             },
-            
-            kashyyyk: { 
+
+            kashyyyk: {
                 name: "THEATER: KASHYYYK // KACHIRO BEACHHEAD", bg: "#031206", gridColor: "rgba(0, 255, 170, 0.02)",
                 terrain: [
                     { type: 'hazard', points: [{x:0, y:150}, {x:220, y:180}, {x:450, y:130}, {x:800, y:160}] }
@@ -667,8 +659,8 @@
                     });
                 }
             },
-            
-            coruscant: { 
+
+            coruscant: {
                 name: "THEATER: CORUSCANT // SECURITY QUADRANT", bg: "#060810", gridColor: "rgba(209, 223, 236, 0.025)",
                 terrain: [
                     { type: 'trench', points: [{x:150, y:0}, {x:150, y:500}] },
@@ -688,8 +680,8 @@
                     ctx.beginPath(); ctx.arc(w/2, h/2, 45, 0, Math.PI*2); ctx.stroke();
                 }
             },
-            
-            corellia: { 
+
+            corellia: {
                 name: "THEATER: CORELLIA // SHIPYARD INDUSTRIAL SLATS", bg: "#0d0404", gridColor: "rgba(230, 57, 70, 0.02)",
                 terrain: [
                     { type: 'ridge', points: [{x:200, y:100}, {x:450, y:100}] },
@@ -737,11 +729,11 @@
 
         const STATE = {
             opName: 'OPERATION AXE-RECON',
-            mode: 'deploy',      
-            pStyle: 'straight',  
-            zType: 'rect',       
-            zStyle: 'faction',   
-            tStyle: 'trench',    
+            mode: 'deploy',
+            pStyle: 'straight',
+            zType: 'rect',
+            zStyle: 'faction',
+            tStyle: 'trench',
             faction: 'GAR',
             unitType: 'Infantry',
             gridOn: true,
@@ -753,16 +745,15 @@
             phases: [{ intel: 'SECURE RECON COORD LAYERS // ASSIGN STRUCTURAL LANES', assets: [], zones: [], paths: [], terrain: [] }]
         };
 
-        // METT-TC Persistent Assessment Store Data Layout
         const METT_DATA = {
             customAddons: [],
             activePane: 'm_pane',
-            uiViewMode: 'map' // 'map' or 'mett'
+            uiViewMode: 'map' 
         };
 
         let systemHistory = [];
         let systemHistoryIdx = -1;
-        let activePings = []; 
+        let activePings = [];
 
         function recordState() {
             if (systemHistoryIdx < systemHistory.length - 1) {
@@ -809,7 +800,7 @@
             window.addEventListener('resize', resizeTacticalSurface);
             attachInterfaceListeners();
             setupMettCoreListeners();
-            
+
             if (isAdminUnlocked) {
                 initializeAdminLayout();
             }
@@ -822,34 +813,51 @@
 
         function initializeAdminLayout() {
             pushTerminalLog("CRITICAL LEVEL ACCESS DETECTED: METT-TC SYSTEM SUBSYSTEM ACTIVATED.");
-            
-            // Inject the Core Analysis Tab Toggle inside the Section Command Header
+
             const cmdSection = document.querySelector('.mode-btn').parentElement;
             const tabHeaderGroup = document.createElement('div');
             tabHeaderGroup.className = 'tabs';
             tabHeaderGroup.style.marginBottom = '6px';
             tabHeaderGroup.innerHTML = `
-                <button id="btn-tab-mapping" class="tab active" style="flex:1;">MAPPING SUITE</button>
-                <button id="btn-tab-analysis" class="tab" style="flex:1; color:#00f2fe;">ANALYSIS CORE</button>
+                <button id="btn-tab-mapping" class="tab active" style="flex:1;">GEOSPATIAL THEATER MAP</button>
+                <button id="btn-tab-analysis" class="tab" style="flex:1; color:#00f2fe;">STRATEGIC CONSOLE</button>
             `;
             cmdSection.insertBefore(tabHeaderGroup, cmdSection.firstChild);
 
+            // Re-bind the mapping suite button to control full system visibility
             document.getElementById('btn-tab-mapping').addEventListener('click', () => {
                 document.getElementById('btn-tab-mapping').classList.add('active');
                 document.getElementById('btn-tab-analysis').classList.remove('active');
                 document.getElementById('panel-mapping').style.display = 'flex';
                 document.getElementById('panel-mett-core').style.display = 'none';
+                
+                // Exclusively restore canvas grid view context
+                METT_DATA.uiViewMode = 'map';
+                document.getElementById('mett-toggle-map').classList.add('active');
+                document.getElementById('mett-toggle-mett').classList.remove('active');
+                canvas.style.display = 'block';
             });
 
+            // Re-bind the strategic console analysis view context link
             document.getElementById('btn-tab-analysis').addEventListener('click', () => {
                 document.getElementById('btn-tab-mapping').classList.remove('active');
                 document.getElementById('btn-tab-analysis').classList.add('active');
                 document.getElementById('panel-mapping').style.display = 'none';
                 document.getElementById('panel-mett-core').style.display = 'flex';
+                
+                // Exclusively toggle to programmatic active route HUD loop visualization
+                METT_DATA.uiViewMode = 'mett';
+                document.getElementById('mett-toggle-map').classList.remove('active');
+                document.getElementById('mett-toggle-mett').classList.add('active');
+                canvas.style.display = 'none';
                 recalculateMettOutput();
             });
 
-            // Reveal the structural canvas switcher bar
+            // Hook up operational sidebar panel escape vector back button trigger link
+            document.getElementById('btn-mett-escape').addEventListener('click', () => {
+                document.getElementById('btn-tab-mapping').click();
+            });
+
             document.getElementById('mett-tab-header').style.display = 'flex';
         }
 
@@ -900,10 +908,10 @@
                     recordState();
                     const targetT = e.target.dataset.theater;
                     STATE.activeTheater = targetT;
-                    
+
                     const profile = THEATERS[targetT];
                     STATE.phases[STATE.phaseIdx].terrain = JSON.parse(JSON.stringify(profile.terrain));
-                    
+
                     document.getElementById('op-label').innerText = `SYS.MAIN // ${profile.name} // SECURE`;
                     pushTerminalLog(`CONNECTED INTEL FEED: DOWNLINKING SATELLITE TOPO FOR ${targetT.toUpperCase()}`);
                     syncInterface();
@@ -911,10 +919,10 @@
             });
 
             document.querySelectorAll('.path-style-btn').forEach(b => {
-                b.addEventListener('click', (e) => { 
+                b.addEventListener('click', (e) => {
                     if(activePathBuilding) commitCurrentPath();
-                    STATE.pStyle = e.target.dataset.pstyle; 
-                    legaliseControlState(); 
+                    STATE.pStyle = e.target.dataset.pstyle;
+                    legaliseControlState();
                 });
             });
 
@@ -947,17 +955,17 @@
             document.getElementById('ctrl-redo').addEventListener('click', triggerRedo);
 
             document.getElementById('ctrl-play').addEventListener('click', () => {
-                if(!STATE.animating) { 
+                if(!STATE.animating) {
                     if(activePathBuilding) commitCurrentPath();
-                    
+
                     const activePhase = STATE.phases[STATE.phaseIdx];
                     activePhase.assets.forEach(a => {
                         a.x = a.spawnX;
                         a.y = a.spawnY;
                     });
-                    
+
                     bindUnitsToRoutes();
-                    STATE.animating = true; 
+                    STATE.animating = true;
                     STATE.animProgress = 0;
                     document.getElementById('ctrl-play').classList.add('active');
                     pushTerminalLog("COMMENCING COORDINATED FACTION-LOCKED ROUTING MATRIX SIMULATION.");
@@ -966,10 +974,10 @@
 
             document.getElementById('ctrl-reset').addEventListener('click', () => {
                 recordState();
-                STATE.phases[STATE.phaseIdx].assets.forEach(a => { 
-                    a.x = a.spawnX; 
+                STATE.phases[STATE.phaseIdx].assets.forEach(a => {
+                    a.x = a.spawnX;
                     a.y = a.spawnY;
-                    a.runtimePoints = null; 
+                    a.runtimePoints = null;
                 });
                 STATE.animating = false;
                 STATE.animProgress = 0;
@@ -981,10 +989,10 @@
             document.getElementById('phase-add').addEventListener('click', () => {
                 recordState();
                 const profile = THEATERS[STATE.activeTheater];
-                STATE.phases.push({ 
-                    intel: `PHASE ${STATE.phases.length + 1} DIRECTIVES`, 
-                    assets: [], zones: [], paths: [], 
-                    terrain: JSON.parse(JSON.stringify(profile.terrain)) 
+                STATE.phases.push({
+                    intel: `PHASE ${STATE.phases.length + 1} DIRECTIVES`,
+                    assets: [], zones: [], paths: [],
+                    terrain: JSON.parse(JSON.stringify(profile.terrain))
                 });
                 STATE.phaseIdx = STATE.phases.length - 1;
                 pushTerminalLog(`New phase window mapped: Phase ${STATE.phaseIdx + 1}`);
@@ -994,11 +1002,11 @@
             document.getElementById('phase-clone').addEventListener('click', () => {
                 recordState();
                 const parent = STATE.phases[STATE.phaseIdx];
-                const cleanAssets = parent.assets.map(a => ({ 
-                    id: Math.random(), 
-                    x: a.spawnX, y: a.spawnY, 
-                    spawnX: a.spawnX, spawnY: a.spawnY, 
-                    faction: a.faction, type: a.type, kia: a.kia || false 
+                const cleanAssets = parent.assets.map(a => ({
+                    id: Math.random(),
+                    x: a.spawnX, y: a.spawnY,
+                    spawnX: a.spawnX, spawnY: a.spawnY,
+                    faction: a.faction, type: a.type, kia: a.kia || false
                 }));
                 STATE.phases.push({
                     intel: `${parent.intel} [CLONE]`,
@@ -1060,13 +1068,12 @@
             window.addEventListener('keydown', handleKeydown);
         }
 
-        // Setup METT-TC Subsystem Interactivity, Hooks, and Calculators
         function setupMettCoreListeners() {
             document.querySelectorAll('.mett-tab').forEach(t => {
                 t.addEventListener('click', (e) => {
                     document.querySelectorAll('.mett-tab').forEach(b => b.classList.remove('active'));
                     document.querySelectorAll('.mett-pane').forEach(p => p.classList.remove('active'));
-                    
+
                     e.target.classList.add('active');
                     const paneId = `mett-${e.target.dataset.mpane}`;
                     document.getElementById(paneId).classList.add('active');
@@ -1074,23 +1081,14 @@
                 });
             });
 
-            // Handle Canvas View Toggling between Drawing Map and Matrix Dashboard
             document.getElementById('mett-toggle-map').addEventListener('click', () => {
-                METT_DATA.uiViewMode = 'map';
-                document.getElementById('mett-toggle-map').classList.add('active');
-                document.getElementById('mett-toggle-mett').classList.remove('active');
-                canvas.style.display = 'block';
+                document.getElementById('btn-tab-mapping').click();
             });
 
             document.getElementById('mett-toggle-mett').addEventListener('click', () => {
-                METT_DATA.uiViewMode = 'mett';
-                document.getElementById('mett-toggle-map').classList.remove('active');
-                document.getElementById('mett-toggle-mett').classList.add('active');
-                canvas.style.display = 'none';
-                recalculateMettOutput();
+                document.getElementById('btn-tab-analysis').click();
             });
 
-            // Wire up input changes to re-trigger compilation calculations immediately
             const elementsToWatch = [
                 'mett-m-friendly', 'mett-m-enemy', 'mett-m-purpose',
                 'mett-5w-who', 'mett-5w-what', 'mett-5w-when', 'mett-5w-where', 'mett-5w-why',
@@ -1101,7 +1099,6 @@
                 document.getElementById(id).addEventListener('input', recalculateMettOutput);
             });
 
-            // Custom Variable Injection System
             document.getElementById('mett-custom-add').addEventListener('click', () => {
                 const input = document.getElementById('mett-custom-input');
                 const val = input.value.trim();
@@ -1137,11 +1134,10 @@
         }
 
         function recalculateMettOutput() {
-            // Read active dropdown structural states
             const mFriendly = document.getElementById('mett-m-friendly').value;
             const mEnemy = document.getElementById('mett-m-enemy').value;
             const mPurpose = document.getElementById('mett-m-purpose').value;
-            
+
             const who = document.getElementById('mett-5w-who').value || '[UNDEF_WHO]';
             const what = document.getElementById('mett-5w-what').value || '[UNDEF_WHAT]';
             const when = document.getElementById('mett-5w-when').value || '[UNDEF_WHEN]';
@@ -1157,7 +1153,6 @@
             const cRisk = document.getElementById('mett-c-risk').value;
             const cRoe = document.getElementById('mett-c-roe').value;
 
-            // Strict 1/3 - 2/3 Backward Time Rule Processing Loop
             const totalHours = parseFloat(document.getElementById('mett-ti-hours').value) || 0;
             const cmdHours = (totalHours * (1/3)).toFixed(1);
             const sqdHours = (totalHours * (2/3)).toFixed(1);
@@ -1165,11 +1160,9 @@
             document.getElementById('mett-calc-plan').innerText = `${cmdHours} hrs`;
             document.getElementById('mett-calc-prep').innerText = `${sqdHours} hrs`;
 
-            // Auto-Generate TLP Step 2 Warning Order Matrix string
             const warnoString = `WARNORD // TLP STEP 2 INIT\n\n1. SITUATION: Enemy forces identified in ${tKey} under ${tWeather}.\n2. MISSION: ${who} will execute a ${mFriendly} operation to ${mPurpose} higher command intents.\n3. EXECUTION TIMELINE: Total window locked at ${totalHours} hours. Commander planning cut-off is H-${cmdHours} hours. Subordinate preparation checks commence immediately. Acknowledgement required.`;
             document.getElementById('mett-warno-box').innerText = warnoString;
 
-            // Filter out custom strings appended into active array
             const filterCustom = (pCode) => METT_DATA.customAddons.filter(x => x.pillar === pCode).map(x => `   • CUSTOM: ${x.text}`).join('\n');
 
             const customM = filterCustom('M');
@@ -1179,30 +1172,29 @@
             const customTI = filterCustom('TI');
             const customC = filterCustom('C');
 
-            // Format Compiled Briefing Sheet
             const synopsis = `[MISSION (M)]
-   • DOCTRINAL VERB: ${mFriendly} / ${mEnemy} / ${mPurpose}
-   • RESTATED 5W: ${who} conducts ${what} at ${where} execution phase ${when} in order to ${why}.
+ • DOCTRINAL VERB: ${mFriendly} / ${mEnemy} / ${mPurpose}
+ • RESTATED 5W: ${who} conducts ${what} at ${where} execution phase ${when} in order to ${why}.
 ${customM ? customM + '\n' : ''}
 [ENEMY (E)]
-   • DISPOSITION: ${eDisp}
-   • THREAT COA: ${eCoa}
+ • DISPOSITION: ${eDisp}
+ • THREAT COA: ${eCoa}
 ${customE ? customE + '\n' : ''}
 [TERRAIN & WEATHER (T)]
-   • OAKOC KEY NODE: ${tKey}
-   • ENVIRO SPEC: ${tWeather}
+ • OAKOC KEY NODE: ${tKey}
+ • ENVIRO SPEC: ${tWeather}
 ${customT ? customT + '\n' : ''}
 [TROOPS & SUPPORT (TR)]
-   • STATUS MANPOWER: ${trStatus}
-   • LOG LOGISTICS: ${trLog}
+ • STATUS MANPOWER: ${trStatus}
+ • LOG LOGISTICS: ${trLog}
 ${customTR ? customTR + '\n' : ''}
 [TIME AVAILABLE (TI)]
-   • TOTAL TIME SPAN: ${totalHours} hours
-   • BACKWARD MILESTONE: Planning = ${cmdHours}h // Subordinate Prep = ${sqdHours}h
+ • TOTAL TIME SPAN: ${totalHours} hours
+ • BACKWARD MILESTONE: Planning = ${cmdHours}h // Subordinate Prep = ${sqdHours}h
 ${customTI ? customTI + '\n' : ''}
 [CIVILIAN CONSIDERATIONS (C)]
-   • CIVIL RISK MATRIX: ${cRisk}
-   • SECURE RULES: ${cRoe}
+ • CIVIL RISK MATRIX: ${cRisk}
+ • SECURE RULES: ${cRoe}
 ${customC ? customC : ''}`;
 
             document.getElementById('mett-live-synopsis').innerText = synopsis;
@@ -1249,7 +1241,7 @@ ${customC ? customC : ''}`;
 
         function pointerDown(e) {
             const pt = readPointer(e);
-            
+
             if (e.shiftKey) {
                 activePings.push({
                     x: pt.x, y: pt.y,
@@ -1283,13 +1275,13 @@ ${customC ? customC : ''}`;
                     pushTerminalLog(`Linked command matrix to asset: OBJ-${found.id.toString().substring(2,7)}`);
                 } else {
                     recordState();
-                    const created = { 
-                        id: Math.random(), 
-                        x: pt.x, y: pt.y, 
-                        spawnX: pt.x, spawnY: pt.y, 
-                        faction: STATE.faction, 
-                        type: STATE.unitType, 
-                        kia: false 
+                    const created = {
+                        id: Math.random(),
+                        x: pt.x, y: pt.y,
+                        spawnX: pt.x, spawnY: pt.y,
+                        faction: STATE.faction,
+                        type: STATE.unitType,
+                        kia: false
                     };
                     activePhase.assets.push(created);
                     STATE.selectedId = created.id;
@@ -1352,7 +1344,7 @@ ${customC ? customC : ''}`;
         function pointerUp(e) {
             if (STATE.animating || METT_DATA.uiViewMode === 'mett') return;
             const activePhase = STATE.phases[STATE.phaseIdx];
-            
+
             if (STATE.mode === 'path') {
                 if (STATE.pStyle === 'straight' && isInteracting && activePathBuilding) {
                     recordState();
@@ -1394,9 +1386,9 @@ ${customC ? customC : ''}`;
         function bindUnitsToRoutes() {
             const activePhase = STATE.phases[STATE.phaseIdx];
             activePhase.assets.forEach(asset => {
-                if(asset.kia) return; 
+                if(asset.kia) return;
                 let bestRoute = null;
-                let minimumDistance = 120; 
+                let minimumDistance = 120;
                 let bestSegmentIdx = 0;
                 let bestInterceptPoint = null;
 
@@ -1451,7 +1443,7 @@ ${customC ? customC : ''}`;
             ctx.fillStyle = '#010306';
             ctx.lineWidth = 2;
 
-            const size = 11; 
+            const size = 11;
             ctx.translate(x, y);
 
             if (type === 'Infantry') {
@@ -1476,11 +1468,14 @@ ${customC ? customC : ''}`;
                 ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(size + 8, 0); ctx.lineWidth = 3; ctx.stroke();
             } else if (type === 'ATTE') {
                 ctx.beginPath();
-                ctx.arc(-size, -size + 4, 3, 0, Math.PI*2); ctx.arc(0, -size + 2, 3, 0, Math.PI*2); ctx.arc(size, -size + 4, 3, 0, Math.PI*2);
-                ctx.arc(-size, size - 4, 3, 0, Math.PI*2); ctx.arc(0, size - 2, 3, 0, Math.PI*2); ctx.arc(size, size - 4, 3, 0, Math.PI*2);
+                ctx.arc(-size, -size + 4, 3, 0, Math.PI*2); ctx.arc(0, -size + 2, 3, 0, Math.PI*2);
+                ctx.arc(size, -size + 4, 3, 0, Math.PI*2);
+                ctx.arc(-size, size - 4, 3, 0, Math.PI*2); ctx.arc(0, size - 2, 3, 0, Math.PI*2);
+                ctx.arc(size, size - 4, 3, 0, Math.PI*2);
                 ctx.fill();
                 ctx.beginPath();
-                ctx.moveTo(-size, -size + 4); ctx.lineTo(size, -size + 4); ctx.lineTo(size + 6, 0); ctx.lineTo(size, size - 4); ctx.lineTo(-size, size - 4); ctx.closePath();
+                ctx.moveTo(-size, -size + 4); ctx.lineTo(size, -size + 4); ctx.lineTo(size + 6, 0); ctx.lineTo(size, size - 4); ctx.lineTo(-size, size - 4);
+                ctx.closePath();
                 ctx.fill(); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(size, 0); ctx.lineTo(size + 9, -2); ctx.moveTo(size, 0); ctx.lineTo(size + 9, 2); ctx.stroke();
             } else if (type === 'Air') {
@@ -1503,7 +1498,7 @@ ${customC ? customC : ''}`;
 
         function renderCanvasGrid() {
             const theaterProfile = THEATERS[STATE.activeTheater];
-            ctx.fillStyle = theaterProfile.bg; 
+            ctx.fillStyle = theaterProfile.bg;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             if(theaterProfile.drawSatelliteMap) {
@@ -1516,7 +1511,7 @@ ${customC ? customC : ''}`;
                 for (let x = 0; x < canvas.width; x += 25) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
                 for (let y = 0; y < canvas.height; y += 25) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
 
-                ctx.strokeStyle = theaterProfile.gridColor.replace(/[\d\.]+\)$/, '0.08)'); 
+                ctx.strokeStyle = theaterProfile.gridColor.replace(/[\d\.]+\)$/, '0.08)');
                 for (let x = 0; x < canvas.width; x += 100) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
                 for (let y = 0; y < canvas.height; y += 100) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
             }
@@ -1524,7 +1519,7 @@ ${customC ? customC : ''}`;
 
         function renderTacticalTerrain(t) {
             if (!t.points || t.points.length < 2) return;
-            
+
             ctx.save();
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
@@ -1546,7 +1541,7 @@ ${customC ? customC : ''}`;
                 ctx.strokeStyle = "rgba(0, 242, 254, 0.3)";
                 ctx.setLineDash([4, 12]);
                 strokePathPoints(t.points);
-                
+
             } else if (t.type === 'ridge') {
                 for (let w = 45; w >= 15; w -= 10) {
                     ctx.lineWidth = w;
@@ -1661,7 +1656,7 @@ ${customC ? customC : ''}`;
                 }
 
                 current.assets.forEach(a1 => {
-                    if(a1.faction !== 'GAR' || a1.kia) return; 
+                    if(a1.faction !== 'GAR' || a1.kia) return;
                     current.assets.forEach(a2 => {
                         if(a2.faction !== 'OPFOR' || a2.kia) return;
                         let dist = Math.hypot(a1.x - a2.x, a1.y - a2.y);
@@ -1712,9 +1707,9 @@ ${customC ? customC : ''}`;
 
                     if (asset.id === STATE.selectedId) {
                         ctx.save();
-                        ctx.strokeStyle = asset.kia ? 'rgba(67, 88, 109, 0.5)' : 'rgba(0, 242, 254, 0.5)'; 
+                        ctx.strokeStyle = asset.kia ? 'rgba(67, 88, 109, 0.5)' : 'rgba(0, 242, 254, 0.5)';
                         ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
-                        ctx.beginPath(); ctx.arc(rx, ry, 18, 0, Math.PI * 2); ctx.stroke(); 
+                        ctx.beginPath(); ctx.arc(rx, ry, 18, 0, Math.PI * 2); ctx.stroke();
                         ctx.restore();
                     }
 
@@ -1741,10 +1736,16 @@ ${customC ? customC : ''}`;
                     ctx.restore();
                 }
             } else {
-                // If view mode is METT dashboard, draw background canvas panel layout
+                // Renders programmatic real-time vector path tracking graphs on the active console panel
                 ctx.fillStyle = '#040914';
-                ctx.fillRect(0,0, canvas.width, canvas.height);
-                
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Grid background matrix overlay layer
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = "rgba(0, 242, 254, 0.015)";
+                for (let x = 0; x < canvas.width; x += 30) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+                for (let y = 0; y < canvas.height; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+
                 ctx.fillStyle = 'rgba(0, 242, 254, 0.02)';
                 ctx.fillRect(40, 40, canvas.width - 80, canvas.height - 80);
                 ctx.strokeStyle = '#122236';
@@ -1754,13 +1755,48 @@ ${customC ? customC : ''}`;
                 ctx.fillStyle = '#00f2fe';
                 ctx.font = '11px "JetBrains Mono", monospace';
                 ctx.fillText('METT-TC STRATEGIC ANALYSIS CORES OVERVIEW MATRIX // ACTIVE TIMELINE', 60, 70);
-                
-                // Print active restated parameters over main display view 
+
+                // Live dynamic flashing operational stream indicator tracking text parameters
+                ctx.save();
+                dynamicDashOffset = (dynamicDashOffset - 0.2) % 24;
+                ctx.fillStyle = Math.sin(Date.now() / 200) > 0 ? '#00ffaa' : 'rgba(0, 255, 170, 0.4)';
+                ctx.fillText('● LIVE FEED DATA LINK SYNCED', canvas.width - 260, 70);
+                ctx.restore();
+
+                // Vector route paths rendering
+                ctx.save();
+                ctx.strokeStyle = '#00f2fe';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 4]);
+                ctx.lineDashOffset = dynamicDashOffset;
+                ctx.beginPath();
+                ctx.moveTo(80, canvas.height - 100);
+                ctx.lineTo(240, 150);
+                ctx.lineTo(440, 230);
+                ctx.lineTo(canvas.width - 120, 130);
+                ctx.stroke();
+
+                // Base node dots definitions
+                ctx.fillStyle = '#00ffaa'; ctx.beginPath(); ctx.arc(80, canvas.height - 100, 6, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#00f2fe'; ctx.font = '9px "JetBrains Mono", monospace'; ctx.fillText('HQ-BASE', 70, canvas.height - 80);
+
+                ctx.fillStyle = '#ffcc00'; ctx.beginPath(); ctx.arc(240, 150, 4, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#ffcc00'; ctx.fillText('STR1', 232, 138);
+
+                ctx.fillStyle = '#ffcc00'; ctx.beginPath(); ctx.arc(440, 230, 4, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#ffcc00'; ctx.fillText('STR2', 432, 218);
+
+                ctx.fillStyle = '#ff3366'; ctx.beginPath(); 
+                ctx.moveTo(canvas.width - 120, 120); ctx.lineTo(canvas.width - 114, 134); ctx.lineTo(canvas.width - 126, 134); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#ff3366'; ctx.fillText('OBJ-ALPHA', canvas.width - 145, 110);
+                ctx.restore();
+
+                // Render active compiled data sheets
                 ctx.fillStyle = '#7a92a8';
                 ctx.font = '10px "JetBrains Mono", monospace';
-                constlines = document.getElementById('mett-live-synopsis').innerText.split('\n');
+                const lines = document.getElementById('mett-live-synopsis').innerText.split('\n');
                 let startY = 110;
-                constlines.forEach(line => {
+                lines.forEach(line => {
                     if(line.startsWith('[')) { ctx.fillStyle = '#00ffaa'; startY += 6; }
                     else { ctx.fillStyle = '#d1dfec'; }
                     ctx.fillText(line, 80, startY);
@@ -1774,7 +1810,7 @@ ${customC ? customC : ''}`;
         function renderZoneBounds(z) {
             ctx.save();
             let zoneColor = COLORS[z.faction] || '#7a92a8';
-            
+
             if (z.style === 'fob') {
                 ctx.strokeStyle = '#00f2fe';
                 ctx.fillStyle = createGridPattern('#00f2fe');
