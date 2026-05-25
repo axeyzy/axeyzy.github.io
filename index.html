@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactical Commander // Operational Core v3.2</title>
+    <title>Tactical Commander // Operational Core v3.5</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
@@ -216,7 +216,7 @@
     <div class="header">
         <div class="op-title">
             <div class="op-indicator"></div>
-            <span class="op-name" id="op-label">OPERATION CORE // RECON v3.2</span>
+            <span class="op-name" id="op-label">OPERATION CORE // RECON v3.5</span>
         </div>
         <div class="controls">
             <div class="control-group">
@@ -248,9 +248,17 @@
                 </div>
 
                 <div class="section">
+                    <div class="section-title">VECTOR ROUTE STYLE</div>
+                    <div class="button-grid">
+                        <button class="path-style-btn active" data-pstyle="straight">STRAIGHT LINE</button>
+                        <button class="path-style-btn" data-pstyle="stencil">ELBOW STENCIL</button>
+                    </div>
+                </div>
+
+                <div class="section">
                     <div class="section-title">ZONE SHAPE ARCHITECTURE</div>
                     <div class="button-grid">
-                        <button class="zone-type-btn active" data-ztype="rect">RECTANGLE BOUNDS</button>
+                        <button class="zone-type-btn" data-ztype="rect">RECTANGLE BOUNDS</button>
                         <button class="zone-type-btn" data-ztype="circle">CIRCULAR RADIUS</button>
                     </div>
                 </div>
@@ -258,7 +266,7 @@
                 <div class="section">
                     <div class="section-title">ZONE STYLE / OVERLAY PRESET</div>
                     <div class="button-grid">
-                        <button class="zone-style-btn active" data-zstyle="faction">MATCH FACTION COLOR</button>
+                        <button class="zone-style-btn" data-zstyle="faction">MATCH FACTION COLOR</button>
                         <button class="zone-style-btn" data-zstyle="fob" style="color:#00f2fe;">FOB MATRIX GRID</button>
                         <button class="zone-style-btn" data-zstyle="noman" style="color:#e63946;">NO MAN'S SLATS</button>
                     </div>
@@ -267,18 +275,18 @@
                 <div class="section">
                     <div class="section-title">TERRAIN STRUCTURE CLASS</div>
                     <div class="button-grid">
-                        <button class="terrain-btn active" data-tstyle="trench">TRENCH LINE</button>
+                        <button class="terrain-btn" data-tstyle="trench">TRENCH LINE</button>
                         <button class="terrain-btn" data-tstyle="ridge">ELEVATED RIDGE</button>
                     </div>
                 </div>
 
                 <div class="section">
-                    <div class="section-title">FACTION SELECTION (COLOR BASE)</div>
+                    <div class="section-title">FACTION SELECTION</div>
                     <div class="button-grid">
                         <button class="faction-btn active" data-faction="GAR">GAR (CYAN)</button>
                         <button class="faction-btn" data-faction="OPFOR" style="color:#ff3366;">OPFOR (RED)</button>
                         <button class="faction-btn" data-faction="ALLY" style="color:#00ffaa;">ALLY (GREEN)</button>
-                        <button class="faction-btn" data-faction="TANGO" style="color:#ffcc00;">TANGO (GOLD)</button>
+                        <button class="faction-btn" data-faction="TARGET" style="color:#ffcc00;">TARGET (GOLD)</button>
                     </div>
                 </div>
 
@@ -289,7 +297,7 @@
                         <button class="unit-btn" data-unit="Specialist">SPC</button>
                         <button class="unit-btn" data-unit="Armoured">ARM</button>
                         <button class="unit-btn" data-unit="Tank">TNK</button>
-                        <button class="unit-btn" data-unit="Walker">WLK</button>
+                        <button class="unit-btn" data-unit="ATTE">ATTE</button>
                         <button class="unit-btn" data-unit="Air">AIR</button>
                     </div>
                 </div>
@@ -313,7 +321,7 @@
                 <canvas id="tactical-grid"></canvas>
             </div>
             <div class="log-terminal" id="system-log">
-                <div class="log-line"><span class="log-time">[00:00:00]</span> CIC INITIALIZED // WORLD GRID SYSTEM ACTIVE V3.2</div>
+                <div class="log-line"><span class="log-time">[00:00:00]</span> CIC INITIALIZED // BASILINE STRUCTURAL MATRIX ONLINE v3.5</div>
             </div>
         </div>
 
@@ -358,7 +366,7 @@
     </div>
 
     <script>
-        const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TANGO: '#ffcc00' };
+        const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TARGET: '#ffcc00' };
 
         // AUTHORIZATION CORE
         const authScreen = document.getElementById('auth-screen');
@@ -381,10 +389,11 @@
             }
         }
 
-        // CONTROL MATRIX DATA ARCHITECTURE
+        // STATE ENGINE
         const STATE = {
             opName: 'OPERATION AXE-RECON',
             mode: 'deploy',      // deploy, path, zone, terrain
+            pStyle: 'straight',  // straight, stencil
             zType: 'rect',       // rect, circle
             zStyle: 'faction',   // faction, fob, noman
             tStyle: 'trench',    // trench, ridge
@@ -395,7 +404,7 @@
             animating: false,
             animProgress: 0,
             selectedId: null,
-            phases: [{ intel: 'SECURE COORD SECTORS // LAY DOWN FOB HUBS AND ROUTE VECTORS', assets: [], zones: [], paths: [], terrain: [] }]
+            phases: [{ intel: 'SECURE RECON COORD LAYERS // ASSIGN STRUCTURAL LANES', assets: [], zones: [], paths: [], terrain: [] }]
         };
 
         let systemHistory = [];
@@ -439,13 +448,14 @@
         let activeZonePreview = null;
         let dynamicDashOffset = 0;
         let activePathBuilding = null;
+        let mouseCurrentPos = { x: 0, y: 0 };
 
         function bootstrapSystem() {
             resizeTacticalSurface();
             window.addEventListener('resize', resizeTacticalSurface);
             attachInterfaceListeners();
             recordState();
-            pushTerminalLog("CIC Operational Core online. Vector routing and custom zones ready.");
+            pushTerminalLog("Operational baseline synchronized successfully.");
             syncInterface();
             runRenderLoop();
         }
@@ -468,10 +478,12 @@
 
         function legaliseControlState() {
             document.querySelectorAll('.unit-btn').forEach(b => b.disabled = (STATE.mode !== 'deploy'));
+            document.querySelectorAll('.path-style-btn').forEach(b => b.disabled = (STATE.mode !== 'path'));
             document.querySelectorAll('.zone-type-btn, .zone-style-btn').forEach(b => b.disabled = (STATE.mode !== 'zone'));
             document.querySelectorAll('.terrain-btn').forEach(b => b.disabled = (STATE.mode !== 'terrain'));
 
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === STATE.mode));
+            document.querySelectorAll('.path-style-btn').forEach(b => b.classList.toggle('active', b.dataset.pstyle === STATE.pStyle));
             document.querySelectorAll('.faction-btn').forEach(b => b.classList.toggle('active', b.dataset.faction === STATE.faction));
             document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('active', b.dataset.unit === STATE.unitType));
             document.querySelectorAll('.zone-type-btn').forEach(b => b.classList.toggle('active', b.dataset.ztype === STATE.zType));
@@ -483,9 +495,17 @@
             document.querySelectorAll('.mode-btn').forEach(b => {
                 b.addEventListener('click', (e) => {
                     STATE.mode = e.target.dataset.mode;
-                    pushTerminalLog(`Interface shifted to ${STATE.mode.toUpperCase()} operations layer.`);
-                    if (STATE.mode !== 'path') activePathBuilding = null;
+                    pushTerminalLog(`Switched layer frame to ${STATE.mode.toUpperCase()}`);
+                    if(STATE.mode !== 'path' && activePathBuilding) commitCurrentPath();
                     legaliseControlState();
+                });
+            });
+
+            document.querySelectorAll('.path-style-btn').forEach(b => {
+                b.addEventListener('click', (e) => { 
+                    if(activePathBuilding) commitCurrentPath();
+                    STATE.pStyle = e.target.dataset.pstyle; 
+                    legaliseControlState(); 
                 });
             });
 
@@ -519,10 +539,11 @@
 
             document.getElementById('ctrl-play').addEventListener('click', () => {
                 if(!STATE.animating) { 
-                    bindUnitsToIntersectingPaths();
+                    if(activePathBuilding) commitCurrentPath();
+                    bindUnitsToRoutes();
                     STATE.animating = true; 
                     STATE.animProgress = 0;
-                    pushTerminalLog("COMMENCING COORDINATED SIM MOVEMENT DISPLACEMENT.");
+                    pushTerminalLog("COMMENCING COORDINATED DISPLACEMENT SIMULATION.");
                 }
             });
 
@@ -531,7 +552,7 @@
                 STATE.phases[STATE.phaseIdx].assets.forEach(a => { a.runtimePoints = null; });
                 STATE.animating = false;
                 STATE.animProgress = 0;
-                pushTerminalLog("Simulation assets reset to timeline coordinate roots.");
+                pushTerminalLog("Simulation coordinates reset to timeline origins.");
                 syncInterface();
             });
 
@@ -539,7 +560,7 @@
                 recordState();
                 STATE.phases.push({ intel: `PHASE ${STATE.phases.length + 1} DIRECTIVES`, assets: [], zones: [], paths: [], terrain: [] });
                 STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog(`New layer matrix: Phase ${STATE.phaseIdx + 1}`);
+                pushTerminalLog(`New phase window mapped: Phase ${STATE.phaseIdx + 1}`);
                 syncInterface();
             });
 
@@ -555,7 +576,7 @@
                     terrain: JSON.parse(JSON.stringify(parent.terrain || []))
                 });
                 STATE.phaseIdx = STATE.phases.length - 1;
-                pushTerminalLog(`Cloned array structures into phase layer ${STATE.phaseIdx + 1}`);
+                pushTerminalLog(`Cloned timeline layers into position ${STATE.phaseIdx + 1}`);
                 syncInterface();
             });
 
@@ -565,7 +586,7 @@
                         recordState();
                         STATE.phases.splice(STATE.phaseIdx, 1);
                         STATE.phaseIdx = Math.max(0, STATE.phaseIdx - 1);
-                        pushTerminalLog("Timeline index slice cleanly extracted.");
+                        pushTerminalLog("Timeline coordinate array cleanly excised.");
                         syncInterface();
                     });
                 }
@@ -576,14 +597,14 @@
                     recordState();
                     let current = STATE.phases[STATE.phaseIdx];
                     current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
-                    pushTerminalLog(`Selected tactical object erased from operational layer memory.`);
+                    pushTerminalLog(`Target micro-unit removed from operational memory.`);
                     STATE.selectedId = null;
                     syncInterface();
                 }
             });
 
             document.getElementById('board-wipe').addEventListener('click', () => {
-                showWarningBox('CLEAR CURRENT ACTIVE LAYER AND RESET WIRE MAP PARAMETERS?', () => {
+                showWarningBox('CLEAR CURRENT WORKSPACE MAP MATRICES?', () => {
                     recordState();
                     STATE.phases[STATE.phaseIdx] = { intel: '', assets: [], zones: [], paths: [], terrain: [] };
                     STATE.selectedId = null;
@@ -600,6 +621,10 @@
             canvas.addEventListener('mousedown', pointerDown);
             canvas.addEventListener('mousemove', pointerMove);
             canvas.addEventListener('mouseup', pointerUp);
+            canvas.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath();
+            });
             window.addEventListener('keydown', handleKeydown);
         }
 
@@ -644,7 +669,7 @@
             const activePhase = STATE.phases[STATE.phaseIdx];
 
             if (STATE.mode === 'deploy') {
-                const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 16);
+                const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 18);
                 if (found) {
                     STATE.selectedId = found.id;
                     dragAnchor = found;
@@ -657,18 +682,20 @@
                     dragAnchor = created;
                     pushTerminalLog(`Asset operational: ${STATE.unitType.toUpperCase()} initialized at grid location.`);
                 }
+                syncInterface();
             } else if (STATE.mode === 'path') {
-                recordState();
-                isInteracting = true;
-                if (!activePathBuilding) {
-                    activePathBuilding = { id: Math.random(), points: [pt] };
-                    activePhase.paths.push(activePathBuilding);
-                    pushTerminalLog("New vector path trace initialized.");
-                } else {
-                    activePathBuilding.points.push(pt);
-                    pushTerminalLog("Appended waypoint vector coordinate node.");
+                if (STATE.pStyle === 'straight') {
+                    isInteracting = true;
+                    activePathBuilding = { id: Math.random(), type: 'straight', points: [pt, {x: pt.x, y: pt.y}] };
+                } else if (STATE.pStyle === 'stencil') {
+                    if (!activePathBuilding) {
+                        activePathBuilding = { id: Math.random(), type: 'stencil', points: [pt] };
+                        pushTerminalLog("Began interconnected elbow stencil trace layout.");
+                    } else {
+                        activePathBuilding.points.push(pt);
+                        pushTerminalLog("Added stencil trajectory elbow segment node.");
+                    }
                 }
-                dragAnchor = pt;
             } else if (STATE.mode === 'zone') {
                 isInteracting = true;
                 dragAnchor = pt;
@@ -679,24 +706,26 @@
                 dragAnchor = { type: STATE.tStyle, points: [pt] };
                 if(!activePhase.terrain) activePhase.terrain = [];
                 activePhase.terrain.push(dragAnchor);
-                pushTerminalLog(`Constructing topographically adjusted ${STATE.tStyle.toUpperCase()} line.`);
+                pushTerminalLog(`Constructing strategic topography line: ${STATE.tStyle.toUpperCase()}`);
             }
-            syncInterface();
         }
 
         function pointerMove(e) {
             const pt = readPointer(e);
-            if (!dragAnchor || STATE.animating) return;
+            mouseCurrentPos = pt;
+            if (STATE.animating) return;
 
-            if (STATE.mode === 'deploy') {
+            if (STATE.mode === 'deploy' && dragAnchor) {
                 dragAnchor.x = pt.x;
                 dragAnchor.y = pt.y;
-            } else if (STATE.mode === 'path' && isInteracting && activePathBuilding) {
-                activeZonePreview = { type: 'line-preview', fx: activePathBuilding.points[activePathBuilding.points.length - 1].x, fy: activePathBuilding.points[activePathBuilding.points.length - 1].y, tx: pt.x, ty: pt.y };
-            } else if (STATE.mode === 'zone' && isInteracting) {
+            } else if (STATE.mode === 'path' && activePathBuilding) {
+                if (STATE.pStyle === 'straight' && isInteracting) {
+                    activePathBuilding.points[1] = pt;
+                }
+            } else if (STATE.mode === 'zone' && isInteracting && activeZonePreview) {
                 activeZonePreview.tx = pt.x;
                 activeZonePreview.ty = pt.y;
-            } else if (STATE.mode === 'terrain' && isInteracting) {
+            } else if (STATE.mode === 'terrain' && isInteracting && dragAnchor) {
                 const lastPt = dragAnchor.points[dragAnchor.points.length - 1];
                 if (Math.hypot(pt.x - lastPt.x, pt.y - lastPt.y) > 15) {
                     dragAnchor.points.push(pt);
@@ -708,28 +737,62 @@
             if (STATE.animating) return;
             const activePhase = STATE.phases[STATE.phaseIdx];
             
-            if (STATE.mode === 'path' && isInteracting) {
-                activeZonePreview = null;
+            if (STATE.mode === 'path') {
+                if (STATE.pStyle === 'straight' && isInteracting && activePathBuilding) {
+                    recordState();
+                    activePhase.paths.push(activePathBuilding);
+                    pushTerminalLog("Committed singular straight line routing vector.");
+                    activePathBuilding = null;
+                }
             } else if (STATE.mode === 'zone' && isInteracting && activeZonePreview) {
                 recordState();
                 activePhase.zones.push(activeZonePreview);
-                pushTerminalLog(`New field grid zone logged: ${activeZonePreview.type.toUpperCase()} [${activeZonePreview.style.toUpperCase()}]`);
+                pushTerminalLog(`Strategic map field zone registered: ${activeZonePreview.type.toUpperCase()}`);
                 activeZonePreview = null;
-            } else if (STATE.mode === 'terrain') {
-                pushTerminalLog(`Structural topographical network committed to regional map array.`);
             }
             isInteracting = false;
-            dragAnchor = null;
+            if(STATE.mode !== 'path') dragAnchor = null;
             syncInterface();
         }
 
-        function bindUnitsToIntersectingPaths() {
+        function commitCurrentPath() {
+            if(!activePathBuilding) return;
+            if(activePathBuilding.type === 'stencil' && activePathBuilding.points.length >= 2) {
+                recordState();
+                STATE.phases[STATE.phaseIdx].paths.push(activePathBuilding);
+                pushTerminalLog("Elbow stencil alignment network committed cleanly to workspace.");
+            }
+            activePathBuilding = null;
+            syncInterface();
+        }
+
+        function findDistanceToSegment(p, v, w) {
+            const l2 = Math.hypot(v.x - w.x, v.y - w.y) ** 2;
+            if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+            let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+        }
+
+        function bindUnitsToRoutes() {
             const activePhase = STATE.phases[STATE.phaseIdx];
             activePhase.assets.forEach(asset => {
-                let matchingPath = activePhase.paths.find(p => p.points.length > 0 && Math.hypot(p.points[0].x - asset.x, p.points[0].y - asset.y) < 35);
-                if (matchingPath) {
-                    asset.runtimePoints = [...matchingPath.points];
-                    pushTerminalLog(`Vector locking engaged: OBJ-${asset.id.toString().substring(2,7)} routing path trace parsed.`);
+                let bestRoute = null;
+                let minimumDistance = 35; // Maximum pixel locking capture radius threshold
+
+                activePhase.paths.forEach(path => {
+                    for(let i = 0; i < path.points.length - 1; i++) {
+                        let dist = findDistanceToSegment(asset, path.points[i], path.points[i+1]);
+                        if(dist < minimumDistance) {
+                            minimumDistance = dist;
+                            bestRoute = path;
+                        }
+                    }
+                });
+
+                if (bestRoute) {
+                    asset.runtimePoints = [...bestRoute.points];
+                    pushTerminalLog(`Routing sync: Asset locked to active trajectory path line vector.`);
                 } else {
                     asset.runtimePoints = null;
                 }
@@ -737,33 +800,45 @@
         }
 
         function drawMilitarySymbol(ctx, x, y, type, color) {
+            ctx.save();
             ctx.strokeStyle = color;
             ctx.fillStyle = '#03060f';
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 2;
 
-            const size = 9; 
-            ctx.save();
+            const size = 11; 
             ctx.translate(x, y);
 
             if (type === 'Infantry') {
-                ctx.beginPath(); ctx.arc(0, 0, size - 1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(-size - 2, 0); ctx.lineTo(size + 2, 0); ctx.moveTo(0, -size - 2); ctx.lineTo(0, size + 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(0, 0, size, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-size, 0); ctx.lineTo(size, 0); ctx.moveTo(0, -size); ctx.lineTo(0, size); ctx.stroke();
             } else if (type === 'Specialist') {
-                ctx.beginPath(); ctx.moveTo(0, -size); ctx.lineTo(size, 0); ctx.lineTo(0, size); ctx.lineTo(-size, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(0, 0, 2, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, -size - 2); ctx.lineTo(size + 2, 0); ctx.lineTo(0, size + 2); ctx.lineTo(-size - 2, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI * 2); ctx.stroke();
             } else if (type === 'Armoured') {
                 ctx.beginPath();
-                for (let i = 0; i < 6; i++) ctx.lineTo(Math.cos(i * Math.PI / 3) * size, Math.sin(i * Math.PI / 3) * size);
+                for (let i = 0; i < 4; i++) {
+                    let angle = (i * Math.PI / 2) + (Math.PI / 4);
+                    ctx.lineTo(Math.cos(angle) * (size + 2), Math.sin(angle) * (size + 2));
+                }
                 ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(-size + 3, 0); ctx.lineTo(size - 3, 0); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-size, -size); ctx.lineTo(size, size); ctx.stroke();
             } else if (type === 'Tank') {
-                ctx.fillRect(-size, -size + 2, size * 2, size * 2 - 4); ctx.strokeRect(-size, -size + 2, size * 2, size * 2 - 4);
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(size + 5, 0); ctx.lineWidth = 2.5; ctx.stroke();
-            } else if (type === 'Walker') {
-                ctx.beginPath(); ctx.moveTo(-size, size); ctx.lineTo(-size + 3, -2); ctx.lineTo(size - 3, -2); ctx.lineTo(size, size); ctx.stroke();
-                ctx.strokeRect(-4, -size, 8, size - 2);
+                ctx.fillRect(-size - 2, -size + 3, (size * 2) + 4, (size * 2) - 6);
+                ctx.strokeRect(-size - 2, -size + 3, (size * 2) + 4, (size * 2) - 6);
+                ctx.fillRect(-size + 2, -size + 1, (size * 2) - 4, (size * 2) - 2);
+                ctx.strokeRect(-size + 2, -size + 1, (size * 2) - 4, (size * 2) - 2);
+                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(size + 8, 0); ctx.lineWidth = 3; ctx.stroke();
+            } else if (type === 'ATTE') {
+                ctx.beginPath();
+                ctx.arc(-size, -size + 4, 3, 0, Math.PI*2); ctx.arc(0, -size + 2, 3, 0, Math.PI*2); ctx.arc(size, -size + 4, 3, 0, Math.PI*2);
+                ctx.arc(-size, size - 4, 3, 0, Math.PI*2); ctx.arc(0, size - 2, 3, 0, Math.PI*2); ctx.arc(size, size - 4, 3, 0, Math.PI*2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(-size, -size + 4); ctx.lineTo(size, -size + 4); ctx.lineTo(size + 6, 0); ctx.lineTo(size, size - 4); ctx.lineTo(-size, size - 4); ctx.closePath();
+                ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(size, 0); ctx.lineTo(size + 9, -2); ctx.moveTo(size, 0); ctx.lineTo(size + 9, 2); ctx.stroke();
             } else if (type === 'Air') {
-                ctx.beginPath(); ctx.moveTo(0, -size - 2); ctx.lineTo(size, size - 1); ctx.lineTo(0, size - 4); ctx.lineTo(-size, size - 1); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(size + 4, 0); ctx.lineTo(-size, -size - 2); ctx.lineTo(-size + 4, 0); ctx.lineTo(-size, size + 2); ctx.closePath(); ctx.fill(); ctx.stroke();
             }
             ctx.restore();
         }
@@ -784,7 +859,7 @@
         }
 
         function runRenderLoop() {
-            dynamicDashOffset = (dynamicDashOffset - 0.4) % 24;
+            dynamicDashOffset = (dynamicDashOffset - 0.5) % 24;
             renderCanvasGrid();
 
             const current = STATE.phases[STATE.phaseIdx];
@@ -808,54 +883,63 @@
                 });
             }
 
-            // FULLY LINKED ZONE RENDERING LAYER
+            // ZONE RENDERING LAYER
             current.zones.forEach(z => renderZoneBounds(z));
+            if (activeZonePreview) renderZoneBounds(activeZonePreview);
 
-            if (activeZonePreview) {
-                if (activeZonePreview.type === 'line-preview') {
-                    ctx.save(); ctx.strokeStyle = 'rgba(0, 242, 254, 0.6)'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
-                    ctx.beginPath(); ctx.moveTo(activeZonePreview.fx, activeZonePreview.fy); ctx.lineTo(activeZonePreview.tx, activeZonePreview.ty); ctx.stroke(); ctx.restore();
-                } else {
-                    renderZoneBounds(activeZonePreview);
-                }
-            }
-
-            // HEAVILY UPGRADED VECTOR ROUTING RENDERING
+            // COMPLETED ROUTES VECTOR LAYER
             current.paths.forEach(path => {
-                if (path.points.length < 2) return;
                 ctx.save();
                 ctx.lineWidth = 4;
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
                 ctx.beginPath(); ctx.moveTo(path.points[0].x, path.points[0].y);
                 for(let i = 1; i < path.points.length; i++) ctx.lineTo(path.points[i].x, path.points[i].y);
                 ctx.stroke();
 
                 ctx.strokeStyle = '#00f2fe';
                 ctx.lineWidth = 2;
-                ctx.setLineDash([6, 6]);
+                ctx.setLineDash([8, 6]);
                 ctx.lineDashOffset = dynamicDashOffset;
                 ctx.stroke();
                 ctx.restore();
 
-                path.points.forEach((pt, pidx) => {
-                    ctx.fillStyle = pidx === 0 ? '#00ffaa' : '#00f2fe';
-                    ctx.beginPath();
-                    ctx.arc(pt.x, pt.y, pidx === 0 ? 5 : 3.5, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = '#03060f';
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
+                path.points.forEach((pt, idx) => {
+                    ctx.fillStyle = idx === 0 ? '#00ffaa' : '#00f2fe';
+                    ctx.beginPath(); ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2); ctx.fill();
                 });
             });
 
-            // FACTION SECTOR DETECTIONS
+            // ACTIVE VECTOR PATH-BUILDING LIVE PREVIEW
+            if (activePathBuilding) {
+                ctx.save();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(activePathBuilding.points[0].x, activePathBuilding.points[0].y);
+                for(let i = 1; i < activePathBuilding.points.length; i++) {
+                    ctx.lineTo(activePathBuilding.points[i].x, activePathBuilding.points[i].y);
+                }
+                if (STATE.pStyle === 'stencil') {
+                    ctx.lineTo(mouseCurrentPos.x, mouseCurrentPos.y);
+                }
+                ctx.stroke();
+                ctx.restore();
+
+                activePathBuilding.points.forEach(pt => {
+                    ctx.fillStyle = '#ffcc00';
+                    ctx.beginPath(); ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2); ctx.fill();
+                });
+            }
+
+            // PROXIMITY ENGAGEMENT SECTOR DETECTIONS
             current.assets.forEach(a1 => {
                 if(a1.faction !== 'GAR') return;
                 current.assets.forEach(a2 => {
                     if(a2.faction !== 'OPFOR') return;
                     let dist = Math.hypot(a1.x - a2.x, a1.y - a2.y);
                     if(dist < 110) {
-                        ctx.save(); ctx.strokeStyle = 'rgba(255, 51, 102, 0.25)'; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+                        ctx.save(); ctx.strokeStyle = 'rgba(255, 51, 102, 0.2)'; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
                         ctx.beginPath(); ctx.moveTo(a1.x, a1.y); ctx.lineTo(a2.x, a2.y); ctx.stroke();
                         let mx = (a1.x + a2.x)/2; let my = (a1.y + a2.y)/2;
                         ctx.strokeStyle = '#ff3366'; ctx.setLineDash([]); ctx.strokeRect(mx - 3, my - 3, 6, 6);
@@ -864,7 +948,7 @@
                 });
             });
 
-            // TIME FLIGHT CALCULATIONS
+            // RUN TIME ANIMATION COEFFICIENTS
             if (STATE.animating) {
                 STATE.animProgress += 0.003;
                 if(STATE.animProgress >= 1) {
@@ -877,12 +961,12 @@
                         }
                     });
                     STATE.animProgress = 0;
-                    pushTerminalLog("Vector displacement simulations calculated and locked.");
+                    pushTerminalLog("Sim flight positioning iterations completed.");
                     syncInterface();
                 }
             }
 
-            // DRAW ACTIVE OBJECTS
+            // FRAME RENDERING DISPLACEMENT FOR TOTAL ASSETS
             current.assets.forEach(asset => {
                 let rx = asset.x; let ry = asset.y;
 
@@ -903,7 +987,7 @@
                 if (asset.id === STATE.selectedId) {
                     ctx.save();
                     ctx.strokeStyle = 'rgba(0, 242, 254, 0.4)'; ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
-                    ctx.beginPath(); ctx.arc(rx, ry, 16, 0, Math.PI * 2); ctx.stroke(); 
+                    ctx.beginPath(); ctx.arc(rx, ry, 18, 0, Math.PI * 2); ctx.stroke(); 
                     ctx.restore();
                 }
 
@@ -915,8 +999,6 @@
 
         function renderZoneBounds(z) {
             ctx.save();
-            
-            // Decoupled styling logic handles specific overrides or standard faction lookups
             let zoneColor = COLORS[z.faction] || '#a3b8cc';
             
             if (z.style === 'fob') {
@@ -926,9 +1008,8 @@
                 ctx.strokeStyle = '#e63946';
                 ctx.fillStyle = createStripedPattern('#e63946');
             } else {
-                // Faction matching mode
                 ctx.strokeStyle = zoneColor;
-                ctx.fillStyle = zoneColor + '15'; // Clear, readable opacity layer
+                ctx.fillStyle = zoneColor + '12';
             }
 
             ctx.lineWidth = 1.5;
@@ -936,13 +1017,7 @@
             if (z.type === 'circle') {
                 const r = Math.hypot(z.tx - z.fx, z.ty - z.fy);
                 ctx.beginPath(); ctx.arc(z.fx, z.fy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                
-                if (z.style === 'fob') {
-                    ctx.strokeStyle = 'rgba(0, 242, 254, 0.3)';
-                    ctx.beginPath(); ctx.arc(z.fx, z.fy, r + 6, 0, Math.PI * 2); ctx.stroke();
-                }
             } else {
-                // Rectangle Boundary Mapping
                 const w = z.tx - z.fx; const h = z.ty - z.fy;
                 ctx.fillRect(z.fx, z.fy, w, h); ctx.strokeRect(z.fx, z.fy, w, h);
             }
@@ -983,7 +1058,7 @@
             if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
             if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); triggerUndo(); }
             if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); triggerRedo(); }
-            if (e.key === 'Escape') { activePathBuilding = null; pushTerminalLog("Running vector sequence locked."); }
+            if (e.key === 'Escape') { if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath(); }
         }
     </script>
 </body>
