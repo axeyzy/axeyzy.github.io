@@ -334,7 +334,7 @@
 
                 <div class="section">
                     <div class="section-title">GRID COORDINATE PREFIX</div>
-                    <input type="text" id="cfg-coord-prefix" class="sidebar-input" value="16U EV" placeholder="e.g., SECTOR-4, RY-02, OUT-RIM">
+                    <input type="text" id="cfg-coord-prefix" class="sidebar-input" value="SECTOR 4" placeholder="e.g., RY-02, COR-09, AL-01">
                 </div>
 
                 <div class="section">
@@ -819,7 +819,7 @@
         }
 
         function triggerPhaseTransitionAnimation(newIdx) {
-            if (transitionState > 0 || isRecordingIntro) return;
+            if (transitionState > 0) return;
             transOldIdx = STATE.phaseIdx;
             transNewIdx = newIdx;
             
@@ -925,8 +925,9 @@
                 recordedChunks = [];
                 
                 try {
-                    const stream = canvas.captureStream(60); 
-                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 5000000 });
+                    // SEAMLESS FIX: Use exact rendering updates for frame allocation matches
+                    const stream = canvas.captureStream(0); 
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 6000000 });
                     
                     mediaRecorder.ondataavailable = function(e) {
                         if (e.data.size > 0) recordedChunks.push(e.data);
@@ -1780,13 +1781,16 @@
                 let rx = asset.x; let ry = asset.y;
 
                 if (STATE.animating && asset.runtimePoints && asset.runtimePoints.length > 0) {
+                    // SEAMLESS FIX: Cosine ease interpolation curve (1 - cos(x)) replaces raw linear ticks
                     let absoluteProgress = STATE.animProgress * (asset.runtimePoints.length - 1);
                     let baseIdx = Math.floor(absoluteProgress);
                     let fractional = absoluteProgress - baseIdx;
+                    
+                    let smoothFactor = (1 - Math.cos(fractional * Math.PI)) / 2;
 
                     if (baseIdx < asset.runtimePoints.length - 1) {
-                        rx = asset.runtimePoints[baseIdx].x + (asset.runtimePoints[baseIdx + 1].x - asset.runtimePoints[baseIdx].x) * fractional;
-                        ry = asset.runtimePoints[baseIdx].y + (asset.runtimePoints[baseIdx + 1].y - asset.runtimePoints[baseIdx].y) * fractional;
+                        rx = asset.runtimePoints[baseIdx].x + (asset.runtimePoints[baseIdx + 1].x - asset.runtimePoints[baseIdx].x) * smoothFactor;
+                        ry = asset.runtimePoints[baseIdx].y + (asset.runtimePoints[baseIdx + 1].y - asset.runtimePoints[baseIdx].y) * smoothFactor;
                     } else {
                         rx = asset.runtimePoints[asset.runtimePoints.length - 1].x;
                         ry = asset.runtimePoints[asset.runtimePoints.length - 1].y;
@@ -1818,6 +1822,7 @@
                 } else {
                     drawRecordingIntro(elapsed);
                     requestAnimationFrame(runRenderLoop);
+                    if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.requestData();
                     return;
                 }
             }
@@ -1842,7 +1847,7 @@
             }
 
             if (STATE.animating && transitionState === 0) {
-                STATE.animProgress += 0.003;
+                STATE.animProgress += 0.0035; // Slightly faster baseline tick matching easing speeds
                 if(STATE.animProgress >= 1) {
                     STATE.animating = false;
                     recordState();
@@ -1859,27 +1864,7 @@
                     
                     document.getElementById('ctrl-play').classList.remove('active');
                     pushTerminalLog("Sim flight positioning iterations completed.");
-                    
-                    if (isRecording && STATE.phaseIdx < STATE.phases.length - 1) {
-                        const nextIndex = STATE.phaseIdx + 1;
-                        
-                        STATE.phases[nextIndex].assets.forEach(nextAsset => {
-                            const matchingCurrentAsset = activePhase.assets.find(currAsset => currAsset.type === nextAsset.type && currAsset.faction === nextAsset.faction);
-                            if (matchingCurrentAsset) {
-                                nextAsset.x = matchingCurrentAsset.x;
-                                nextAsset.y = matchingCurrentAsset.y;
-                                nextAsset.spawnX = matchingCurrentAsset.x;
-                                nextAsset.spawnY = matchingCurrentAsset.y;
-                            }
-                        });
-
-                        triggerPhaseTransitionAnimation(nextIndex);
-                        setTimeout(() => {
-                            document.getElementById('ctrl-play').click();
-                        }, 700);
-                    } else {
-                        syncInterface();
-                    }
+                    syncInterface();
                 }
             }
 
@@ -1933,14 +1918,13 @@
                 }
             }
 
-            if (STATE.gridOn && !isRecordingIntro && mouseCurrentPos.x > 0 && mouseCurrentPos.y > 0) {
+            // SEAMLESS FIX: Hides mouse matrix tracking overlays entirely while recording capture rules are active
+            if (STATE.gridOn && !isRecording && !isRecordingIntro && mouseCurrentPos.x > 0 && mouseCurrentPos.y > 0) {
                 const cSize = canvas.width / 24; 
                 const cellCol = Math.floor(mouseCurrentPos.x / cSize);
                 const cellRow = Math.floor(mouseCurrentPos.y / cSize);
 
                 if (cellCol >= 0 && cellRow >= 0 && mouseCurrentPos.x <= canvas.width && mouseCurrentPos.y <= canvas.height) {
-                    
-                    // FIXED: Dynamically pulls the customized prefix right from your sidebar input form
                     const activePrefix = document.getElementById('cfg-coord-prefix').value.trim() || "GRID";
                     const coordinateString = `${activePrefix} ${String(cellCol).padStart(2, '0')} ${String(cellRow).padStart(2, '0')}`;
                     
@@ -1969,6 +1953,7 @@
             }
 
             requestAnimationFrame(runRenderLoop);
+            if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.requestData();
         }
 
         function renderZoneBounds(z) {
