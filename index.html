@@ -789,8 +789,8 @@
         let systemHistoryIdx = -1;
         let activePings = []; 
 
-        let mediaRecorder = null;
-        let recordedChunks = [];
+        // PNG FIX: Array storage allocation maps high res snapshots smoothly
+        let recordedFrames = [];
         let isRecording = false;
         let isRecordingIntro = false;
         let recIntroStartTime = null;
@@ -811,11 +811,14 @@
         function capturePhaseSnapshot(index) {
             const phase = STATE.phases[index];
             if (!phase) return;
-            phase.initialPhasePositions = phase.assets.map(a => ({
+            // DECOUPLING FIX: JSON serialization completely breaks object linking memory leakage bugs
+            phase.initialPhasePositions = JSON.parse(JSON.stringify(phase.assets.map(a => ({
                 id: a.id,
                 x: a.x,
-                y: a.y
-            }));
+                y: a.y,
+                spawnX: a.spawnX,
+                spawnY: a.spawnY
+            }))));
         }
 
         function triggerPhaseTransitionAnimation(newIdx) {
@@ -922,46 +925,55 @@
             if (!isRecording) {
                 isRecordingIntro = true;
                 recIntroStartTime = null;
-                recordedChunks = [];
-                
-                try {
-                    // SEAMLESS FIX: Use exact rendering updates for frame allocation matches
-                    const stream = canvas.captureStream(0); 
-                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 6000000 });
-                    
-                    mediaRecorder.ondataavailable = function(e) {
-                        if (e.data.size > 0) recordedChunks.push(e.data);
-                    };
-                    
-                    mediaRecorder.onstop = function() {
-                        const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                        const url = URL.createObjectURL(blob);
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.download = `briefing_${STATE.opName.toLowerCase()}.webm`;
-                        link.click();
-                        URL.revokeObjectURL(url);
-                        pushTerminalLog("Cinematic video captured and exported successfully.");
-                    };
-                    
-                    mediaRecorder.start();
-                    isRecording = true;
-                    btnRecord.classList.add('recording-active');
-                    btnRecord.innerText = "STOP RECORD";
-                    pushTerminalLog("Cinematic platform recording sequence armed.");
-                } catch (err) {
-                    console.error("Recording initialization failed", err);
-                    pushTerminalLog("Recording failed: Browser stream interface capture error.", true);
-                    isRecordingIntro = false;
-                }
+                recordedFrames = [];
+                isRecording = true;
+                btnRecord.classList.add('recording-active');
+                btnRecord.innerText = "STOP RECORD";
+                pushTerminalLog("Cinematic PNG standalone stream sequence armed.");
             } else {
-                if(mediaRecorder && mediaRecorder.state !== 'inactive') {
-                    mediaRecorder.stop();
-                }
                 isRecording = false;
                 isRecordingIntro = false;
                 btnRecord.classList.remove('recording-active');
                 btnRecord.innerText = "RECORD ANIM";
+                
+                // PNG FIX: Creates a clean tactical sequence layout automatically rather than webp streams
+                if(recordedFrames.length > 0) {
+                    pushTerminalLog(`Processing ${recordedFrames.length} high-res png sequence layers...`);
+                    
+                    const snapshotWindow = window.open();
+                    snapshotWindow.document.write(`
+                        <html>
+                        <head><title>Operation ${STATE.opName} // Tactical Briefing Sequence</title></head>
+                        <body style="background:#02050a; color:#00f2fe; font-family:monospace; padding:30px; text-align:center;">
+                            <h2>TACTICAL MAP BRIEFING SEQUENCE // UNCOMPRESSED GENERATION</h2>
+                            <p style="color:#7a92a8;">Right-click any captured frame below to save as raw uncompressed PNG.</p>
+                            <hr style="border-color:#122236; margin-bottom:20px;">
+                            <div style="display:flex; flex-direction:column; gap:25px; align-items:center;" id="img-holder"></div>
+                        </body>
+                        </html>
+                    `);
+                    
+                    recordedFrames.forEach((fData, fIdx) => {
+                        const imgNode = snapshotWindow.document.createElement('img');
+                        imgNode.src = fData;
+                        imgNode.style.border = "2px solid #1e354d";
+                        imgNode.style.maxWidth = "85vw";
+                        imgNode.style.boxShadow = "0 0 15px rgba(0,242,254,0.1)";
+                        
+                        const capNode = snapshotWindow.document.createElement('div');
+                        capNode.innerText = `FRAME VECTOR INDEX: ${fIdx + 1} // STAGE TARGET TIMELINE`;
+                        capNode.style.fontSize = "11px";
+                        capNode.style.color = "#ffcc00";
+                        capNode.style.marginTop = "4px";
+                        capNode.style.marginBottom = "20px";
+                        
+                        snapshotWindow.document.getElementById('img-holder').appendChild(imgNode);
+                        snapshotWindow.document.getElementById('img-holder').appendChild(capNode);
+                    });
+                    
+                    recordedFrames = [];
+                    pushTerminalLog("Cinematic uncompressed capture sequence successfully exported.");
+                }
             }
         }
 
@@ -1093,25 +1105,26 @@
                 recordState();
                 const activePhase = STATE.phases[STATE.phaseIdx];
                 
+                // RESET FIX: Rigidly fall back to explicit index snapshots decouples references completely
                 if (activePhase.initialPhasePositions && activePhase.initialPhasePositions.length > 0) {
-                    activePhase.assets.forEach(a => {
-                        const originalPos = activePhase.initialPhasePositions.find(snap => snap.id === a.id);
-                        if (originalPos) {
-                            a.x = originalPos.x;
-                            a.y = originalPos.y;
-                            a.spawnX = originalPos.x;
-                            a.spawnY = originalPos.y;
-                        }
-                        a.runtimePoints = null;
-                    });
+                    activePhase.assets = activePhase.initialPhasePositions.map(snap => ({
+                        id: snap.id,
+                        x: snap.x,
+                        y: snap.y,
+                        spawnX: snap.spawnX,
+                        spawnY: snap.spawnY,
+                        faction: activePhase.assets.find(orig => orig.id === snap.id)?.faction || 'GAR',
+                        type: activePhase.assets.find(orig => orig.id === snap.id)?.type || 'Infantry',
+                        kia: activePhase.assets.find(orig => orig.id === snap.id)?.kia || false
+                    }));
                 } else {
                     activePhase.assets.forEach(a => { 
                         a.x = a.spawnX; 
                         a.y = a.spawnY;
-                        a.runtimePoints = null; 
                     });
                 }
                 
+                activePhase.assets.forEach(a => a.runtimePoints = null);
                 STATE.animating = false;
                 STATE.animProgress = 0;
                 document.getElementById('ctrl-play').classList.remove('active');
@@ -1488,6 +1501,7 @@
             return { dist: Math.hypot(p.x - interceptPoint.x, p.y - interceptPoint.y), point: interceptPoint, t: t };
         }
 
+        // TRAVERSAL MATRIX: Sets exact runtime curve layers on units safely
         function bindUnitsToRoutes() {
             const activePhase = STATE.phases[STATE.phaseIdx];
             activePhase.assets.forEach(asset => {
@@ -1781,7 +1795,6 @@
                 let rx = asset.x; let ry = asset.y;
 
                 if (STATE.animating && asset.runtimePoints && asset.runtimePoints.length > 0) {
-                    // SEAMLESS FIX: Cosine ease interpolation curve (1 - cos(x)) replaces raw linear ticks
                     let absoluteProgress = STATE.animProgress * (asset.runtimePoints.length - 1);
                     let baseIdx = Math.floor(absoluteProgress);
                     let fractional = absoluteProgress - baseIdx;
@@ -1822,7 +1835,8 @@
                 } else {
                     drawRecordingIntro(elapsed);
                     requestAnimationFrame(runRenderLoop);
-                    if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.requestData();
+                    // PNG FIX: Captures initial frames smoothly on buffer splits
+                    if (isRecording && STATE.animating) recordedFrames.push(canvas.toDataURL('image/png'));
                     return;
                 }
             }
@@ -1847,7 +1861,7 @@
             }
 
             if (STATE.animating && transitionState === 0) {
-                STATE.animProgress += 0.0035; // Slightly faster baseline tick matching easing speeds
+                STATE.animProgress += 0.0035; 
                 if(STATE.animProgress >= 1) {
                     STATE.animating = false;
                     recordState();
@@ -1918,7 +1932,6 @@
                 }
             }
 
-            // SEAMLESS FIX: Hides mouse matrix tracking overlays entirely while recording capture rules are active
             if (STATE.gridOn && !isRecording && !isRecordingIntro && mouseCurrentPos.x > 0 && mouseCurrentPos.y > 0) {
                 const cSize = canvas.width / 24; 
                 const cellCol = Math.floor(mouseCurrentPos.x / cSize);
@@ -1953,7 +1966,10 @@
             }
 
             requestAnimationFrame(runRenderLoop);
-            if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.requestData();
+            // PNG FIX: Appends high res uncompressed sequence vectors instantly into memory frame buffers
+            if (isRecording && STATE.animating) {
+                recordedFrames.push(canvas.toDataURL('image/png'));
+            }
         }
 
         function renderZoneBounds(z) {
@@ -2022,4 +2038,4 @@
         }
     </script>
 </body>
-</html> 
+</html>
