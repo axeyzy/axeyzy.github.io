@@ -789,7 +789,6 @@
         let systemHistoryIdx = -1;
         let activePings = []; 
 
-        // PNG FIX: Array storage allocation maps high res snapshots smoothly
         let recordedFrames = [];
         let isRecording = false;
         let isRecordingIntro = false;
@@ -811,14 +810,16 @@
         function capturePhaseSnapshot(index) {
             const phase = STATE.phases[index];
             if (!phase) return;
-            // DECOUPLING FIX: JSON serialization completely breaks object linking memory leakage bugs
-            phase.initialPhasePositions = JSON.parse(JSON.stringify(phase.assets.map(a => ({
-                id: a.id,
-                x: a.x,
-                y: a.y,
-                spawnX: a.spawnX,
-                spawnY: a.spawnY
-            }))));
+            // PERSISTENT MEMORY FIX: If baseline origins exist, do not truncate or map downstream updates over them
+            if (!phase.initialPhasePositions || phase.initialPhasePositions.length === 0) {
+                phase.initialPhasePositions = JSON.parse(JSON.stringify(phase.assets.map(a => ({
+                    id: a.id,
+                    x: a.x,
+                    y: a.y,
+                    spawnX: a.spawnX,
+                    spawnY: a.spawnY
+                }))));
+            }
         }
 
         function triggerPhaseTransitionAnimation(newIdx) {
@@ -936,7 +937,6 @@
                 btnRecord.classList.remove('recording-active');
                 btnRecord.innerText = "RECORD ANIM";
                 
-                // PNG FIX: Creates a clean tactical sequence layout automatically rather than webp streams
                 if(recordedFrames.length > 0) {
                     pushTerminalLog(`Processing ${recordedFrames.length} high-res png sequence layers...`);
                     
@@ -1105,7 +1105,6 @@
                 recordState();
                 const activePhase = STATE.phases[STATE.phaseIdx];
                 
-                // RESET FIX: Rigidly fall back to explicit index snapshots decouples references completely
                 if (activePhase.initialPhasePositions && activePhase.initialPhasePositions.length > 0) {
                     activePhase.assets = activePhase.initialPhasePositions.map(snap => ({
                         id: snap.id,
@@ -1149,26 +1148,36 @@
                 recordState();
                 const parent = STATE.phases[STATE.phaseIdx];
                 
+                // FIXED CLONING BUG: Explicitly deep-clones base origin arrays independently to isolate timeline phase segments
                 const inheritedAssets = parent.assets.map(a => {
                     let targetX = a.x;
                     let targetY = a.y;
+                    let targetSpawnX = a.spawnX || targetX;
+                    let targetSpawnY = a.spawnY || targetY;
                     return { 
                         id: Math.random(), 
                         x: targetX, y: targetY, 
-                        spawnX: targetX, spawnY: targetY, 
+                        spawnX: targetSpawnX, spawnY: targetSpawnY, 
                         faction: a.faction, type: a.type, kia: a.kia || false 
                     };
                 });
 
+                const newPhaseIdx = STATE.phases.length;
                 STATE.phases.push({
-                    name: `PHASE ${STATE.phases.length + 1}`,
+                    name: `PHASE ${newPhaseIdx + 1}`,
                     intel: `${parent.intel} [CLONE]`,
                     assets: inheritedAssets,
                     zones: JSON.parse(JSON.stringify(parent.zones)),
                     paths: [], 
                     terrain: JSON.parse(JSON.stringify(parent.terrain || []))
                 });
-                triggerPhaseTransitionAnimation(STATE.phases.length - 1);
+
+                // Isolate the new phase's original position tracking from the parent's coordinates
+                STATE.phases[newPhaseIdx].initialPhasePositions = JSON.parse(JSON.stringify(inheritedAssets.map(a => ({
+                    id: a.id, x: a.x, y: a.y, spawnX: a.spawnX, spawnY: a.spawnY
+                }))));
+
+                triggerPhaseTransitionAnimation(newPhaseIdx);
                 syncInterface();
             });
 
@@ -1192,6 +1201,8 @@
                     current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
                     pushTerminalLog("Target micro-unit removed from operational memory.");
                     
+                    // Force rebuild the position snapshot since asset configuration updated
+                    current.initialPhasePositions = null;
                     capturePhaseSnapshot(STATE.phaseIdx);
                     
                     STATE.selectedId = null;
@@ -1395,6 +1406,8 @@
                     };
                     activePhase.assets.push(created);
                     
+                    // Reset position memory tracking so fresh entries map correctly
+                    activePhase.initialPhasePositions = null;
                     capturePhaseSnapshot(STATE.phaseIdx);
                     
                     STATE.selectedId = created.id;
@@ -1458,6 +1471,7 @@
             if (STATE.animating || transitionState > 0) return;
             
             if (STATE.mode === 'deploy' && dragAnchor) {
+                STATE.phases[STATE.phaseIdx].initialPhasePositions = null;
                 capturePhaseSnapshot(STATE.phaseIdx);
             }
             
@@ -1501,7 +1515,6 @@
             return { dist: Math.hypot(p.x - interceptPoint.x, p.y - interceptPoint.y), point: interceptPoint, t: t };
         }
 
-        // TRAVERSAL MATRIX: Sets exact runtime curve layers on units safely
         function bindUnitsToRoutes() {
             const activePhase = STATE.phases[STATE.phaseIdx];
             activePhase.assets.forEach(asset => {
@@ -1835,7 +1848,6 @@
                 } else {
                     drawRecordingIntro(elapsed);
                     requestAnimationFrame(runRenderLoop);
-                    // PNG FIX: Captures initial frames smoothly on buffer splits
                     if (isRecording && STATE.animating) recordedFrames.push(canvas.toDataURL('image/png'));
                     return;
                 }
@@ -1966,7 +1978,6 @@
             }
 
             requestAnimationFrame(runRenderLoop);
-            // PNG FIX: Appends high res uncompressed sequence vectors instantly into memory frame buffers
             if (isRecording && STATE.animating) {
                 recordedFrames.push(canvas.toDataURL('image/png'));
             }
