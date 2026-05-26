@@ -789,7 +789,9 @@
         let systemHistoryIdx = -1;
         let activePings = []; 
 
-        let recordedFrames = [];
+        // VIDEO CONFIG: Reverted back to high performance webm stream processing
+        let mediaRecorder = null;
+        let recordedChunks = [];
         let isRecording = false;
         let isRecordingIntro = false;
         let recIntroStartTime = null;
@@ -810,7 +812,6 @@
         function capturePhaseSnapshot(index) {
             const phase = STATE.phases[index];
             if (!phase) return;
-            // PERSISTENT MEMORY FIX: If baseline origins exist, do not truncate or map downstream updates over them
             if (!phase.initialPhasePositions || phase.initialPhasePositions.length === 0) {
                 phase.initialPhasePositions = JSON.parse(JSON.stringify(phase.assets.map(a => ({
                     id: a.id,
@@ -926,54 +927,46 @@
             if (!isRecording) {
                 isRecordingIntro = true;
                 recIntroStartTime = null;
-                recordedFrames = [];
-                isRecording = true;
-                btnRecord.classList.add('recording-active');
-                btnRecord.innerText = "STOP RECORD";
-                pushTerminalLog("Cinematic PNG standalone stream sequence armed.");
+                recordedChunks = [];
+                
+                try {
+                    // FPS STREAM FIX: Armed canvas line loops explicitly at 30fps to compile playable file outputs
+                    const stream = canvas.captureStream(30); 
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 5000000 });
+                    
+                    mediaRecorder.ondataavailable = function(e) {
+                        if (e.data.size > 0) recordedChunks.push(e.data);
+                    };
+                    
+                    mediaRecorder.onstop = function() {
+                        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `briefing_${STATE.opName.toLowerCase()}.webm`;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        pushTerminalLog("Cinematic video briefing exported successfully.");
+                    };
+                    
+                    mediaRecorder.start();
+                    isRecording = true;
+                    btnRecord.classList.add('recording-active');
+                    btnRecord.innerText = "STOP RECORD";
+                    pushTerminalLog("Cinematic platform recording sequence armed.");
+                } catch (err) {
+                    console.error("Recording initialization failed", err);
+                    pushTerminalLog("Recording failed: Browser stream interface capture error.", true);
+                    isRecordingIntro = false;
+                }
             } else {
+                if(mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
                 isRecording = false;
                 isRecordingIntro = false;
                 btnRecord.classList.remove('recording-active');
                 btnRecord.innerText = "RECORD ANIM";
-                
-                if(recordedFrames.length > 0) {
-                    pushTerminalLog(`Processing ${recordedFrames.length} high-res png sequence layers...`);
-                    
-                    const snapshotWindow = window.open();
-                    snapshotWindow.document.write(`
-                        <html>
-                        <head><title>Operation ${STATE.opName} // Tactical Briefing Sequence</title></head>
-                        <body style="background:#02050a; color:#00f2fe; font-family:monospace; padding:30px; text-align:center;">
-                            <h2>TACTICAL MAP BRIEFING SEQUENCE // UNCOMPRESSED GENERATION</h2>
-                            <p style="color:#7a92a8;">Right-click any captured frame below to save as raw uncompressed PNG.</p>
-                            <hr style="border-color:#122236; margin-bottom:20px;">
-                            <div style="display:flex; flex-direction:column; gap:25px; align-items:center;" id="img-holder"></div>
-                        </body>
-                        </html>
-                    `);
-                    
-                    recordedFrames.forEach((fData, fIdx) => {
-                        const imgNode = snapshotWindow.document.createElement('img');
-                        imgNode.src = fData;
-                        imgNode.style.border = "2px solid #1e354d";
-                        imgNode.style.maxWidth = "85vw";
-                        imgNode.style.boxShadow = "0 0 15px rgba(0,242,254,0.1)";
-                        
-                        const capNode = snapshotWindow.document.createElement('div');
-                        capNode.innerText = `FRAME VECTOR INDEX: ${fIdx + 1} // STAGE TARGET TIMELINE`;
-                        capNode.style.fontSize = "11px";
-                        capNode.style.color = "#ffcc00";
-                        capNode.style.marginTop = "4px";
-                        capNode.style.marginBottom = "20px";
-                        
-                        snapshotWindow.document.getElementById('img-holder').appendChild(imgNode);
-                        snapshotWindow.document.getElementById('img-holder').appendChild(capNode);
-                    });
-                    
-                    recordedFrames = [];
-                    pushTerminalLog("Cinematic uncompressed capture sequence successfully exported.");
-                }
             }
         }
 
@@ -1148,7 +1141,6 @@
                 recordState();
                 const parent = STATE.phases[STATE.phaseIdx];
                 
-                // FIXED CLONING BUG: Explicitly deep-clones base origin arrays independently to isolate timeline phase segments
                 const inheritedAssets = parent.assets.map(a => {
                     let targetX = a.x;
                     let targetY = a.y;
@@ -1172,7 +1164,6 @@
                     terrain: JSON.parse(JSON.stringify(parent.terrain || []))
                 });
 
-                // Isolate the new phase's original position tracking from the parent's coordinates
                 STATE.phases[newPhaseIdx].initialPhasePositions = JSON.parse(JSON.stringify(inheritedAssets.map(a => ({
                     id: a.id, x: a.x, y: a.y, spawnX: a.spawnX, spawnY: a.spawnY
                 }))));
@@ -1201,7 +1192,6 @@
                     current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
                     pushTerminalLog("Target micro-unit removed from operational memory.");
                     
-                    // Force rebuild the position snapshot since asset configuration updated
                     current.initialPhasePositions = null;
                     capturePhaseSnapshot(STATE.phaseIdx);
                     
@@ -1406,7 +1396,6 @@
                     };
                     activePhase.assets.push(created);
                     
-                    // Reset position memory tracking so fresh entries map correctly
                     activePhase.initialPhasePositions = null;
                     capturePhaseSnapshot(STATE.phaseIdx);
                     
@@ -1848,7 +1837,6 @@
                 } else {
                     drawRecordingIntro(elapsed);
                     requestAnimationFrame(runRenderLoop);
-                    if (isRecording && STATE.animating) recordedFrames.push(canvas.toDataURL('image/png'));
                     return;
                 }
             }
@@ -1978,9 +1966,6 @@
             }
 
             requestAnimationFrame(runRenderLoop);
-            if (isRecording && STATE.animating) {
-                recordedFrames.push(canvas.toDataURL('image/png'));
-            }
         }
 
         function renderZoneBounds(z) {
