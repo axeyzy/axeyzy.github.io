@@ -789,7 +789,6 @@
         let systemHistoryIdx = -1;
         let activePings = []; 
 
-        // VIDEO CONFIG: Reverted back to high performance webm stream processing
         let mediaRecorder = null;
         let recordedChunks = [];
         let isRecording = false;
@@ -930,7 +929,6 @@
                 recordedChunks = [];
                 
                 try {
-                    // FPS STREAM FIX: Armed canvas line loops explicitly at 30fps to compile playable file outputs
                     const stream = canvas.captureStream(30); 
                     mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 5000000 });
                     
@@ -2028,9 +2026,21 @@
 
         function handleKeydown(e) {
             if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-            if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); triggerUndo(); }
-            if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); triggerRedo(); }
-            if (e.key === 'Escape') { if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath(); }
+            
+            // PROPAGATION FIX: Adding stopImmediatePropagation prevents double execution loops globally
+            if (e.ctrlKey && e.key.toLowerCase() === 'z') { 
+                e.preventDefault(); 
+                e.stopImmediatePropagation();
+                triggerUndo(); 
+            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'y') { 
+                e.preventDefault(); 
+                e.stopImmediatePropagation();
+                triggerRedo(); 
+            }
+            if (e.key === 'Escape') { 
+                if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath(); 
+            }
         }
     </script>
 </body>
