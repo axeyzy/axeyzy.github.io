@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tactical Commander // Operational Core v4.6</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght=400;500;700&display=swap');
 
         :root {
             /* Baseline default parameters (Cyan core matrix) */
@@ -925,8 +925,9 @@
                 recordedChunks = [];
                 
                 try {
-                    const stream = canvas.captureStream(60); 
-                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 5000000 });
+                    // SEAMLESS FIX: Use exact rendering updates for frame allocation matches
+                    const stream = canvas.captureStream(0); 
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 6000000 });
                     
                     mediaRecorder.ondataavailable = function(e) {
                         if (e.data.size > 0) recordedChunks.push(e.data);
@@ -1780,13 +1781,16 @@
                 let rx = asset.x; let ry = asset.y;
 
                 if (STATE.animating && asset.runtimePoints && asset.runtimePoints.length > 0) {
+                    // SEAMLESS FIX: Cosine ease interpolation curve (1 - cos(x)) replaces raw linear ticks
                     let absoluteProgress = STATE.animProgress * (asset.runtimePoints.length - 1);
                     let baseIdx = Math.floor(absoluteProgress);
                     let fractional = absoluteProgress - baseIdx;
+                    
+                    let smoothFactor = (1 - Math.cos(fractional * Math.PI)) / 2;
 
                     if (baseIdx < asset.runtimePoints.length - 1) {
-                        rx = asset.runtimePoints[baseIdx].x + (asset.runtimePoints[baseIdx + 1].x - asset.runtimePoints[baseIdx].x) * fractional;
-                        ry = asset.runtimePoints[baseIdx].y + (asset.runtimePoints[baseIdx + 1].y - asset.runtimePoints[baseIdx].y) * fractional;
+                        rx = asset.runtimePoints[baseIdx].x + (asset.runtimePoints[baseIdx + 1].x - asset.runtimePoints[baseIdx].x) * smoothFactor;
+                        ry = asset.runtimePoints[baseIdx].y + (asset.runtimePoints[baseIdx + 1].y - asset.runtimePoints[baseIdx].y) * smoothFactor;
                     } else {
                         rx = asset.runtimePoints[asset.runtimePoints.length - 1].x;
                         ry = asset.runtimePoints[asset.runtimePoints.length - 1].y;
@@ -1818,6 +1822,7 @@
                 } else {
                     drawRecordingIntro(elapsed);
                     requestAnimationFrame(runRenderLoop);
+                    if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.requestData();
                     return;
                 }
             }
@@ -1841,9 +1846,8 @@
                 }
             }
 
-            // CLEAN RECORDING FIX: Split automation variables out of runtime arrays
             if (STATE.animating && transitionState === 0) {
-                STATE.animProgress += 0.003;
+                STATE.animProgress += 0.0035; // Slightly faster baseline tick matching easing speeds
                 if(STATE.animProgress >= 1) {
                     STATE.animating = false;
                     recordState();
@@ -1914,7 +1918,8 @@
                 }
             }
 
-            if (STATE.gridOn && !isRecordingIntro && mouseCurrentPos.x > 0 && mouseCurrentPos.y > 0) {
+            // SEAMLESS FIX: Hides mouse matrix tracking overlays entirely while recording capture rules are active
+            if (STATE.gridOn && !isRecording && !isRecordingIntro && mouseCurrentPos.x > 0 && mouseCurrentPos.y > 0) {
                 const cSize = canvas.width / 24; 
                 const cellCol = Math.floor(mouseCurrentPos.x / cSize);
                 const cellRow = Math.floor(mouseCurrentPos.y / cSize);
@@ -1948,6 +1953,7 @@
             }
 
             requestAnimationFrame(runRenderLoop);
+            if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.requestData();
         }
 
         function renderZoneBounds(z) {
