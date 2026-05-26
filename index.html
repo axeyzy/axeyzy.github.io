@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tactical Commander // Operational Core v4.6</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght=400;500;700&display=swap');
 
         :root {
             /* Baseline default parameters (Cyan core matrix) */
@@ -156,6 +156,11 @@
         }
         button.active::before { content: '▪'; color: var(--theme-color); }
         button:disabled { opacity: 0.15; cursor: not-allowed; }
+
+        input[type="text"].sidebar-input {
+            background: #010307; border: 1px solid var(--theme-border); color: #d1dfec; padding: 8px; font-family: inherit; font-size: 10px; outline: none; width: 100%;
+        }
+        input[type="text"].sidebar-input:focus { border-color: var(--theme-color); }
 
         #ctrl-play { border-color: #00ffaa; color: #00ffaa; }
         #ctrl-play.active { background: rgba(0,255,170,0.1); box-shadow: 0 0 10px rgba(0,255,170,0.2); }
@@ -325,6 +330,11 @@
                         <button class="mode-btn" data-mode="terrain" style="color: #ff9f1c;">TERRAIN LAYER</button>
                     </div>
                     <div style="font-size: 8px; color: #43586d; margin-top: 5px; text-align: center; letter-spacing: 0.05em; font-weight: bold; border-top: 1px dashed #122236; padding-top: 4px;">💡 PRO TIP: HOLD SHIFT+CLICK TO PING SCANNER<br><span style="color:#ff3366;">CTRL+CLICK ON A UNIT TO TOGGLE KIA STATUS</span></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">GRID COORDINATE PREFIX</div>
+                    <input type="text" id="cfg-coord-prefix" class="sidebar-input" value="16U EV" placeholder="e.g., SECTOR-4, RY-02, OUT-RIM">
                 </div>
 
                 <div class="section">
@@ -798,7 +808,6 @@
             systemHistoryIdx++;
         }
 
-        // Dedicated snapshot registry to prevent carryover desynchronizations
         function capturePhaseSnapshot(index) {
             const phase = STATE.phases[index];
             if (!phase) return;
@@ -814,7 +823,6 @@
             transOldIdx = STATE.phaseIdx;
             transNewIdx = newIdx;
             
-            // Lock positioning data exactly before running the slide panel sweep
             capturePhaseSnapshot(transNewIdx);
             
             transitionState = 1;
@@ -1070,7 +1078,6 @@
                 if(!STATE.animating) { 
                     if(activePathBuilding) commitCurrentPath();
                     
-                    // Always make sure snapshot state parameters match layout boundaries right before execution
                     capturePhaseSnapshot(STATE.phaseIdx);
                     
                     bindUnitsToRoutes();
@@ -1085,7 +1092,6 @@
                 recordState();
                 const activePhase = STATE.phases[STATE.phaseIdx];
                 
-                // Decisive Fix: Reset positions using the immutable phase tab snap history cache block
                 if (activePhase.initialPhasePositions && activePhase.initialPhasePositions.length > 0) {
                     activePhase.assets.forEach(a => {
                         const originalPos = activePhase.initialPhasePositions.find(snap => snap.id === a.id);
@@ -1098,7 +1104,6 @@
                         a.runtimePoints = null;
                     });
                 } else {
-                    // Fallback to local properties if snapshot mapping hasn't triggered yet
                     activePhase.assets.forEach(a => { 
                         a.x = a.spawnX; 
                         a.y = a.spawnY;
@@ -1173,7 +1178,6 @@
                     current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
                     pushTerminalLog("Target micro-unit removed from operational memory.");
                     
-                    // Re-calculate local phase tracking history parameters instantly
                     capturePhaseSnapshot(STATE.phaseIdx);
                     
                     STATE.selectedId = null;
@@ -1377,7 +1381,6 @@
                     };
                     activePhase.assets.push(created);
                     
-                    // Track position natively into initial snap registries
                     capturePhaseSnapshot(STATE.phaseIdx);
                     
                     STATE.selectedId = created.id;
@@ -1441,7 +1444,6 @@
             if (STATE.animating || transitionState > 0) return;
             
             if (STATE.mode === 'deploy' && dragAnchor) {
-                // Keep local snapshots clean when finishing drag actions
                 capturePhaseSnapshot(STATE.phaseIdx);
             }
             
@@ -1937,7 +1939,9 @@
                 const cellRow = Math.floor(mouseCurrentPos.y / cSize);
 
                 if (cellCol >= 0 && cellRow >= 0 && mouseCurrentPos.x <= canvas.width && mouseCurrentPos.y <= canvas.height) {
-                    const activePrefix = "16U EV";
+                    
+                    // FIXED: Dynamically pulls the customized prefix right from your sidebar input form
+                    const activePrefix = document.getElementById('cfg-coord-prefix').value.trim() || "GRID";
                     const coordinateString = `${activePrefix} ${String(cellCol).padStart(2, '0')} ${String(cellRow).padStart(2, '0')}`;
                     
                     ctx.save();
