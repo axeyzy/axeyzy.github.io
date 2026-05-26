@@ -329,7 +329,7 @@
                         <button class="mode-btn" data-mode="zone">ZONE BUILDER</button>
                         <button class="mode-btn" data-mode="terrain" style="color: #ff9f1c;">TERRAIN LAYER</button>
                     </div>
-                    <div style="font-size: 8px; color: #43586d; margin-top: 5px; text-align: center; letter-spacing: 0.05em; font-weight: bold; border-top: 1px dashed #122236; padding-top: 4px;">💡 PRO TIP: HOLD SHIFT+CLICK TO PING SCANNER<br><span style="color:#ff3366;">CTRL+CLICK ON A UNIT TO TOGGLE KIA STATUS</span></div>
+                    <div style="font-size: 8px; color: #43586d; margin-top: 5px; text-align: center; letter-spacing: 0.05em; font-weight: bold; border-top: 1px dashed #122236; padding-top: 4px;">💡 PRO TIP: HOLD SHIFT+CLICK TO PING SCANNER<br><span style="color:#ff3366;">CTRL+CLICK ON A UNIT TO TOGGLE KIA STATUS</span><br><span style="color:#00ffaa; font-weight:bold;">DOUBLE RIGHT-CLICK AN ITEM TO ERASE IT</span></div>
                 </div>
 
                 <div class="section">
@@ -788,6 +788,7 @@
         let systemHistory = [];
         let systemHistoryIdx = -1;
         let activePings = []; 
+        let isProcessingUndo = false; // FLAG LOCK FIX: Prevents concurrent browser input propagation loops
 
         let mediaRecorder = null;
         let recordedChunks = [];
@@ -1217,11 +1218,25 @@
             canvas.addEventListener('mousedown', pointerDown);
             canvas.addEventListener('mousemove', pointerMove);
             canvas.addEventListener('mouseup', pointerUp);
+            
+            // UNIVERSAL DELETION MATRIX: Hook into context menu double click events securely
             canvas.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath();
             });
-            window.addEventListener('keydown', handleKeydown);
+            
+            canvas.addEventListener('mousedown', (e) => {
+                if (e.button === 2) { 
+                    const clickTime = performance.now();
+                    if (clickTime - (canvas.dataset.lastRClick || 0) < 300) {
+                        e.preventDefault();
+                        executeUniversalDoubleRightClickPurge(readPointer(e));
+                    }
+                    canvas.dataset.lastRClick = clickTime;
+                }
+            });
+
+            window.addEventListener('keydown', handleKeydown, true);
 
             document.getElementById('nav-btn-map').addEventListener('click', () => toggleGlobalWorkspaceMode('map'));
             document.getElementById('nav-btn-mett').addEventListener('click', () => toggleGlobalWorkspaceMode('mett'));
@@ -1238,6 +1253,80 @@
             document.querySelectorAll('#mett-strategic-workspace input, #mett-strategic-workspace select, #mett-strategic-workspace textarea').forEach(inputNode => {
                 inputNode.addEventListener('input', runMettCalculationSync);
             });
+        }
+
+        // DELETION LAYER ENGINE: Scans coordinate proximity vectors across every data array on dbl click
+        function executeUniversalDoubleRightClickPurge(pt) {
+            if (STATE.animating || transitionState > 0) return;
+            const activePhase = STATE.phases[STATE.phaseIdx];
+            let itemRemoved = false;
+
+            // 1. Scan Units Proximity
+            const unitIdx = activePhase.assets.findIndex(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 18);
+            if (unitIdx !== -1) {
+                recordState();
+                const removedAsset = activePhase.assets.splice(unitIdx, 1)[0];
+                if (STATE.selectedId === removedAsset.id) STATE.selectedId = null;
+                activePhase.initialPhasePositions = null;
+                capturePhaseSnapshot(STATE.phaseIdx);
+                pushTerminalLog(`Erased target unit object from blueprint map area.`);
+                itemRemoved = true;
+            }
+
+            // 2. Scan Path Points/Segments Proximity
+            if (!itemRemoved) {
+                const pathIdx = activePhase.paths.findIndex(path => {
+                    for (let i = 0; i < path.points.length - 1; i++) {
+                        let res = findDistanceToSegment(pt, path.points[i], path.points[i+1]);
+                        if (res.dist < 15) return true;
+                    }
+                    return false;
+                });
+                if (pathIdx !== -1) {
+                    recordState();
+                    activePhase.paths.splice(pathIdx, 1);
+                    pushTerminalLog(`Purged vector layout route pathway from tactical grid.`);
+                    itemRemoved = true;
+                }
+            }
+
+            // 3. Scan Boundaries Zones Proximity
+            if (!itemRemoved) {
+                const zoneIdx = activePhase.zones.findIndex(z => {
+                    if (z.type === 'circle') {
+                        return Math.hypot(z.fx - pt.x, z.fy - pt.y) < Math.hypot(z.tx - z.fx, z.ty - z.fy);
+                    } else {
+                        const minX = Math.min(z.fx, z.tx); const maxX = Math.max(z.fx, z.tx);
+                        const minY = Math.min(z.fy, z.ty); const maxY = Math.max(z.fy, z.ty);
+                        return pt.x >= minX && pt.x <= maxX && pt.y >= minY && pt.y <= maxY;
+                    }
+                });
+                if (zoneIdx !== -1) {
+                    recordState();
+                    activePhase.zones.splice(zoneIdx, 1);
+                    pushTerminalLog(`Exposed deployment boundary zone structure.`);
+                    itemRemoved = true;
+                }
+            }
+
+            // 4. Scan Topo Terrain Layers Proximity
+            if (!itemRemoved && activePhase.terrain) {
+                const terrainIdx = activePhase.terrain.findIndex(t => {
+                    for (let i = 0; i < t.points.length - 1; i++) {
+                        let res = findDistanceToSegment(pt, t.points[i], t.points[i+1]);
+                        if (res.dist < 20) return true;
+                    }
+                    return false;
+                });
+                if (terrainIdx !== -1) {
+                    recordState();
+                    activePhase.terrain.splice(terrainIdx, 1);
+                    pushTerminalLog(`Excavated tactical environment feature layout.`);
+                    itemRemoved = true;
+                }
+            }
+
+            if (itemRemoved) syncInterface();
         }
 
         function toggleGlobalWorkspaceMode(mode) {
@@ -1361,7 +1450,7 @@
                 return;
             }
 
-            if (STATE.animating || transitionState > 0) return;
+            if (STATE.animating || transitionState > 0 || e.button === 2) return;
             const activePhase = STATE.phases[STATE.phaseIdx];
 
             if (e.ctrlKey) {
@@ -1455,7 +1544,7 @@
         }
 
         function pointerUp(e) {
-            if (STATE.animating || transitionState > 0) return;
+            if (STATE.animating || transitionState > 0 || e.button === 2) return;
             
             if (STATE.mode === 'deploy' && dragAnchor) {
                 STATE.phases[STATE.phaseIdx].initialPhasePositions = null;
@@ -2027,16 +2116,24 @@
         function handleKeydown(e) {
             if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
             
-            // PROPAGATION FIX: Adding stopImmediatePropagation prevents double execution loops globally
+            // CONCURRENCY UNIFIED MATRIX: Enforces rigid flag checks to terminate duplicate triggers dead in their tracks
             if (e.ctrlKey && e.key.toLowerCase() === 'z') { 
                 e.preventDefault(); 
                 e.stopImmediatePropagation();
+                if(isProcessingUndo) return;
+                isProcessingUndo = true;
                 triggerUndo(); 
+                setTimeout(() => { isProcessingUndo = false; }, 30);
+                return;
             }
             if (e.ctrlKey && e.key.toLowerCase() === 'y') { 
                 e.preventDefault(); 
                 e.stopImmediatePropagation();
+                if(isProcessingUndo) return;
+                isProcessingUndo = true;
                 triggerRedo(); 
+                setTimeout(() => { isProcessingUndo = false; }, 30);
+                return;
             }
             if (e.key === 'Escape') { 
                 if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath(); 
