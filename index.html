@@ -802,7 +802,7 @@
             unitType: 'Infantry',
             gridOn: true,
             phaseIdx: 0,
-            animating: false,
+            animating = false,
             animProgress: 0,
             selectedId: null,
             activeTheater: 'default',
@@ -1090,6 +1090,7 @@
             document.querySelectorAll('.faction-btn').forEach(b => {
                 b.addEventListener('click', (e) => { 
                     STATE.faction = e.target.dataset.faction; 
+                    // Point directly to whatever live value is currently registered inside the mutable matrix map
                     STATE.customColor = COLORS[STATE.faction];
                     document.getElementById('custom-wheel-picker').value = STATE.customColor;
                     pushTerminalLog(`Linked blueprint target registry parameters to ${STATE.faction}.`);
@@ -1097,8 +1098,10 @@
                 });
             });
 
+            // FIXED: Mutates color matrix dynamically so customized values persist on swap
             document.getElementById('custom-wheel-picker').addEventListener('input', (e) => {
                 STATE.customColor = e.target.value;
+                COLORS[STATE.faction] = e.target.value; 
                 legaliseControlState();
             });
 
@@ -2017,7 +2020,6 @@
                 });
             }
 
-            // PROXIMITY THREAT LINE ENGAGEMENT MAP METRIC GRID (GAR <-> OPFOR LASERS)
             phaseData.assets.forEach(a1 => {
                 if(a1.faction !== 'GAR' || a1.kia) return; 
                 phaseData.assets.forEach(a2 => {
@@ -2144,6 +2146,8 @@
                     const systemAccent = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim();
                     ctx.strokeStyle = systemAccent;
                     ctx.lineWidth = 3;
+                    ctx.shadowColor = systemAccent;
+                    ctx.shadowBlur = 12;
                     ctx.shadowColor = systemAccent;
                     ctx.shadowBlur = 12;
                     ctx.stroke();
