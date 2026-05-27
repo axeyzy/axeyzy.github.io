@@ -786,7 +786,7 @@
             zStyle: 'faction',   
             tStyle: 'trench',    
             faction: 'GAR',
-            customColor: '#00f2fe', // Active tracking element for color picker system
+            customColor: '#00f2fe', // MASTER DEPLOYMENT LAYER COLOR SPECIFIER
             unitType: 'Infantry',
             gridOn: true,
             phaseIdx: 0,
@@ -1570,7 +1570,7 @@
                         x: pt.x, y: pt.y, 
                         spawnX: pt.x, spawnY: pt.y, 
                         faction: STATE.faction, 
-                        color: getCurrentSelectedColor(),
+                        color: getCurrentSelectedColor(), // LOCK PERSISTENT ACTIVE SIDEBAR HEX SIGNATURE
                         type: STATE.unitType, 
                         scale: 1.0,
                         kia: false 
@@ -1692,7 +1692,7 @@
             if (structuralChangeOccurred) {
                 recordState(); 
             }
-            syncInterface();
+            syncInterface(); // Sync view to hold selection states correctly without shifting color configurations
         }
 
         function commitCurrentPath() {
@@ -1725,7 +1725,6 @@
                 let bestInterceptPoint = null;
                 let forceReversed = false;
 
-                // Bind units based on physical matching coordinates
                 const compatiblePaths = activePhase.paths;
 
                 compatiblePaths.forEach(path => {
@@ -1951,7 +1950,6 @@
                 const pathScale = path.scale || 1.0;
                 ctx.save();
                 
-                // TARGET SELECTION FEEDBACK BACKING: Render red indicator lane immediately underneath active selected route vectors
                 if (path.id === STATE.selectedId && (STATE.mode === 'deploy' || STATE.mode === 'resize') && phaseData === STATE.phases[STATE.phaseIdx]) {
                     ctx.save();
                     ctx.lineWidth = 8 * pathScale;
@@ -1962,7 +1960,6 @@
                     ctx.restore();
                 }
 
-                // THICKNESS CONFIGURATION: Baseline vector tracks turned down slightly for optimal look
                 ctx.lineWidth = 8 * pathScale;
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
                 ctx.beginPath(); ctx.moveTo(path.points[0].x, path.points[0].y);
