@@ -788,7 +788,7 @@
         let systemHistory = [];
         let systemHistoryIdx = -1;
         let activePings = []; 
-        let isProcessingUndo = false; // FLAG LOCK FIX: Prevents concurrent browser input propagation loops
+        let isProcessingUndo = false; 
 
         let mediaRecorder = null;
         let recordedChunks = [];
@@ -1030,7 +1030,6 @@
 
             document.querySelectorAll('.theater-btn').forEach(b => {
                 b.addEventListener('click', (e) => {
-                    recordState();
                     const targetT = e.target.dataset.theater;
                     STATE.activeTheater = targetT;
                     
@@ -1039,6 +1038,7 @@
                     
                     updateMasterTitle();
                     pushTerminalLog(`CONNECTED INTEL FEED: DOWNLINKING SATELLITE TOPO FOR ${targetT.toUpperCase()}`);
+                    recordState(); // Only save after full context updates complete
                     syncInterface();
                 });
             });
@@ -1094,7 +1094,6 @@
             });
 
             document.getElementById('ctrl-reset').addEventListener('click', () => {
-                recordState();
                 const activePhase = STATE.phases[STATE.phaseIdx];
                 
                 if (activePhase.initialPhasePositions && activePhase.initialPhasePositions.length > 0) {
@@ -1120,11 +1119,11 @@
                 STATE.animProgress = 0;
                 document.getElementById('ctrl-play').classList.remove('active');
                 pushTerminalLog("Simulation coordinates hard-reset to initial phase entry nodes.");
+                recordState();
                 syncInterface();
             });
 
             document.getElementById('phase-add').addEventListener('click', () => {
-                recordState();
                 const profile = THEATERS[STATE.activeTheater];
                 STATE.phases.push({ 
                     name: `PHASE ${STATE.phases.length + 1}`,
@@ -1133,11 +1132,11 @@
                     terrain: JSON.parse(JSON.stringify(profile.terrain || [])) 
                 });
                 triggerPhaseTransitionAnimation(STATE.phases.length - 1);
+                recordState();
                 syncInterface();
             });
 
             document.getElementById('phase-clone').addEventListener('click', () => {
-                recordState();
                 const parent = STATE.phases[STATE.phaseIdx];
                 
                 const inheritedAssets = parent.assets.map(a => {
@@ -1168,17 +1167,18 @@
                 }))));
 
                 triggerPhaseTransitionAnimation(newPhaseIdx);
+                recordState();
                 syncInterface();
             });
 
             document.getElementById('phase-delete').addEventListener('click', () => {
                 if(STATE.phases.length > 1) {
                     showWarningBox('PURGE ACTIVE STRATEGIC PHASE ARRAY?', () => {
-                        recordState();
                         STATE.phases.splice(STATE.phaseIdx, 1);
                         let targetIdx = Math.max(0, STATE.phaseIdx - 1);
                         triggerPhaseTransitionAnimation(targetIdx);
                         pushTerminalLog("Timeline coordinate array cleanly excised.");
+                        recordState();
                         syncInterface();
                     });
                 }
@@ -1186,7 +1186,6 @@
 
             document.getElementById('asset-purge').addEventListener('click', () => {
                 if(STATE.selectedId) {
-                    recordState();
                     let current = STATE.phases[STATE.phaseIdx];
                     current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
                     pushTerminalLog("Target micro-unit removed from operational memory.");
@@ -1195,18 +1194,19 @@
                     capturePhaseSnapshot(STATE.phaseIdx);
                     
                     STATE.selectedId = null;
+                    recordState();
                     syncInterface();
                 }
             });
 
             document.getElementById('board-wipe').addEventListener('click', () => {
                 showWarningBox('CLEAR CURRENT WORKSPACE MAP MATRICES?', () => {
-                    recordState();
                     STATE.phases[STATE.phaseIdx] = { name: `PHASE ${STATE.phaseIdx + 1}`, intel: '', assets: [], zones: [], paths: [], terrain: [] };
                     STATE.selectedId = null;
                     activePathBuilding = null;
                     capturePhaseSnapshot(STATE.phaseIdx);
                     pushTerminalLog("Wiped active workspace parameters cleanly.", true);
+                    recordState();
                     syncInterface();
                 });
             });
@@ -1219,7 +1219,6 @@
             canvas.addEventListener('mousemove', pointerMove);
             canvas.addEventListener('mouseup', pointerUp);
             
-            // UNIVERSAL DELETION MATRIX: Hook into context menu double click events securely
             canvas.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 if(STATE.mode === 'path' && activePathBuilding) commitCurrentPath();
@@ -1255,16 +1254,14 @@
             });
         }
 
-        // DELETION LAYER ENGINE: Scans coordinate proximity vectors across every data array on dbl click
         function executeUniversalDoubleRightClickPurge(pt) {
             if (STATE.animating || transitionState > 0) return;
             const activePhase = STATE.phases[STATE.phaseIdx];
             let itemRemoved = false;
 
-            // 1. Scan Units Proximity
+            // 1. Proximity Units Check
             const unitIdx = activePhase.assets.findIndex(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 18);
             if (unitIdx !== -1) {
-                recordState();
                 const removedAsset = activePhase.assets.splice(unitIdx, 1)[0];
                 if (STATE.selectedId === removedAsset.id) STATE.selectedId = null;
                 activePhase.initialPhasePositions = null;
@@ -1273,7 +1270,7 @@
                 itemRemoved = true;
             }
 
-            // 2. Scan Path Points/Segments Proximity
+            // 2. Proximity Path Check
             if (!itemRemoved) {
                 const pathIdx = activePhase.paths.findIndex(path => {
                     for (let i = 0; i < path.points.length - 1; i++) {
@@ -1283,14 +1280,13 @@
                     return false;
                 });
                 if (pathIdx !== -1) {
-                    recordState();
                     activePhase.paths.splice(pathIdx, 1);
                     pushTerminalLog(`Purged vector layout route pathway from tactical grid.`);
                     itemRemoved = true;
                 }
             }
 
-            // 3. Scan Boundaries Zones Proximity
+            // 3. Proximity Bounds Check
             if (!itemRemoved) {
                 const zoneIdx = activePhase.zones.findIndex(z => {
                     if (z.type === 'circle') {
@@ -1302,14 +1298,13 @@
                     }
                 });
                 if (zoneIdx !== -1) {
-                    recordState();
                     activePhase.zones.splice(zoneIdx, 1);
                     pushTerminalLog(`Exposed deployment boundary zone structure.`);
                     itemRemoved = true;
                 }
             }
 
-            // 4. Scan Topo Terrain Layers Proximity
+            // 4. Proximity Terrain Check
             if (!itemRemoved && activePhase.terrain) {
                 const terrainIdx = activePhase.terrain.findIndex(t => {
                     for (let i = 0; i < t.points.length - 1; i++) {
@@ -1319,14 +1314,16 @@
                     return false;
                 });
                 if (terrainIdx !== -1) {
-                    recordState();
                     activePhase.terrain.splice(terrainIdx, 1);
                     pushTerminalLog(`Excavated tactical environment feature layout.`);
                     itemRemoved = true;
                 }
             }
 
-            if (itemRemoved) syncInterface();
+            if (itemRemoved) {
+                recordState(); // Save snapshot ONLY if a real element was excised from memory
+                syncInterface();
+            }
         }
 
         function toggleGlobalWorkspaceMode(mode) {
@@ -1456,10 +1453,10 @@
             if (e.ctrlKey) {
                 const found = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 18);
                 if (found) {
-                    recordState();
                     found.kia = !found.kia;
                     pushTerminalLog(`Asset OBJ-${found.id.toString().substring(2,7)} metric status changed: ${found.kia ? 'KIA // LOSS REGISTERED' : 'ACTIVE // RETURNED TO SERVICE'}`);
                     STATE.selectedId = found.id;
+                    recordState(); // Save single discrete change to chain
                     syncInterface();
                 }
                 return;
@@ -1472,7 +1469,6 @@
                     dragAnchor = found;
                     pushTerminalLog(`Linked command matrix to asset: OBJ-${found.id.toString().substring(2,7)}`);
                 } else {
-                    recordState();
                     const created = { 
                         id: Math.random(), 
                         x: pt.x, y: pt.y, 
@@ -1509,7 +1505,6 @@
                 dragAnchor = pt;
                 activeZonePreview = { type: STATE.zType, style: STATE.zStyle, fx: pt.x, fy: pt.y, tx: pt.x, ty: pt.y, faction: STATE.faction };
             } else if (STATE.mode === 'terrain') {
-                recordState();
                 isInteracting = true;
                 dragAnchor = { type: STATE.tStyle, points: [pt] };
                 if (!activePhase.terrain) activePhase.terrain = [];
@@ -1546,37 +1541,46 @@
         function pointerUp(e) {
             if (STATE.animating || transitionState > 0 || e.button === 2) return;
             
-            if (STATE.mode === 'deploy' && dragAnchor) {
-                STATE.phases[STATE.phaseIdx].initialPhasePositions = null;
-                capturePhaseSnapshot(STATE.phaseIdx);
-            }
-            
+            let structuralChangeOccurred = false;
             const activePhase = STATE.phases[STATE.phaseIdx];
+
+            if (STATE.mode === 'deploy' && dragAnchor) {
+                activePhase.initialPhasePositions = null;
+                capturePhaseSnapshot(STATE.phaseIdx);
+                structuralChangeOccurred = true; // Dropped or finished dragging unit
+            }
             
             if (STATE.mode === 'path') {
                 if (STATE.pStyle === 'straight' && isInteracting && activePathBuilding) {
-                    recordState();
                     activePhase.paths.push(activePathBuilding);
                     pushTerminalLog(`Committed straight line routing vector for ${activePathBuilding.faction}.`);
                     activePathBuilding = null;
+                    structuralChangeOccurred = true;
                 }
             } else if (STATE.mode === 'zone' && isInteracting && activeZonePreview) {
-                recordState();
                 activePhase.zones.push(activeZonePreview);
                 pushTerminalLog(`Strategic map zone registered: ${activeZonePreview.type.toUpperCase()}`);
                 activeZonePreview = null;
+                structuralChangeOccurred = true;
+            } else if (STATE.mode === 'terrain' && isInteracting) {
+                structuralChangeOccurred = true; // Drag finished drawing obstacle trail
             }
+
             isInteracting = false;
             if(STATE.mode !== 'path') dragAnchor = null;
+            
+            if (structuralChangeOccurred) {
+                recordState(); // CRITICAL RESOLUTION: States are locked strictly on mouse up, destroying duplicate tracking entries
+            }
             syncInterface();
         }
 
         function commitCurrentPath() {
             if(!activePathBuilding) return;
             if(activePathBuilding.type === 'stencil' && activePathBuilding.points.length >= 2) {
-                recordState();
                 STATE.phases[STATE.phaseIdx].paths.push(activePathBuilding);
                 pushTerminalLog(`Elbow stencil network committed cleanly for ${activePathBuilding.faction}.`);
+                recordState();
             }
             activePathBuilding = null;
             syncInterface();
@@ -1951,7 +1955,6 @@
                 STATE.animProgress += 0.0035; 
                 if(STATE.animProgress >= 1) {
                     STATE.animating = false;
-                    recordState();
                     
                     const activePhase = STATE.phases[STATE.phaseIdx];
                     activePhase.assets.forEach(a => {
@@ -1965,6 +1968,7 @@
                     
                     document.getElementById('ctrl-play').classList.remove('active');
                     pushTerminalLog("Sim flight positioning iterations completed.");
+                    recordState(); // Save snapshot after flight vectors finalize natively
                     syncInterface();
                 }
             }
@@ -2116,14 +2120,13 @@
         function handleKeydown(e) {
             if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
             
-            // CONCURRENCY UNIFIED MATRIX: Enforces rigid flag checks to terminate duplicate triggers dead in their tracks
             if (e.ctrlKey && e.key.toLowerCase() === 'z') { 
                 e.preventDefault(); 
                 e.stopImmediatePropagation();
                 if(isProcessingUndo) return;
                 isProcessingUndo = true;
                 triggerUndo(); 
-                setTimeout(() => { isProcessingUndo = false; }, 30);
+                setTimeout(() => { isProcessingUndo = false; }, 40);
                 return;
             }
             if (e.ctrlKey && e.key.toLowerCase() === 'y') { 
@@ -2132,7 +2135,7 @@
                 if(isProcessingUndo) return;
                 isProcessingUndo = true;
                 triggerRedo(); 
-                setTimeout(() => { isProcessingUndo = false; }, 30);
+                setTimeout(() => { isProcessingUndo = false; }, 40);
                 return;
             }
             if (e.key === 'Escape') { 
