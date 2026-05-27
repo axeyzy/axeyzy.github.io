@@ -611,12 +611,27 @@
     <script>
         const COLORS = { GAR: '#00f2fe', OPFOR: '#ff3366', ALLY: '#00ffaa', TARGET: '#ffcc00' };
 
+        // EXPANDED 19-UNIT DIVISION THEME KEY REGISTER
         const LEGION_THEMES = {
             'BARC':  { color: '#ff3366', rgb: '255, 51, 102',  border: '#4a121f', label: "BARC COMMAND // STAGE RED" },
             '104TH': { color: '#8a9da8', rgb: '138, 157, 168', border: '#2b353c', label: "104TH WOLF PACK // STAGE GREY" },
             '187TH': { color: '#a033ff', rgb: '160, 51, 255',  border: '#33124a', label: "187TH LEGION // STAGE PURPLE" },
             '212TH': { color: '#ff9f1c', rgb: '255, 159, 28',  border: '#4a300d', label: "212TH ATTACK // STAGE ORANGE" },
-            '501ST': { color: '#0066ff', rgb: '0, 102, 255',   border: '#0d254a', label: "501ST VANGUARD // STAGE BLUE" }
+            '501ST': { color: '#0066ff', rgb: '0, 102, 255',   border: '#0d254a', label: "501ST VANGUARD // STAGE BLUE" },
+            'SFC':   { color: '#131927', rgb: '19, 25, 39',     border: '#060a12', label: "SFC COMS // DEEP SPACE MATRIX" },
+            'RSF':   { color: '#131927', rgb: '19, 25, 39',     border: '#060a12', label: "RSF MATRIX // ROYAL SECURITY CORES" },
+            '442ND': { color: '#00ffaa', rgb: '0, 255, 170',   border: '#083a26', label: "442ND SIEGE BATTALION GRID" },
+            '5TH':   { color: '#0a2342', rgb: '10, 35, 66',     border: '#030d1a', label: "5TH FLEET SECURITY LAYER" },
+            '21ST':  { color: '#800020', rgb: '128, 0, 32',     border: '#3a000e', label: "21ST NOVA CORPS // MAROON TELEMETRY" },
+            'RC':    { color: '#4a5768', rgb: '74, 87, 104',    border: '#1b222b', label: "REPUBLIC COMMANDO CORE" },
+            'ARC':   { color: '#2b6cb0', rgb: '43, 108, 176',   border: '#102a47', label: "ARC DATA VECTOR MESH" },
+            'SOB':   { color: '#0a0a0a', rgb: '10, 10, 10',     border: '#262626', label: "SOB STEALTH OUTLINE // SHADOW OPERATIVE" },
+            'SG':    { color: '#002244', rgb: '0, 34, 68',      border: '#001122', label: "SENATE GUARD DEPLOYMENT PLATFORM" },
+            '401ST': { color: '#d90429', rgb: '217, 4, 41',     border: '#4d000c', label: "401ST COMBAT NETWORK" },
+            'CG':    { color: '#d90429', rgb: '217, 4, 41',     border: '#4d000c', label: "CORUSCANT GUARD FORCE MESH" },
+            'RG':    { color: '#d90429', rgb: '217, 4, 41',     border: '#4d000c', label: "ROYAL SECURITY SQUADRON" },
+            '41ST':  { color: '#2e7d32', rgb: '46, 125, 50',    border: '#113313', label: "41ST ELITE CORPS CAMOUFLAGE MATRIX" },
+            '87TH':  { color: '#6a1b9a', rgb: '106, 27, 154',   border: '#2a0842', label: "87TH SENTINEL PLATFORM ARRAY" }
         };
 
         const THEATERS = {
@@ -1072,18 +1087,16 @@
                 });
             });
 
-            // FIXED action framework: Clicking preset groups applies faction defaults to picker field, while maintaining independent override layers
             document.querySelectorAll('.faction-btn').forEach(b => {
                 b.addEventListener('click', (e) => { 
                     STATE.faction = e.target.dataset.faction; 
-                    STATE.customColor = COLORS[STATE.faction]; // Sync default color matrix configuration
+                    STATE.customColor = COLORS[STATE.faction];
                     document.getElementById('custom-wheel-picker').value = STATE.customColor;
                     pushTerminalLog(`Linked blueprint target registry parameters to ${STATE.faction}.`);
                     legaliseControlState(); 
                 });
             });
 
-            // Native Color Wheel input hook matrix
             document.getElementById('custom-wheel-picker').addEventListener('input', (e) => {
                 STATE.customColor = e.target.value;
                 legaliseControlState();
@@ -1299,7 +1312,6 @@
             const activePhase = STATE.phases[STATE.phaseIdx];
             let itemRemoved = false;
 
-            // 1. Proximity Units Check
             const unitIdx = activePhase.assets.findIndex(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 18);
             if (unitIdx !== -1) {
                 const removedAsset = activePhase.assets.splice(unitIdx, 1)[0];
@@ -1310,7 +1322,6 @@
                 itemRemoved = true;
             }
 
-            // 2. Proximity Path Check
             if (!itemRemoved) {
                 const pathIdx = activePhase.paths.findIndex(path => {
                     for (let i = 0; i < path.points.length - 1; i++) {
@@ -1327,7 +1338,6 @@
                 }
             }
 
-            // 3. Proximity Bounds Check
             if (!itemRemoved) {
                 const zoneIdx = activePhase.zones.findIndex(z => {
                     if (z.type === 'circle') {
@@ -1345,7 +1355,6 @@
                 }
             }
 
-            // 4. Proximity Terrain Check
             if (!itemRemoved && activePhase.terrain) {
                 const terrainIdx = activePhase.terrain.findIndex(t => {
                     for (let i = 0; i < t.points.length - 1; i++) {
@@ -1485,11 +1494,9 @@
         function findHoveredObject(pt) {
             const activePhase = STATE.phases[STATE.phaseIdx];
             
-            // 1. Units Proximity Check
             const foundUnit = activePhase.assets.find(a => Math.hypot(a.x - pt.x, a.y - pt.y) < 18);
             if(foundUnit) return { type: 'unit', ref: foundUnit };
 
-            // 2. Paths Proximity Check
             const foundPath = activePhase.paths.find(path => {
                 for (let i = 0; i < path.points.length - 1; i++) {
                     let res = findDistanceToSegment(pt, path.points[i], path.points[i+1]);
@@ -2010,6 +2017,7 @@
                 });
             }
 
+            // PROXIMITY THREAT LINE ENGAGEMENT MAP METRIC GRID (GAR <-> OPFOR LASERS)
             phaseData.assets.forEach(a1 => {
                 if(a1.faction !== 'GAR' || a1.kia) return; 
                 phaseData.assets.forEach(a2 => {
