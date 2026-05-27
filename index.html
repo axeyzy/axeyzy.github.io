@@ -273,9 +273,6 @@
         .mett-workspace select:focus, .mett-workspace input:focus, .mett-workspace textarea:focus { border-color: var(--theme-color); }
         .mett-workspace select { color: var(--theme-color); cursor: pointer; }
         
-        .live-output-card { background: #010307; border: 1px solid #122236; padding: 10px; font-size: 10px; line-height: 1.5; color: #7a92a8; white-space: pre-wrap; }
-        .live-output-card.tlp-highlight { border-color: #00ffaa; color: #00ffaa; }
-
         /* Custom Color Picker UI Styling */
         .color-picker-row { display: flex; gap: 8px; align-items: center; background: #010307; border: 1px solid var(--theme-border); padding: 4px 8px; width: 100%; }
         .color-picker-label { font-size: 9px; color: #7a92a8; font-weight: 700; flex: 1; }
@@ -1075,10 +1072,12 @@
                 });
             });
 
-            // FIXED click action: Modifies the target asset identity group only, maintaining independent wheel color profiles
+            // FIXED action framework: Clicking preset groups applies faction defaults to picker field, while maintaining independent override layers
             document.querySelectorAll('.faction-btn').forEach(b => {
                 b.addEventListener('click', (e) => { 
                     STATE.faction = e.target.dataset.faction; 
+                    STATE.customColor = COLORS[STATE.faction]; // Sync default color matrix configuration
+                    document.getElementById('custom-wheel-picker').value = STATE.customColor;
                     pushTerminalLog(`Linked blueprint target registry parameters to ${STATE.faction}.`);
                     legaliseControlState(); 
                 });
