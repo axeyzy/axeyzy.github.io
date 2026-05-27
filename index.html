@@ -381,10 +381,10 @@
                 <div class="section">
                     <div class="section-title">FACTION SELECTION // QUICK PRESETS</div>
                     <div class="button-grid">
-                        <button class="faction-btn active" data-faction="GAR">GAR (CYAN)</button>
-                        <button class="faction-btn" data-faction="OPFOR" style="color:#ff3366;">OPFOR (RED)</button>
-                        <button class="faction-btn" data-faction="ALLY" style="color:#00ffaa;">ALLY (GREEN)</button>
-                        <button class="faction-btn" data-faction="TARGET" style="color:#ffcc00;">TARGET (GOLD)</button>
+                        <button class="faction-btn active" data-faction="GAR">GAR</button>
+                        <button class="faction-btn" data-faction="OPFOR" style="color:#ff3366;">OPFOR</button>
+                        <button class="faction-btn" data-faction="ALLY" style="color:#00ffaa;">ALLY</button>
+                        <button class="faction-btn" data-faction="TARGET" style="color:#ffcc00;">TARGET</button>
                     </div>
                     <div class="color-picker-row">
                         <span class="color-picker-label">CUSTOM MATRIX HEX:</span>
@@ -786,7 +786,7 @@
             zStyle: 'faction',   
             tStyle: 'trench',    
             faction: 'GAR',
-            customColor: '#00f2fe', // MASTER DEPLOYMENT LAYER COLOR SPECIFIER
+            customColor: '#00f2fe', 
             unitType: 'Infantry',
             gridOn: true,
             phaseIdx: 0,
@@ -936,7 +936,7 @@
             document.querySelectorAll('.path-style-btn').forEach(b => b.classList.toggle('active', b.dataset.pstyle === STATE.pStyle));
             
             document.querySelectorAll('.faction-btn').forEach(b => {
-                b.classList.toggle('active', b.dataset.faction === STATE.faction && STATE.faction !== 'CUSTOM');
+                b.classList.toggle('active', b.dataset.faction === STATE.faction);
             });
             
             document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('active', b.dataset.unit === STATE.unitType));
@@ -1075,18 +1075,17 @@
                 });
             });
 
+            // FIXED click action: Modifies the target asset identity group only, maintaining independent wheel color profiles
             document.querySelectorAll('.faction-btn').forEach(b => {
                 b.addEventListener('click', (e) => { 
                     STATE.faction = e.target.dataset.faction; 
-                    STATE.customColor = COLORS[STATE.faction];
-                    document.getElementById('custom-wheel-picker').value = STATE.customColor;
+                    pushTerminalLog(`Linked blueprint target registry parameters to ${STATE.faction}.`);
                     legaliseControlState(); 
                 });
             });
 
             // Native Color Wheel input hook matrix
             document.getElementById('custom-wheel-picker').addEventListener('input', (e) => {
-                STATE.faction = 'CUSTOM';
                 STATE.customColor = e.target.value;
                 legaliseControlState();
             });
@@ -1570,7 +1569,7 @@
                         x: pt.x, y: pt.y, 
                         spawnX: pt.x, spawnY: pt.y, 
                         faction: STATE.faction, 
-                        color: getCurrentSelectedColor(), // LOCK PERSISTENT ACTIVE SIDEBAR HEX SIGNATURE
+                        color: getCurrentSelectedColor(), 
                         type: STATE.unitType, 
                         scale: 1.0,
                         kia: false 
@@ -1692,7 +1691,7 @@
             if (structuralChangeOccurred) {
                 recordState(); 
             }
-            syncInterface(); // Sync view to hold selection states correctly without shifting color configurations
+            syncInterface(); 
         }
 
         function commitCurrentPath() {
