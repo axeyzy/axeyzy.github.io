@@ -276,6 +276,11 @@
         .live-output-card { background: #010307; border: 1px solid #122236; padding: 10px; font-size: 10px; line-height: 1.5; color: #7a92a8; white-space: pre-wrap; }
         .live-output-card.tlp-highlight { border-color: #00ffaa; color: #00ffaa; }
 
+        /* Custom Color Picker UI Styling */
+        .color-picker-row { display: flex; gap: 8px; align-items: center; background: #010307; border: 1px solid var(--theme-border); padding: 4px 8px; width: 100%; }
+        .color-picker-label { font-size: 9px; color: #7a92a8; font-weight: 700; flex: 1; }
+        .wheel-node { cursor: pointer; border: 1px solid #122236; background: none; width: 34px; height: 26px; padding: 0; display: block; }
+
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
@@ -374,12 +379,16 @@
                 </div>
 
                 <div class="section">
-                    <div class="section-title">FACTION SELECTION // OBJECT ACCENT</div>
+                    <div class="section-title">FACTION SELECTION // QUICK PRESETS</div>
                     <div class="button-grid">
                         <button class="faction-btn active" data-faction="GAR">GAR (CYAN)</button>
                         <button class="faction-btn" data-faction="OPFOR" style="color:#ff3366;">OPFOR (RED)</button>
                         <button class="faction-btn" data-faction="ALLY" style="color:#00ffaa;">ALLY (GREEN)</button>
                         <button class="faction-btn" data-faction="TARGET" style="color:#ffcc00;">TARGET (GOLD)</button>
+                    </div>
+                    <div class="color-picker-row">
+                        <span class="color-picker-label">CUSTOM MATRIX HEX:</span>
+                        <input type="color" id="custom-wheel-picker" class="wheel-node" value="#00f2fe">
                     </div>
                 </div>
 
@@ -777,6 +786,7 @@
             zStyle: 'faction',   
             tStyle: 'trench',    
             faction: 'GAR',
+            customColor: '#00f2fe', // Active tracking element for color picker system
             unitType: 'Infantry',
             gridOn: true,
             phaseIdx: 0,
@@ -812,6 +822,10 @@
             }
             systemHistory.push(JSON.stringify(STATE.phases));
             systemHistoryIdx++;
+        }
+
+        function getCurrentSelectedColor() {
+            return STATE.customColor;
         }
 
         function capturePhaseSnapshot(index) {
@@ -868,7 +882,7 @@
         const terminalLog = document.getElementById('system-log');
 
         let isInteracting = false;
-        let dragAnchor = null; // Can hold a unit reference OR a path object reference now
+        let dragAnchor = null; 
         let activeZonePreview = null;
         let dynamicDashOffset = 0;
         let activePathBuilding = null;
@@ -920,7 +934,11 @@
 
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === STATE.mode));
             document.querySelectorAll('.path-style-btn').forEach(b => b.classList.toggle('active', b.dataset.pstyle === STATE.pStyle));
-            document.querySelectorAll('.faction-btn').forEach(b => b.classList.toggle('active', b.dataset.faction === STATE.faction));
+            
+            document.querySelectorAll('.faction-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.faction === STATE.faction && STATE.faction !== 'CUSTOM');
+            });
+            
             document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('active', b.dataset.unit === STATE.unitType));
             document.querySelectorAll('.zone-type-btn').forEach(b => b.classList.toggle('active', b.dataset.ztype === STATE.zType));
             document.querySelectorAll('.zone-style-btn').forEach(b => b.classList.toggle('active', b.dataset.zstyle === STATE.zStyle));
@@ -1058,7 +1076,19 @@
             });
 
             document.querySelectorAll('.faction-btn').forEach(b => {
-                b.addEventListener('click', (e) => { STATE.faction = e.target.dataset.faction; legaliseControlState(); });
+                b.addEventListener('click', (e) => { 
+                    STATE.faction = e.target.dataset.faction; 
+                    STATE.customColor = COLORS[STATE.faction];
+                    document.getElementById('custom-wheel-picker').value = STATE.customColor;
+                    legaliseControlState(); 
+                });
+            });
+
+            // Native Color Wheel input hook matrix
+            document.getElementById('custom-wheel-picker').addEventListener('input', (e) => {
+                STATE.faction = 'CUSTOM';
+                STATE.customColor = e.target.value;
+                legaliseControlState();
             });
 
             document.querySelectorAll('.unit-btn').forEach(b => {
@@ -1110,6 +1140,7 @@
                         spawnX: snap.spawnX,
                         spawnY: snap.spawnY,
                         faction: activePhase.assets.find(orig => orig.id === snap.id)?.faction || 'GAR',
+                        color: activePhase.assets.find(orig => orig.id === snap.id)?.color || '#00f2fe',
                         type: activePhase.assets.find(orig => orig.id === snap.id)?.type || 'Infantry',
                         kia: activePhase.assets.find(orig => orig.id === snap.id)?.kia || false
                     }));
@@ -1154,7 +1185,7 @@
                         id: Math.random(), 
                         x: targetX, y: targetY, 
                         spawnX: targetSpawnX, spawnY: targetSpawnY, 
-                        faction: a.faction, type: a.type, kia: a.kia || false 
+                        faction: a.faction, color: a.color || '#00f2fe', type: a.type, kia: a.kia || false 
                     };
                 });
 
@@ -1194,7 +1225,6 @@
                 if(STATE.selectedId) {
                     let current = STATE.phases[STATE.phaseIdx];
                     
-                    // Try to purge from units or paths cleanly
                     const isUnit = current.assets.some(a => a.id === STATE.selectedId);
                     if(isUnit) {
                         current.assets = current.assets.filter(a => a.id !== STATE.selectedId);
@@ -1437,12 +1467,12 @@
             if(selectedAsset) {
                 infoBox.innerHTML = `<div>SYS_ID // OBJ-${selectedAsset.id.toString().substring(2,7)}</div>
                                      <div>CLASS  // ${selectedAsset.type.toUpperCase()}</div>
-                                     <div>TEAM   // <span style="color:${selectedAsset.kia ? '#43586d' : COLORS[selectedAsset.faction]}">${selectedAsset.faction} ${selectedAsset.kia ? '[KIA]' : ''}</span></div>
+                                     <div>TEAM   // <span style="color:${selectedAsset.kia ? '#43586d' : selectedAsset.color}">${selectedAsset.faction} ${selectedAsset.kia ? '[KIA]' : ''}</span></div>
                                      <div>LOC    // X:${Math.round(selectedAsset.x)} Y:${Math.round(selectedAsset.y)}</div>`;
             } else if (selectedPath) {
                 infoBox.innerHTML = `<div>SYS_ID // PATH-${selectedPath.id.toString().substring(2,7)}</div>
                                      <div>CLASS  // MANEUVER VECTOR</div>
-                                     <div>FACTION// <span style="color:${COLORS[selectedPath.faction]}">${selectedPath.faction}</span></div>
+                                     <div>FACTION// <span style="color:${selectedPath.color}">${selectedPath.faction}</span></div>
                                      <div>NODES  // ${selectedPath.points.length} STEPS</div>`;
             } else {
                 infoBox.innerHTML = `<span style="color: #43586d; text-align:center;">AWAITING SELECTION TARGET</span>`;
@@ -1481,7 +1511,7 @@
             if (e.shiftKey) {
                 activePings.push({
                     x: pt.x, y: pt.y,
-                    color: COLORS[STATE.faction],
+                    color: getCurrentSelectedColor(),
                     radius: 2, maxRadius: 65, alpha: 1.0, expansionRate: 2.2
                 });
                 pushTerminalLog(`COMS BRIEF PING: BROADCAST APPLIED AT FIELD SECTOR X:${Math.round(pt.x)} Y:${Math.round(pt.y)}`);
@@ -1507,7 +1537,8 @@
             if (STATE.mode === 'recolor') {
                 if (hoverObj) {
                     hoverObj.ref.faction = STATE.faction;
-                    pushTerminalLog(`Recolored structure target vector to match ${STATE.faction} parameters.`);
+                    hoverObj.ref.color = getCurrentSelectedColor();
+                    pushTerminalLog(`Recolored tactical architecture frame to custom parameters.`);
                     recordState();
                     syncInterface();
                 }
@@ -1531,7 +1562,7 @@
                 if (hoverObj) {
                     STATE.selectedId = hoverObj.ref.id;
                     dragAnchor = hoverObj.ref;
-                    dragAnchor._targetType = hoverObj.type; // Save contextual layer target block
+                    dragAnchor._targetType = hoverObj.type; 
                     pushTerminalLog(`Linked command matrix directly to asset object layer.`);
                 } else {
                     const created = { 
@@ -1539,6 +1570,7 @@
                         x: pt.x, y: pt.y, 
                         spawnX: pt.x, spawnY: pt.y, 
                         faction: STATE.faction, 
+                        color: getCurrentSelectedColor(),
                         type: STATE.unitType, 
                         scale: 1.0,
                         kia: false 
@@ -1557,10 +1589,10 @@
             } else if (STATE.mode === 'path') {
                 if (STATE.pStyle === 'straight') {
                     isInteracting = true;
-                    activePathBuilding = { id: Math.random(), type: 'straight', faction: STATE.faction, scale: 1.0, points: [pt, {x: pt.x, y: pt.y}] };
+                    activePathBuilding = { id: Math.random(), type: 'straight', faction: STATE.faction, color: getCurrentSelectedColor(), scale: 1.0, points: [pt, {x: pt.x, y: pt.y}] };
                 } else if (STATE.pStyle === 'stencil') {
                     if (!activePathBuilding) {
-                        activePathBuilding = { id: Math.random(), type: 'stencil', faction: STATE.faction, scale: 1.0, points: [pt] };
+                        activePathBuilding = { id: Math.random(), type: 'stencil', faction: STATE.faction, color: getCurrentSelectedColor(), scale: 1.0, points: [pt] };
                         pushTerminalLog(`Began interconnected ${STATE.faction}-locked elbow stencil trace layout.`);
                     } else {
                         activePathBuilding.points.push(pt);
@@ -1570,7 +1602,7 @@
             } else if (STATE.mode === 'zone') {
                 isInteracting = true;
                 dragAnchor = pt;
-                activeZonePreview = { type: STATE.zType, style: STATE.zStyle, fx: pt.x, fy: pt.y, tx: pt.x, ty: pt.y, faction: STATE.faction };
+                activeZonePreview = { type: STATE.zType, style: STATE.zStyle, fx: pt.x, fy: pt.y, tx: pt.x, ty: pt.y, faction: STATE.faction, color: getCurrentSelectedColor() };
             } else if (STATE.mode === 'terrain') {
                 isInteracting = true;
                 dragAnchor = { type: STATE.tStyle, points: [pt] };
@@ -1595,7 +1627,6 @@
                     dragAnchor.spawnX = pt.x;
                     dragAnchor.spawnY = pt.y;
                 } else if (dragAnchor._targetType === 'path') {
-                    // Translate entire geometry grid of the targeted vector sequence cleanly
                     dragAnchor.points.forEach(p => {
                         p.x += dx;
                         p.y += dy;
@@ -1642,7 +1673,7 @@
             if (STATE.mode === 'path') {
                 if (STATE.pStyle === 'straight' && isInteracting && activePathBuilding) {
                     activePhase.paths.push(activePathBuilding);
-                    pushTerminalLog(`Committed straight line routing vector for ${activePathBuilding.faction}.`);
+                    pushTerminalLog(`Committed straight line routing vector.`);
                     activePathBuilding = null;
                     structuralChangeOccurred = true;
                 }
@@ -1668,7 +1699,7 @@
             if(!activePathBuilding) return;
             if(activePathBuilding.type === 'stencil' && activePathBuilding.points.length >= 2) {
                 STATE.phases[STATE.phaseIdx].paths.push(activePathBuilding);
-                pushTerminalLog(`Elbow stencil network committed cleanly for ${activePathBuilding.faction}.`);
+                pushTerminalLog(`Elbow stencil network committed cleanly.`);
                 recordState();
             }
             activePathBuilding = null;
@@ -1694,9 +1725,10 @@
                 let bestInterceptPoint = null;
                 let forceReversed = false;
 
-                const factionCompatiblePaths = activePhase.paths.filter(path => path.faction === asset.faction);
+                // Bind units based on physical matching coordinates
+                const compatiblePaths = activePhase.paths;
 
-                factionCompatiblePaths.forEach(path => {
+                compatiblePaths.forEach(path => {
                     if (path.points.length < 2) return;
                     
                     const startNode = path.points[0];
@@ -1919,15 +1951,26 @@
                 const pathScale = path.scale || 1.0;
                 ctx.save();
                 
-                // THICKNESS UPGRADE: Thicker underlying tactical bloom vectors applied globally
-                ctx.lineWidth = 12 * pathScale;
+                // TARGET SELECTION FEEDBACK BACKING: Render red indicator lane immediately underneath active selected route vectors
+                if (path.id === STATE.selectedId && (STATE.mode === 'deploy' || STATE.mode === 'resize') && phaseData === STATE.phases[STATE.phaseIdx]) {
+                    ctx.save();
+                    ctx.lineWidth = 8 * pathScale;
+                    ctx.strokeStyle = 'rgba(255, 51, 102, 0.3)';
+                    ctx.beginPath(); ctx.moveTo(path.points[0].x, path.points[0].y);
+                    for(let i = 1; i < path.points.length; i++) ctx.lineTo(path.points[i].x, path.points[i].y);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                // THICKNESS CONFIGURATION: Baseline vector tracks turned down slightly for optimal look
+                ctx.lineWidth = 8 * pathScale;
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
                 ctx.beginPath(); ctx.moveTo(path.points[0].x, path.points[0].y);
                 for(let i = 1; i < path.points.length; i++) ctx.lineTo(path.points[i].x, path.points[i].y);
                 ctx.stroke();
 
-                ctx.strokeStyle = COLORS[path.faction] || '#00f2fe';
-                ctx.lineWidth = 3.5 * pathScale; // Crisp foreground trace line
+                ctx.strokeStyle = path.color || '#00f2fe';
+                ctx.lineWidth = 2.4 * pathScale; 
                 ctx.setLineDash([10, 8]);
                 ctx.lineDashOffset = dynamicDashOffset;
                 ctx.stroke();
@@ -1945,15 +1988,15 @@
                 }
 
                 path.points.forEach((pt, idx) => {
-                    ctx.fillStyle = idx === 0 ? '#00ffaa' : (COLORS[path.faction] || '#00f2fe');
-                    ctx.beginPath(); ctx.arc(pt.x, pt.y, 4.5 * pathScale, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = idx === 0 ? '#00ffaa' : (path.color || '#00f2fe');
+                    ctx.beginPath(); ctx.arc(pt.x, pt.y, 4.0 * pathScale, 0, Math.PI * 2); ctx.fill();
                 });
             });
 
             if (activePathBuilding && phaseData === STATE.phases[STATE.phaseIdx]) {
                 ctx.save();
-                ctx.lineWidth = 3.5;
-                ctx.strokeStyle = COLORS[activePathBuilding.faction] + '88';
+                ctx.lineWidth = 2.4;
+                ctx.strokeStyle = (activePathBuilding.color || '#00f2fe') + '88';
                 ctx.setLineDash([6, 6]);
                 ctx.beginPath();
                 ctx.moveTo(activePathBuilding.points[0].x, activePathBuilding.points[0].y);
@@ -1968,7 +2011,7 @@
 
                 activePathBuilding.points.forEach(pt => {
                     ctx.fillStyle = '#ffcc00';
-                    ctx.beginPath(); ctx.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(pt.x, pt.y, 4.0, 0, Math.PI * 2); ctx.fill();
                 });
             }
 
@@ -2019,7 +2062,7 @@
                     ctx.restore();
                 }
 
-                drawMilitarySymbol(ctx, rx, ry, asset.type, COLORS[asset.faction], asset.kia, assetScale);
+                drawMilitarySymbol(ctx, rx, ry, asset.type, asset.color || '#00f2fe', asset.kia, assetScale);
             });
         }
 
@@ -2165,7 +2208,7 @@
 
         function renderZoneBounds(z) {
             ctx.save();
-            let zoneColor = COLORS[z.faction] || '#7a92a8';
+            let zoneColor = z.color || '#7a92a8';
             const baseAccent = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim();
             
             if (z.style === 'fob') {
