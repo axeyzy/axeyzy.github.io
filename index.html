@@ -802,7 +802,7 @@
             unitType: 'Infantry',
             gridOn: true,
             phaseIdx: 0,
-            animating: false, // FIXED: Syntax expression corrected to accurately pair key-value objects
+            animating: false, // FIXED: Syntax expression corrected to pair key-value object correctly
             animProgress: 0,
             selectedId: null,
             activeTheater: 'default',
@@ -1731,7 +1731,8 @@
                 let bestInterceptPoint = null;
                 let forceReversed = false;
 
-                const compatiblePaths = activePhase.paths;
+                // FIX NATIVE INTEGRATED: Filter path routes strictly by active faction type matching parameters
+                const compatiblePaths = activePhase.paths.filter(path => path.faction === asset.faction);
 
                 compatiblePaths.forEach(path => {
                     if (path.points.length < 2) return;
